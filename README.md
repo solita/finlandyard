@@ -28,9 +28,19 @@ visualisointi:
 - open layers (https://openlayers.org/en/latest/examples/)
 
 - tallennetaan jsonina pelin kulku??
-	- sisältää pelejä, jotka sisältävät jokaisen poliisin ja rosvojen sijainnit, ja ajanhetket 
+	- sisältää pelejä, jotka sisältävät jokaisen poliisin ja rosvojen sijainnit, ja ajanhetket
 - piirto tapahtuisi "jäljessä" vaikka peli olis jo päättynyt
 
 - X siirron jälkeen rosvo voittaa/kuinka monta poliisia kartalla ennenkö jää kiinni
 
 
+## Aikataulujen perusteella reittien piirto
+
+Dusasin Nikon reitinpiirron perusteella kaikki reitit kartalle. Ohessa screenshotti, en viitsi sitä commitoida koska en oikein vielä tiedä, miten tämä kannattaa tehdä.
+
+Oheinen kuva on piirretty tällä:
+https://rata.digitraffic.fi/api/v1/schedules?departure_date=2015-03-01
+
+Periaatteessa kai tuo json sisältäisi kaiken mitä "yhden päivän pyörittämiseen" tarvitaan?
+
+![Reitit](https://github.com/annisall/finlandyard/planning_docs/routes.png?raw=true "Reitit")

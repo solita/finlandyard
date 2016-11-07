@@ -48,17 +48,21 @@
 
       //Poistaa asemat ennen lähtöasemaa ja määränpääaseman jälkeen. Rajapinta palauttaa kyselylle koko reitin.
       function limitStationsBetween(connections, departureStation, arrivalStation) {
-        return _.forEach(connections, function (connection) {
+        console.log(connections);
+        return connections;
+        /*return _.forEach(connections, function (connection) {
           connection.timeTableRows = dropStationsAfter(dropStationsBefore(connection.timeTableRows, departureStation), arrivalStation);
           return connection;
-        });
+        });*/
       }
 
       //Palauttaa yhteydet lähtöasemalta määränpäähän, jos lähtö on annettujen aikojen välillä.
       //Ei selviä vielä nätisti, jos välille ei ole yhteyksiä.
       function getConnectionsBetweenStations(departureStationCode, arrivalStationCode, fromTime, toTime) {
         var query = buildConnectionQueryString(departureStationCode, arrivalStationCode, fromTime, toTime);
+        query = "?departure_date=2015-03-01"
         var xmlHttp = new XMLHttpRequest();
+
         xmlHttp.open( "GET", "http://cors-anywhere.herokuapp.com/https://rata.digitraffic.fi/api/v1/schedules" + query, false ); // false for synchronous request
         xmlHttp.send( null );
         return limitStationsBetween(JSON.parse(xmlHttp.responseText), departureStationCode, arrivalStationCode);
@@ -88,17 +92,20 @@
       }
 
       //Piirtää annetun yhteyden annettuun sourceen
-      function drawConnection(connection, source) {
-        var geom = new ol.geom.LineString(collectStationCoordinatesForDrawing(connection.timeTableRows));
-        var feat = new ol.Feature({
-          name: "connection",
-          geometry: geom
-        });
-        source.addFeature(feat);
+      function drawConnections(connections, source) {
+        for (var i = 0; i < connections.length; i++) {
+          var connection = connections[i];
+          var geom = new ol.geom.LineString(collectStationCoordinatesForDrawing(connection.timeTableRows));
+          var feat = new ol.Feature({
+            name: "connection",
+            geometry: geom
+          });
+          source.addFeature(feat);
+        }
       }
 
       var stations = getStations();
-      
+
       // Luodaan jokaisesta asemasta feature
       var features = new Array(stations.length);
       for (var i = 0; i < stations.length; ++i) {
@@ -106,7 +113,7 @@
         features[i] = new ol.Feature({
           'geometry': new ol.geom.Point(
               ol.proj.fromLonLat([station.longitude, station.latitude])),
-          'i': i    
+          'i': i
         });
       }
 
@@ -125,7 +132,7 @@
             fill: new ol.style.Fill({color: 'red'}),
             stroke: new ol.style.Stroke({color: '#bada55', width: 1})
           })
-        }) 
+        })
       });
 
       // Attribution on tuo copyright huomautus
@@ -159,14 +166,14 @@
       });
 
       //Draw first connection from Helsinki to Tampere on 4.11.2016 between 8:00-8:15
-      drawConnection(getConnectionsBetweenStations("HKI", "TPE", new Date(Date.UTC(2016,10,4,8,0,0,0)), new Date(Date.UTC(2016,10,4,8,15,0,0)))[0], connectionSource);
+      drawConnections(getConnectionsBetweenStations("HKI", "PM", new Date(Date.UTC(2016,10,4,8,0,0,0)), new Date(Date.UTC(2016,10,4,8,15,0,0))), connectionSource);
 
       function checkSize() {
         var small = map.getSize()[0] < 600;
         attribution.setCollapsible(small);
         attribution.setCollapsed(small);
       }
-      
+
       window.addEventListener('resize', checkSize);
       checkSize();
     </script>
