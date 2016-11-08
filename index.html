@@ -7,132 +7,26 @@
     <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
     <script src="https://openlayers.org/en/v3.19.1/build/ol-debug.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.16.6/lodash.js"></script>
+    <script src="api.js"></script>
   </head>
   <body>
     <div id="map" class="map"></div>
 
     <div id="schedule" class="schedule"></div>
     <script>
-      // Naurettava synkroninen kutsu
-      function getStations() {
-          var xmlHttp = new XMLHttpRequest();
-          xmlHttp.open( "GET", "http://cors-anywhere.herokuapp.com/https://rata.digitraffic.fi/api/v1/metadata/stations", false ); // false for synchronous request
-          xmlHttp.send( null );
-          return JSON.parse(xmlHttp.responseText);
-      }
 
-      var connectionSource = new ol.source.Vector();
-
-      function buildConnectionQueryString(fromStation, toStation, fromTime, toTime) {
-        return "?departure_station="+fromStation+"&arrival_station="+toStation+"&from="+fromTime.toISOString()+"&to="+toTime.toISOString() + "&include_nonstopping=false";
-      }
-
-      //Poistaa listasta asemat annetun koodin jälkeen.
-      function dropStationsAfter(scheduleStations, stationCode) {
-        return _.dropRightWhile(scheduleStations, function (station ) {
-          return station.stationShortCode !== stationCode;
-        });
-      }
-
-      //Poistaa listasta asemat ennen annettua koodia.
-      function dropStationsBefore(scheduleStations, stationCode) {
-        return _.dropWhile(scheduleStations, function (station) {
-          return station.stationShortCode !== stationCode;
-        });
-      }
-
-      //Ei käytetä vielä. Reitin piirtämisessä on hyvä pitää kaikki asemat mukana, että saadaan hienompi viiva.
-      function filterOutNonStoppingStations(scheduleStations) {
-        return _.filter(scheduleStations, function (station) { return station.trainStopping;});
-      }
-
-      //Poistaa asemat ennen lähtöasemaa ja määränpääaseman jälkeen. Rajapinta palauttaa kyselylle koko reitin.
-      function limitStationsBetween(connections, departureStation, arrivalStation) {
-        console.log(connections);
-        return connections;
-        /*return _.forEach(connections, function (connection) {
-          connection.timeTableRows = dropStationsAfter(dropStationsBefore(connection.timeTableRows, departureStation), arrivalStation);
-          return connection;
-        });*/
-      }
-
-      //Palauttaa yhteydet lähtöasemalta määränpäähän, jos lähtö on annettujen aikojen välillä.
-      //Ei selviä vielä nätisti, jos välille ei ole yhteyksiä.
-      function getConnectionsBetweenStations(departureStationCode, arrivalStationCode, fromTime, toTime) {
-        var query = buildConnectionQueryString(departureStationCode, arrivalStationCode, fromTime, toTime);
-        query = "?departure_date=2015-03-01"
-        var xmlHttp = new XMLHttpRequest();
-
-        xmlHttp.open( "GET", "http://cors-anywhere.herokuapp.com/https://rata.digitraffic.fi/api/v1/schedules" + query, false ); // false for synchronous request
-        xmlHttp.send( null );
-        return limitStationsBetween(JSON.parse(xmlHttp.responseText), departureStationCode, arrivalStationCode);
-      }
-
-      //Palauttaa aseman asemakoodin perusteella asematiedoista.
-      //Ensimmäinen parametri on asematiedot API:n /metadata/stations palauttamat asemat.
-      function findStation(stationData, stationCode) {
-        return _.find(stationData, function (station) {
-          return station.stationShortCode === stationCode;
-        });
-      }
-
-      //Erottaa aikataulun asemasta koordinaatit.
-      function getCoordsFromStationObject (timeTableStation) {
-        return [timeTableStation.longitude, timeTableStation.latitude];
-      }
-
-      //Kerää asemaslistasta asemien koordinaatit ja palauttaa ne oikeassa muodossa piirtämistä varten.
-      function collectStationCoordinatesForDrawing(scheduleStations) {
-        var coords = [];
-        var stationData = getStations();
-        for (var i = 0; i < scheduleStations.length; i++) {
-          coords.push(ol.proj.fromLonLat(getCoordsFromStationObject(findStation(stationData, scheduleStations[i].stationShortCode))));
-        }
-        return coords;
-      }
-
-      //Piirtää annetun yhteyden annettuun sourceen
-      function drawConnections(connections, source) {
-        for (var i = 0; i < connections.length; i++) {
-          var connection = connections[i];
-          var geom = new ol.geom.LineString(collectStationCoordinatesForDrawing(connection.timeTableRows));
-          var feat = new ol.Feature({
-            name: "connection",
-            geometry: geom
-          });
-          source.addFeature(feat);
-        }
-      }
-
-      var stations = getStations();
-
-      // Luodaan jokaisesta asemasta feature
-      var features = new Array(stations.length);
-      for (var i = 0; i < stations.length; ++i) {
-        var station = stations[i];
-        features[i] = new ol.Feature({
-          'geometry': new ol.geom.Point(
-              ol.proj.fromLonLat([station.longitude, station.latitude])),
-          'i': i
-        });
-      }
-
-      // Feature on niinkuin öööh, kartan yksi otus?
-      var vectorSource = new ol.source.Vector({
-        features: features,
+      var stationSource = new ol.source.Vector({
+        loader: function() {
+          api_bridge.getStationFeatures(this);
+        },
         wrapX: false
       });
 
-      // Otusvektori, tyyli voi olla myös funktio
-      var vector = new ol.layer.Vector({
-        source: vectorSource,
-        style: new ol.style.Style({
-          image: new ol.style.Circle({
-            radius: 2,
-            fill: new ol.style.Fill({color: 'red'}),
-            stroke: new ol.style.Stroke({color: '#bada55', width: 1})
-          })
-        })
+      var connectionSource = new ol.source.Vector({
+          loader: function() {
+            api_bridge.getConnectionFeatures(this);
+          },
+          wrapX: false
       });
 
       // Attribution on tuo copyright huomautus
@@ -146,7 +40,18 @@
           new ol.layer.Tile({
             source: new ol.source.OSM()
           }),
-          vector,
+          // Asemat
+          new ol.layer.Vector({
+            source: stationSource,
+            style: new ol.style.Style({
+              image: new ol.style.Circle({
+                radius: 2,
+                fill: new ol.style.Fill({color: 'red'}),
+                stroke: new ol.style.Stroke({color: '#bada55', width: 1})
+              })
+            })
+          }),
+          // Yhteydet
           new ol.layer.Vector({ //Layer for connections
             source: connectionSource,
             style: new ol.style.Style({
@@ -164,9 +69,6 @@
           zoom: 5
         })
       });
-
-      //Draw first connection from Helsinki to Tampere on 4.11.2016 between 8:00-8:15
-      drawConnections(getConnectionsBetweenStations("HKI", "PM", new Date(Date.UTC(2016,10,4,8,0,0,0)), new Date(Date.UTC(2016,10,4,8,15,0,0))), connectionSource);
 
       function checkSize() {
         var small = map.getSize()[0] < 600;
