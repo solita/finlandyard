@@ -16,16 +16,12 @@
     <script>
 
       var stationSource = new ol.source.Vector({
-        loader: function() {
-          api_bridge.getStationFeatures(this);
-        },
+
         wrapX: false
       });
 
       var connectionSource = new ol.source.Vector({
-          loader: function() {
-            api_bridge.getConnectionFeatures(this);
-          },
+
           wrapX: false
       });
 
@@ -45,9 +41,9 @@
             source: stationSource,
             style: new ol.style.Style({
               image: new ol.style.Circle({
-                radius: 2,
-                fill: new ol.style.Fill({color: 'red'}),
-                stroke: new ol.style.Stroke({color: '#bada55', width: 1})
+                radius: 1,
+                fill: new ol.style.Fill({color: 'black'}),
+                stroke: new ol.style.Stroke({color: 'black', width: 1})
               })
             })
           }),
@@ -56,8 +52,8 @@
             source: connectionSource,
             style: new ol.style.Style({
               stroke: new ol.style.Stroke({
-                color: '#f21ae0',
-                width: 3
+                color: 'red',
+                width: 1
               })
             })
           })
@@ -68,6 +64,15 @@
           center: ol.proj.fromLonLat([25.9241, 64.7482]),
           zoom: 5
         })
+      });
+
+      // tätä voi aksessoida kivasti selaimen konsolista
+      var stateAtom = null;
+      loadData(function(state) {
+        console.log("state loaded");
+        stateAtom = state;
+        feature_constructor.stationsToFeature(state.stations, stationSource);
+        feature_constructor.connectionsToFeature(state, reduceConnections(state), connectionSource);
       });
 
       function checkSize() {
