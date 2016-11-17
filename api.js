@@ -71,6 +71,18 @@ var feature_constructor = {
           'geometry': new ol.geom.Point(ol.proj.fromLonLat([station.longitude, station.latitude]))
         });
       }
+      if(actor.state === 'TRAVELLING') {
+        var s = getStationById(state, actor.start);
+        var d = getStationById(state, actor.destination);
+        // Tähän pitää laskea suhdeluku, missä kohtaa dudex on tällä hetkellä
+        var porpotion = 0.6;
+        return new ol.Feature({
+          'geometry':
+              new ol.geom.Point(ol.proj.fromLonLat(
+                [s.longitude + porpotion * (d.longitude - s.longitude),
+                 s.latitude + porpotion * (d.latitude - s.latitude)]))
+        });
+      }
     });
     source.addFeatures(features);
   }
