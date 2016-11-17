@@ -2,9 +2,13 @@
  * Returns station by id
  */
 function getStationById(state, id) {
-  return _.find(state.stations, function(s) {
+  var a = _.find(state.stations, function(s) {
     return s.stationShortCode === id;
   });
+  if(a) {
+    return a;
+  }
+  throw "No such station: " + id;
 }
 
 /**
@@ -58,6 +62,17 @@ var feature_constructor = {
       return acc.concat(lines);
     }, []);
     connectionsSource.addFeatures(features);
+  },
+  drawActors: function(state, actors, source) {
+    var features = _.map(actors, function(actor) {
+      if(actor.state === 'IDLE') {
+        var station = getStationById(state, actor.location);
+        return new ol.Feature({
+          'geometry': new ol.geom.Point(ol.proj.fromLonLat([station.longitude, station.latitude]))
+        });
+      }
+    });
+    source.addFeatures(features);
   }
 }
 
