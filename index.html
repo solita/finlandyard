@@ -7,6 +7,8 @@
     <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
     <script src="https://openlayers.org/en/v3.19.1/build/ol-debug.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.16.6/lodash.js"></script>
+    <script src="http://momentjs.com/downloads/moment.js"></script>
+
     <script src="api.js"></script>
   </head>
   <body>
@@ -101,15 +103,15 @@
         stateAtom = state;
 
         // Kovakoodattu vähän statea
-        state.police = [
+        state.clockIs = moment(state.timetable[0].timeTableRows[0].scheduledTime);
 
+        state.police = [
           { id: "Raatikaine",
             state: 'IDLE',
             location: 'JNS'},
           { id: "Tony",
             state: 'TRAVELLING',
-            start: "HKI",
-            destination: "PSL"}
+            train: state.timetable[0] }
         ];
         state.thieves = [
           { id: "Ake",
@@ -124,8 +126,27 @@
         ];
         feature_constructor.stationsToFeature(state.stations, stationSource);
         feature_constructor.connectionsToFeature(state, reduceConnections(state), connectionSource);
-        feature_constructor.drawActors(state, state.police, policeSource);
-        feature_constructor.drawActors(state, state.thieves, thieveSource);
+
+        // THE game loop
+        (function tick() {
+          setTimeout(
+            function() {
+              // edistä kelloa (huom! Nyt on olennaista, että)
+              state.clockIs = state.clockIs.add(5, 'minutes');
+
+              // tästä applytettäisiin stateen ai funktiot
+              // Mietittävää: miten saadaan siististi hoidettua TRAVELLING > IDLE tilamuutos, ts. mistä tiedetään, kun saapuu perille?
+              //  1) Joku event systeemi?
+              //  2) Tarkistetaan aina tilat, että onko tullut perille tällä tickillä?
+              // nyt kaatuu kun saapuu perille
+
+              // piirretään uusi tila
+              feature_constructor.drawActors(state, state.police, policeSource);
+              feature_constructor.drawActors(state, state.thieves, thieveSource);
+
+              tick();
+            },
+            50)})();
       });
 
       function checkSize() {

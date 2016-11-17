@@ -11,6 +11,14 @@ function getStationById(state, id) {
   throw "No such station: " + id;
 }
 
+function getStations(state, timeTableRows) {
+  var a = _.find(state.timetable, function(train) {
+    return train.trainNumber === trainId;
+  });
+
+
+}
+
 /**
  * Return all distinct connections from state.
  *
@@ -72,10 +80,30 @@ var feature_constructor = {
         });
       }
       if(actor.state === 'TRAVELLING') {
-        var s = getStationById(state, actor.start);
-        var d = getStationById(state, actor.destination);
-        // Tähän pitää laskea suhdeluku, missä kohtaa dudex on tällä hetkellä
-        var porpotion = 0.6;
+        // joutuu tällä erää filteroidä arrivalit näin pois
+        var timetable = _.filter(actor.train.timeTableRows, function(e) {
+          return e.type == 'DEPARTURE';
+        });
+        var now = state.clockIs.unix();
+        var start = null;
+        var end = null;
+        for(var i = 0; i < timetable.length; i++) {
+          if(moment(timetable[i].scheduledTime).unix() <= now &&
+            moment(timetable[i + 1].scheduledTime).unix() >= now ) {
+              start = timetable[i];
+              end = timetable[i + 1];
+              break;
+            }
+          // Mitähän käy jos ei löydy...
+        //  throw "Reitin rendaaminen meni reisille"
+        }
+        var s = getStationById(state, start.stationShortCode);
+        var d =  getStationById(state, end.stationShortCode);
+        var leaving = moment(start.scheduledTime).unix();
+        var arriving = moment(end.scheduledTime).unix();
+
+        var porpotion = 1 - (arriving - now) / (arriving - leaving);
+
         return new ol.Feature({
           'geometry':
               new ol.geom.Point(ol.proj.fromLonLat(
