@@ -103,7 +103,10 @@
         stateAtom = state;
 
         // Kovakoodattu vähän statea
-        state.clockIs = moment(state.timetable[0].timeTableRows[0].scheduledTime);
+
+        // Tähän voi laittaa indeksin, mistä aikataulu otetaan ja se rendautuu hienosti ja ihanasti
+        var takeThisTrain = 144;
+        state.clockIs = moment(state.timetable[takeThisTrain].timeTableRows[0].scheduledTime);
 
         state.police = [
           { id: "Raatikaine",
@@ -111,7 +114,7 @@
             location: 'JNS'},
           { id: "Tony",
             state: 'TRAVELLING',
-            train: state.timetable[0] }
+            train: state.timetable[takeThisTrain] }
         ];
         state.thieves = [
           { id: "Ake",
