@@ -72,6 +72,7 @@ var feature_constructor = {
     connectionsSource.addFeatures(features);
   },
   drawActors: function(state, actors, source) {
+    source.clear();
     var features = _.map(actors, function(actor) {
       if(actor.state === 'IDLE') {
         var station = getStationById(state, actor.location);

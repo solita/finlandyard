@@ -13,8 +13,7 @@
   </head>
   <body>
     <div id="map" class="map"></div>
-
-    <div id="schedule" class="schedule"></div>
+    <div id="clock"></div>
     <script>
 
       var stationSource = new ol.source.Vector({
@@ -136,6 +135,7 @@
             function() {
               // edistä kelloa (huom! Nyt on olennaista, että)
               state.clockIs = state.clockIs.add(5, 'minutes');
+              document.getElementById("clock").innerHTML = state.clockIs.format();
 
               // tästä applytettäisiin stateen ai funktiot
               // Mietittävää: miten saadaan siististi hoidettua TRAVELLING > IDLE tilamuutos, ts. mistä tiedetään, kun saapuu perille?
