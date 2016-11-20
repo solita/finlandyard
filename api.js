@@ -15,8 +15,42 @@ function getStations(state, timeTableRows) {
   var a = _.find(state.timetable, function(train) {
     return train.trainNumber === trainId;
   });
+}
 
+function arrivalTimeToDestination(travellingActor) {
+    var a = _.find(travellingActor.train.timeTableRows, function(entry) {
+      return entry.stationShortCode === travellingActor.location;
+    });
 
+    return moment(a.scheduledTime);
+}
+
+function haltArrivedActors(time, actors) {
+  return _.map(actors, function(actor) {
+    if(actor.state === 'TRAVELLING'){
+      var arrivalTime = arrivalTimeToDestination(actor);
+      if(arrivalTime.unix() === time.unix()) {
+        console.log(actor.id + " has arrived to " + actor.location);
+        return { id: actor.id, location: actor.location, state: 'IDLE'};
+      }
+    }
+    if(actor.state === 'IDLE' && actor.train) {
+      var departureTime = moment(actor.train.timeTableRows[0].scheduledTime);
+      if(departureTime.unix() === time.unix()) {
+        var destination = _.last(actor.train.timeTableRows).stationShortCode;
+        console.log(actor.id + " train departures to " + destination);
+        return { id: actor.id, location: destination, train: actor.train, state: "TRAVELLING" };
+      }
+    }
+    return actor;
+  });
+}
+
+function stateChanges(state) {
+  state.police = haltArrivedActors(state.clockIs, state.police);
+  state.thieves = haltArrivedActors(state.clockIs, state.thieves);
+
+  return state;
 }
 
 /**
@@ -76,6 +110,7 @@ var feature_constructor = {
     var features = _.map(actors, function(actor) {
       if(actor.state === 'IDLE') {
         var station = getStationById(state, actor.location);
+
         return new ol.Feature({
           'geometry': new ol.geom.Point(ol.proj.fromLonLat([station.longitude, station.latitude]))
         });
@@ -90,13 +125,17 @@ var feature_constructor = {
         var end = null;
         for(var i = 0; i < timetable.length; i++) {
           if(moment(timetable[i].scheduledTime).unix() <= now &&
-            moment(timetable[i + 1].scheduledTime).unix() >= now ) {
+             timetable[i + 1] &&
+             moment(timetable[i + 1].scheduledTime).unix() >= now ) {
               start = timetable[i];
               end = timetable[i + 1];
               break;
             }
           // Mitähän käy jos ei löydy...
         //  throw "Reitin rendaaminen meni reisille"
+        }
+        if(start == null || end == null) {
+          return;
         }
         var s = getStationById(state, start.stationShortCode);
         var d =  getStationById(state, end.stationShortCode);
@@ -113,7 +152,8 @@ var feature_constructor = {
         });
       }
     });
-    source.addFeatures(features);
+    source.addFeatures(_.filter(features, function(f) { return f != null; } ));
+    //source.addFeatures(features);
   }
 }
 

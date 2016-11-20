@@ -104,27 +104,40 @@
         // Kovakoodattu vähän statea
 
         // Tähän voi laittaa indeksin, mistä aikataulu otetaan ja se rendautuu hienosti ja ihanasti
-        var takeThisTrain = 144;
-        state.clockIs = moment(state.timetable[takeThisTrain].timeTableRows[0].scheduledTime);
+        var takeThisTrain = 0;
+        state.clockIs = moment(state.timetable[takeThisTrain].timeTableRows[0].scheduledTime).subtract(5, 'minutes');
 
         state.police = [
-          { id: "Raatikaine",
+          { id: "Sorjonen",
+            location: _.first(state.timetable[0].timeTableRows).stationShortCode,
             state: 'IDLE',
-            location: 'JNS'},
-          { id: "Tony",
-            state: 'TRAVELLING',
-            train: state.timetable[takeThisTrain] }
+            train: state.timetable[0] },
+          { id: "McNulty",
+            location: _.first(state.timetable[1].timeTableRows).stationShortCode,
+            state: 'IDLE',
+            train: state.timetable[1] },
+          { id: "Saga Norren",
+            location: _.first(state.timetable[10].timeTableRows).stationShortCode,
+            state: 'IDLE',
+            train: state.timetable[10] },
+          { id: "Sipowicz",
+            location: _.first(state.timetable[12].timeTableRows).stationShortCode,
+            state: 'IDLE',
+            train: state.timetable[12] }
         ];
         state.thieves = [
           { id: "Ake",
+            location: _.first(state.timetable[3].timeTableRows).stationShortCode,
             state: 'IDLE',
-            location: "AHO"},
+            train: state.timetable[3] },
           { id: "Make",
+            location: _.first(state.timetable[15].timeTableRows).stationShortCode,
             state: 'IDLE',
-            location: 'ALH'},
+            train: state.timetable[15]},
           { id: "Pera",
+            location: _.first(state.timetable[20].timeTableRows).stationShortCode,
             state: 'IDLE',
-            location: "HNH"}
+            train: state.timetable[20]}
         ];
         feature_constructor.stationsToFeature(state.stations, stationSource);
         feature_constructor.connectionsToFeature(state, reduceConnections(state), connectionSource);
@@ -133,15 +146,12 @@
         (function tick() {
           setTimeout(
             function() {
-              // edistä kelloa (huom! Nyt on olennaista, että)
-              state.clockIs = state.clockIs.add(5, 'minutes');
+              // Edistä kelloa
+              state.clockIs = state.clockIs.add(1, 'minutes');
               document.getElementById("clock").innerHTML = state.clockIs.format();
 
-              // tästä applytettäisiin stateen ai funktiot
-              // Mietittävää: miten saadaan siististi hoidettua TRAVELLING > IDLE tilamuutos, ts. mistä tiedetään, kun saapuu perille?
-              //  1) Joku event systeemi?
-              //  2) Tarkistetaan aina tilat, että onko tullut perille tällä tickillä?
-              // nyt kaatuu kun saapuu perille
+              // Pyöräytetään tilamuutokset
+              state = stateChanges(state);
 
               // piirretään uusi tila
               feature_constructor.drawActors(state, state.police, policeSource);
@@ -149,7 +159,7 @@
 
               tick();
             },
-            50)})();
+            10)})();
       });
 
       function checkSize() {
