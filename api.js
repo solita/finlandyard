@@ -17,6 +17,17 @@ function getStations(state, timeTableRows) {
   });
 }
 
+function getTrainsLeavingFromStation(state, station) {
+  return _.filter(state.timetable, function(route) {
+    return _.filter(route.timeTableRows, function(tbr) {
+      if(tbr.type === 'DEPARTURE') {
+        return tbr.stationShortCode === station;
+      }
+      return false;
+    }).length > 0;
+  });
+}
+
 function arrivalTimeToDestination(travellingActor) {
     var a = _.find(travellingActor.train.timeTableRows, function(entry) {
       return entry.stationShortCode === travellingActor.location;
@@ -50,6 +61,24 @@ function stateChanges(state) {
   state.police = haltArrivedActors(state.clockIs, state.police);
   state.thieves = haltArrivedActors(state.clockIs, state.thieves);
 
+  return state;
+}
+
+function randomSelectionOfNextTrain(state, actor) {
+  if(actor.state === 'IDLE' && !actor.train) {
+    var trainsLeaving = getTrainsLeavingFromStation(state, actor.location);
+    var na = {id: actor.id, state: 'IDLE', location: actor.location, train: _.sample(trainsLeaving)}
+
+    console.log(na.id + " decides to leave to " + _.last(na.train.timeTableRows).stationShortCode);
+    return na;
+  }
+  return actor;
+}
+
+// Tätä ei oikeasti pidä toteuttaa näin
+function applyAI(state) {
+  state.police = _.map(state.police, function(actor) { return randomSelectionOfNextTrain(state, actor); });
+  state.thieves = _.map(state.thieves, function(actor) { return randomSelectionOfNextTrain(state, actor); });
   return state;
 }
 

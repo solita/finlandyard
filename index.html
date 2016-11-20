@@ -103,41 +103,33 @@
 
         // Kovakoodattu vähän statea
 
-        // Tähän voi laittaa indeksin, mistä aikataulu otetaan ja se rendautuu hienosti ja ihanasti
-        var takeThisTrain = 0;
-        state.clockIs = moment(state.timetable[takeThisTrain].timeTableRows[0].scheduledTime).subtract(5, 'minutes');
+        state.clockIs = moment(state.timetable[0].timeTableRows[0].scheduledTime).subtract(5, 'minutes');
+        var clockRollOver = state.clockIs.clone();
 
         state.police = [
           { id: "Sorjonen",
-            location: _.first(state.timetable[0].timeTableRows).stationShortCode,
-            state: 'IDLE',
-            train: state.timetable[0] },
+            location: "HKI",
+            state: 'IDLE' },
           { id: "McNulty",
-            location: _.first(state.timetable[1].timeTableRows).stationShortCode,
-            state: 'IDLE',
-            train: state.timetable[1] },
+            location: "HKI",
+            state: 'IDLE' },
           { id: "Saga Norren",
-            location: _.first(state.timetable[10].timeTableRows).stationShortCode,
-            state: 'IDLE',
-            train: state.timetable[10] },
+            location: "HKI",
+            state: 'IDLE'},
           { id: "Sipowicz",
-            location: _.first(state.timetable[12].timeTableRows).stationShortCode,
-            state: 'IDLE',
-            train: state.timetable[12] }
+            location: "HKI",
+            state: 'IDLE' }
         ];
         state.thieves = [
           { id: "Ake",
-            location: _.first(state.timetable[3].timeTableRows).stationShortCode,
-            state: 'IDLE',
-            train: state.timetable[3] },
+            location: "JNS",
+            state: 'IDLE' },
           { id: "Make",
-            location: _.first(state.timetable[15].timeTableRows).stationShortCode,
-            state: 'IDLE',
-            train: state.timetable[15]},
+            location: "JNS",
+            state: 'IDLE' },
           { id: "Pera",
-            location: _.first(state.timetable[20].timeTableRows).stationShortCode,
-            state: 'IDLE',
-            train: state.timetable[20]}
+            location: "JNS",
+            state: 'IDLE' }
         ];
         feature_constructor.stationsToFeature(state.stations, stationSource);
         feature_constructor.connectionsToFeature(state, reduceConnections(state), connectionSource);
@@ -148,10 +140,14 @@
             function() {
               // Edistä kelloa
               state.clockIs = state.clockIs.add(1, 'minutes');
+              if(state.clockIs.unix() === clockRollOver.clone().add(1, 'days').unix()) {
+                state.clockIs = clockRollOver.clone();
+              }
               document.getElementById("clock").innerHTML = state.clockIs.format();
 
               // Pyöräytetään tilamuutokset
               state = stateChanges(state);
+              state = applyAI(state);
 
               // piirretään uusi tila
               feature_constructor.drawActors(state, state.police, policeSource);
