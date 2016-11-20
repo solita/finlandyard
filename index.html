@@ -111,13 +111,13 @@
             location: "HKI",
             state: 'IDLE' },
           { id: "McNulty",
-            location: "HKI",
+            location: "TKU",
             state: 'IDLE' },
           { id: "Saga Norren",
-            location: "HKI",
+            location: "KE",
             state: 'IDLE'},
           { id: "Sipowicz",
-            location: "HKI",
+            location: "PM",
             state: 'IDLE' }
         ];
         state.thieves = [
@@ -125,14 +125,14 @@
             location: "JNS",
             state: 'IDLE' },
           { id: "Make",
-            location: "JNS",
+            location: "KUO",
             state: 'IDLE' },
           { id: "Pera",
-            location: "JNS",
+            location: "RI",
             state: 'IDLE' }
         ];
-        feature_constructor.stationsToFeature(state.stations, stationSource);
-        feature_constructor.connectionsToFeature(state, reduceConnections(state), connectionSource);
+        feature_constructor.stationsToFeature(state, stationSource);
+        feature_constructor.connectionsToFeature(state, connectionSource);
 
         // THE game loop
         (function tick() {

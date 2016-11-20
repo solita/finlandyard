@@ -36,6 +36,14 @@ function arrivalTimeToDestination(travellingActor) {
     return moment(a.scheduledTime);
 }
 
+function leavingTime(travellingActor) {
+    var a = _.find(travellingActor.train.timeTableRows, function(entry) {
+      return entry.stationShortCode === travellingActor.location;
+    });
+
+    return moment(a.scheduledTime);
+}
+
 function haltArrivedActors(time, actors) {
   return _.map(actors, function(actor) {
     if(actor.state === 'TRAVELLING'){
@@ -46,7 +54,7 @@ function haltArrivedActors(time, actors) {
       }
     }
     if(actor.state === 'IDLE' && actor.train) {
-      var departureTime = moment(actor.train.timeTableRows[0].scheduledTime);
+      var departureTime = leavingTime(actor);
       if(departureTime.unix() === time.unix()) {
         var destination = _.last(actor.train.timeTableRows).stationShortCode;
         console.log(actor.id + " train departures to " + destination);
@@ -114,14 +122,17 @@ function reduceConnections(state) {
 }
 
 var feature_constructor = {
-  stationsToFeature: function(stations, stationsSource) {
-    stationsSource.addFeatures(_.map(stations, function(station) {
+  stationsToFeature: function(state, stationsSource) {
+    var connections = _.keys(reduceConnections(state));
+
+    stationsSource.addFeatures(_.map(_.filter(state.stations, function(s) { return _.some(connections, function(a) { return a === s.stationShortCode; } ); }), function(station) {
       return new ol.Feature({
             'geometry': new ol.geom.Point(ol.proj.fromLonLat([station.longitude, station.latitude]))
           });
     }));
   },
-  connectionsToFeature: function(state, connections, connectionsSource) {
+  connectionsToFeature: function(state, connectionsSource) {
+    var connections = reduceConnections(state);
     var features = _.reduce(connections, function(acc, toStations, fromStation) {
       var fs = getStationById(state, fromStation);
       var lines = _.map(toStations, function(t) {
@@ -147,7 +158,7 @@ var feature_constructor = {
       if(actor.state === 'TRAVELLING') {
         // joutuu tällä erää filteroidä arrivalit näin pois
         var timetable = _.filter(actor.train.timeTableRows, function(e) {
-          return e.type == 'DEPARTURE';
+          return e.type == 'DEPARTURE' || e.type == 'ARRIVAL';
         });
         var now = state.clockIs.unix();
         var start = null;
