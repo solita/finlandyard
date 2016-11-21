@@ -1,5 +1,5 @@
 require('file?name=[name].[ext]!./index.html');
-var stateUtils = require('./StateUtils.js');
+var dataUtils = require('./DataUtils.js');
 var mapControl = require('./MapControl.js');
 var loadData = require('./Api.js');
 var moment = require('moment')
@@ -11,8 +11,8 @@ var mapControl = mapControl();
 loadData(function(state) {
   var startingTime = moment(state.timetable[0].timeTableRows[0].scheduledTime);
   state.clockIs = startingTime.clone();
-  mapControl.drawConnections(stateUtils.collectConnections(state));
-  mapControl.drawStations(stateUtils.connectedStations(state));
+  mapControl.drawConnections(dataUtils.collectConnections(state));
+  mapControl.drawStations(dataUtils.connectedStations(state));
 
   // THE game loop
   (function tick() {

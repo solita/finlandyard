@@ -51,9 +51,9 @@ function state() {
 }
 
 
-describe("StateUtils", function() {
+describe("DataUtils", function() {
 
-  var stateUtils = require('../src/StateUtils.js');
+  var stateUtils = require('../src/DataUtils.js');
 
   describe("getStationById", function() {
     it("should throw if no station was found for id", function() {
