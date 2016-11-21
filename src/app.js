@@ -9,5 +9,5 @@ var mapControl = mapControl();
 
 loadData(function(state) {
   mapControl.drawConnections(stateUtils.collectConnections(state));
-  mapControl.drawStations(state.stations);
+  mapControl.drawStations(stateUtils.connectedStations(state));
 });

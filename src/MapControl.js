@@ -30,6 +30,7 @@ module.exports = function() {
   // We do not expose sources directly
   return {
     drawStations: function(stations) {
+      console.log("Drawing " + stations.length + " stations");
       stationSource.addFeatures(_.map(stations, function(station) {
         return new ol.Feature({
               'geometry': new ol.geom.Point(ol.proj.fromLonLat([station.longitude, station.latitude]))
@@ -37,6 +38,7 @@ module.exports = function() {
       }));
     },
     drawConnections: function(connections) {
+      console.log("Drawing " + connections.length + " connections");
       var features = _.map(connections, function(connection){
           return new ol.Feature({
             'geometry': new ol.geom.LineString([ol.proj.fromLonLat(connection.from), ol.proj.fromLonLat(connection.to)])

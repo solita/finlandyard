@@ -127,4 +127,24 @@ describe("StateUtils", function() {
       expect(stateUtils.collectConnections(s).length).toEqual(1);
     });
   });
+
+  describe("connectedStations", function() {
+    it("Should return nothing without timetable", function() {
+      var s = state()
+        .withStation(station("ID-1", 14.24444, 42.24242))
+        .build();
+      expect(stateUtils.connectedStations(s).length).toEqual(0);
+    });
+    it("Should return stations in timetable", function() {
+      var s = state()
+        .withStation(station("ID-1", 14.24444, 42.24242))
+        .withStation(station("ID-2", 62.24444, 41.24242))
+        .withStation(station("ID-3", 32.24444, 45.24242))
+        .withTimetableEntry("TRAIN-1",
+            departure("ID-1"),
+            arrival("ID-2"))
+        .build();
+      expect(stateUtils.connectedStations(s).length).toEqual(2);
+    });
+  });
 });

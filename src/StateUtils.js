@@ -31,5 +31,12 @@ module.exports = {
 
     // Remove util data
     return _.map(_.uniqBy(allConnections, "sortIdentifier"), function(e) { return _.omit(e, "sortIdentifier");});
+  },
+  connectedStations: function(state) {
+    var allConnectedStations =
+      _.flatten(_.map(state.timetable,
+        function(t) { return _.map(t.timeTableRows, "stationShortCode"); }));
+
+    return _.map(_.uniq(allConnectedStations), _.partial(module.exports.getStationById, state));
   }
 }
