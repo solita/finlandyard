@@ -12,12 +12,12 @@ describe("DataUtils", function() {
     });
 
     it("should return station with id", function() {
-      var s = sb.state().withStation("STATIONID").build();
+      var s = sb.state().withStation(sb.station("STATIONID")).build();
       expect(stateUtils.getStationById(s, "STATIONID").stationShortCode).toEqual("STATIONID");
     });
 
     it("should return correct station with id", function() {
-      var s = sb.state().withStation("STATION-1").withStation("STATION-2").build();
+      var s = sb.state().withStation(sb.station("STATION-1")).withStation(sb.station("STATION-2")).build();
       expect(stateUtils.getStationById(s, "STATION-2").stationShortCode).toEqual("STATION-2");
     });
   });

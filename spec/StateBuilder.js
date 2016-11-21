@@ -4,8 +4,8 @@ function station(id, longitude, latitude) {
   return {
     stationShortCode: id,
     name: "Station " + id,
-    latitude: latitude,
-    longitude: longitude
+    latitude: latitude || 63.32323,
+    longitude: longitude || 42.424242
   }
 }
 
@@ -29,19 +29,15 @@ function state() {
     timetable: []
   };
   return {
-      withStation: function(s) {
-        var newStation = s;
-        if(typeof s !== 'object') {
-          newStation = station(s, 63.32323, 42.424242);
-        }
+      withStation: function(newStation) {
         stuff.stations = _.concat(stuff.stations, newStation);
         return this;
       },
-      withTimetableEntry: function(id) {
-
+      withTimetableEntry:function(id) {
         stuff.timetable = _.concat(stuff.timetable,
           { trainId: id,
-            timeTableRows: Array.prototype.slice.call(arguments).slice(1)});
+            timeTableRows: Array.prototype.slice.call(arguments).slice(1)
+          });
         return this;
       },
       build: function() {
