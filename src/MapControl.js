@@ -1,6 +1,18 @@
 var map = require('./Map.js');
 var ol = require('openlayers');
 
+function stationToFeature(station) {
+  return new ol.Feature({
+    'geometry': new ol.geom.Point(ol.proj.fromLonLat([station.longitude, station.latitude]))
+  });
+}
+
+function connectionToFeature(connection) {
+  return new ol.Feature({
+    'geometry': new ol.geom.LineString([ol.proj.fromLonLat(connection.from), ol.proj.fromLonLat(connection.to)])
+  });
+}
+
 module.exports = function() {
   // Closure for holding source states
   var stationSource = new ol.source.Vector({
@@ -31,21 +43,11 @@ module.exports = function() {
   return {
     drawStations: function(stations) {
       console.log("Drawing " + stations.length + " stations");
-      stationSource.addFeatures(_.map(stations, function(station) {
-        return new ol.Feature({
-              'geometry': new ol.geom.Point(ol.proj.fromLonLat([station.longitude, station.latitude]))
-            });
-      }));
+      stationSource.addFeatures(_.map(stations, stationToFeature));
     },
     drawConnections: function(connections) {
       console.log("Drawing " + connections.length + " connections");
-      var features = _.map(connections, function(connection){
-          return new ol.Feature({
-            'geometry': new ol.geom.LineString([ol.proj.fromLonLat(connection.from), ol.proj.fromLonLat(connection.to)])
-          });
-        });
-
-      connectionSource.addFeatures(features);
+      connectionSource.addFeatures(_.map(connections, connectionToFeature));
     }
   }
 }
