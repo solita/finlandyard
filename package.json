@@ -1,0 +1,30 @@
+{
+  "name": "finlandyard",
+  "version": "0.0.1",
+  "description": "Finland Yard, IA game thingy based on VR API:s",
+  "main": "api.js",
+  "scripts": {
+    "clean": "rm -rf dist",
+    "test": "jasmine",
+    "dist": "webpack",
+    "dev": "webpack-dev-server --content-base dist/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/annisall/finlandyard/"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "css-loader": "0.26.0",
+    "extract-text-webpack-plugin": "1.0.1",
+    "file-loader": "0.9.0",
+    "jasmine": "2.5.2",
+    "webpack": "1.13.3",
+    "webpack-dev-server": "1.16.2"
+  },
+  "dependencies": {
+    "lodash": "4.17.2",
+    "openlayers": "3.19.1"
+  }
+}

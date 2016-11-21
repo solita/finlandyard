@@ -1,5 +1,22 @@
 #Finland yard
 
+## Kehittäminen
+
+Softa paketoidaan webpackillä.
+
+```
+# Asenna riippuvuudet
+npm install
+# Aja testit
+npm run test
+# Devaa livenä
+npm run dev
+```
+
+Testit sijaitsee spec/ ja koodi src-hakemistoissa.
+
+## Suunnitelmat
+
 - Aikaintervallit kinda vuoroja (esim. 15min = 1 "vuoro")
 - Kun rosvo saapuu kaupunkiin, tekee päätökseen lähteekö jollain junalla tai päättääkö jäädä kaupunkiin
 	- Jos rosvo haluaa lähteä vasta esim 2h päästä menevällä junalla, se joutuu odottamaan sen aikaa ja voi vielä muuttaa suunnitelmiaan ennen lähtöä
