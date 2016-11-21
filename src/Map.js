@@ -63,39 +63,4 @@ function initMap(stationSource, connectionSource, policeSource, thieveSource, at
   });
 }
 
-module.exports = function() {
-  // Closure for holding source states
-  var stationSource = new ol.source.Vector({
-    wrapX: false
-  });
-
-  var connectionSource = new ol.source.Vector({
-      wrapX: false
-  });
-
-  var policeSource = new ol.source.Vector({
-      wrapX: false
-  });
-
-  var thieveSource = new ol.source.Vector({
-      wrapX: false
-  });
-
-  var attribution = new ol.control.Attribution({
-    collapsible: false
-  });
-
-  // Initialize map
-  initMap(stationSource, connectionSource, policeSource, thieveSource, attribution);
-
-  // Return object for commanding sources with access to state closure
-  return {
-    drawStations: function(stations) {
-        stationSource.addFeatures(_.map(stations, function(station) {
-          return new ol.Feature({
-                'geometry': new ol.geom.Point(ol.proj.fromLonLat([station.longitude, station.latitude]))
-              });
-        }));
-    }
-  }
-}
+module.exports = initMap;
