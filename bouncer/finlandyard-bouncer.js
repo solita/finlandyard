@@ -5,7 +5,7 @@ var crypto = require('crypto');
 
 // Port proxy is bound to
 const PORT=8000;
-const CACHE_STORE='.store/'
+const CACHE_STORE= __dirname + '/.store/'
 
 if(!fs.existsSync(CACHE_STORE)) {
   console.log('Store does not exist, creating it.');
