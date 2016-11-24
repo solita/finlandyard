@@ -18,11 +18,11 @@ function doAsyncJsonRequest(url, cb) {
 
 function loadData(fireCallback) {
   var state = {};
-  doAsyncJsonRequest("http://cors-anywhere.herokuapp.com/https://rata.digitraffic.fi/api/v1/metadata/stations", function(stations) {
+  doAsyncJsonRequest("http://localhost:8000/api/v1/metadata/stations", function(stations) {
     console.log("Stations loaded. " + stations.length + " stations");
     state.stations = stations;
   });
-  doAsyncJsonRequest("http://cors-anywhere.herokuapp.com/https://rata.digitraffic.fi/api/v1/schedules?departure_date=2015-03-01", function(timetable) {
+  doAsyncJsonRequest("http://localhost:8000/api/v1/schedules?departure_date=2015-03-01", function(timetable) {
     console.log("Timetable loaded. Contains " + timetable.length);
     state.timetable = timetable;
   });

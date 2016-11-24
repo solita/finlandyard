@@ -9,6 +9,10 @@ console.log("Starting up finland yard");
 var mapControl = mapControl();
 
 loadData(function(state) {
+  if(state.timetable.length === 0) {
+    console.error("No timetable rows found from api");
+    return;
+  }
   var startingTime = moment(state.timetable[0].timeTableRows[0].scheduledTime);
   state.clockIs = startingTime.clone();
   mapControl.drawConnections(dataUtils.collectConnections(state));
