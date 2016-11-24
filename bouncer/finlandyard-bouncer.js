@@ -8,8 +8,12 @@ var crypto = require('crypto');
 const PORT=8000;
 const CACHE_STORE= __dirname + '/.store/'
 
+function echoLine(line) {
+  console.log('\x1b[45m[FY-BOUNCER]:\x1b[0m',  line);
+}
+
 if(!fs.existsSync(CACHE_STORE)) {
-  console.log('Store does not exist, creating it.');
+  echoLine('Store does not exist, creating it.');
   fs.mkdirSync(CACHE_STORE);
 }
 
@@ -25,17 +29,17 @@ function serve(data, response) {
 }
 
 function store(filename, data) {
-  console.log('Storing: ' + filename + " " + Buffer.byteLength(data, 'utf8') + ' bytes');
+  echoLine('Storing: ' + filename + " " + Buffer.byteLength(data, 'utf8') + ' bytes');
   fs.writeFile(filename, data, function(err) {
     if(err) {
       console.error('Error while storing');
-      console.log(err);
+      echoLine(err);
     }
   });
 }
 
 function queryOverHttp(url, filename, response) {
-  console.log('Querying over http for ' + filename);
+  echoLine('Querying over http for ' + filename);
   http.get({
     hostname: 'rata.digitraffic.fi',
     port: 80,
@@ -57,11 +61,11 @@ function handleRequest(request, response){
   let filename = persistentFileName(request.url);
   fs.exists(filename, function(exists) {
     if(exists) {
-      console.log('Serving pickles from fs ' + filename);
+      echoLine('Serving pickles from fs ' + filename);
       fs.readFile(filename, function(err, data) {
         if(err) {
           // Awesome self repairing
-          console.log('Error while serving pickles :(, trying http');
+          echoLine('Error while serving pickles :(, trying http');
           queryOverHttp(request.url, filename, response);
         }
         serve(data, response);
@@ -75,5 +79,5 @@ function handleRequest(request, response){
 
 var server = http.createServer(handleRequest);
 server.listen(PORT, function(){
-    console.log('FINLANDYARD bouncer proxy listening: http://localhost:%s', PORT);
+    echoLine('FINLANDYARD bouncer proxy listening: http://localhost:' + PORT);
 });

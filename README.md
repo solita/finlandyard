@@ -18,6 +18,11 @@ npm run proxy
 npm run dev
 ```
 
+```
+# Tosi coolit tyypit ajaa vain
+npm run dev+proxy
+```
+
 Tuo proxy ikäänkuin välimuistittaa persistentisti apin tarjoamia json bodyjä bouncer/.store/ lokaatiossa. Tämän avulla ei myöskään tarvitse käyttää mitään ulkoista cors-anywhere systeemiä. Tosin, rata.digitraffic api lisää vastauksiin Access-Control-Allow-Origin headerin.
 
 Testit sijaitsee spec/ ja koodi src-hakemistoissa.
