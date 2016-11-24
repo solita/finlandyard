@@ -1,3 +1,5 @@
+'use strict';
+
 require('file?name=[name].[ext]!./index.html');
 var dataUtils = require('./DataUtils.js');
 var mapControl = require('./MapControl.js');

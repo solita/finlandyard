@@ -1,4 +1,5 @@
-//Lets require/import the HTTP module
+'use strict';
+
 var http = require('http');
 var fs = require('fs');
 var crypto = require('crypto');

@@ -1,3 +1,4 @@
+'use strict';
 // LUL WUT? Why yuno promise?
 
 function doAsyncJsonRequest(url, cb) {

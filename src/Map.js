@@ -1,3 +1,5 @@
+'use strict';
+
 var ol = require('openlayers');
 require('../node_modules/openlayers/css/ol.css');
 

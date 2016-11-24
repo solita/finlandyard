@@ -1,3 +1,5 @@
+'use strict';
+
 var map = require('./Map.js');
 var ol = require('openlayers');
 

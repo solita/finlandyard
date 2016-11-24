@@ -1,3 +1,5 @@
+'use strict';
+
 var _ = require('lodash');
 
 function station(id, longitude, latitude) {
