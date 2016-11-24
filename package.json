@@ -4,10 +4,11 @@
   "description": "Finland Yard, IA game thingy based on VR API:s",
   "main": "api.js",
   "scripts": {
-    "clean": "rm -rf dist",
+    "clean": "rm -rf dist && cd bouncer && npm run clean",
     "test": "jasmine",
     "dist": "webpack",
-    "dev": "webpack-dev-server --content-base dist/"
+    "dev": "webpack-dev-server --content-base dist/",
+    "proxy": "cd bouncer && npm run proxy"
   },
   "repository": {
     "type": "git",
