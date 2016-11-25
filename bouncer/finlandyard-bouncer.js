@@ -24,13 +24,13 @@ function persistentFileName(uri) {
 
 function serve(data, response) {
   response.setHeader('Access-Control-Allow-Origin', '*');
-  response.setHeader('content-type', 'application/json');
+  response.setHeader('content-type', 'application/json; charset=utf-8');
   response.end(data);
 }
 
 function store(filename, data) {
   echoLine('Storing: ' + filename + " " + Buffer.byteLength(data, 'utf8') + ' bytes');
-  fs.writeFile(filename, data, function(err) {
+  fs.writeFile(filename, data, 'utf8', function(err) {
     if(err) {
       console.error('Error while storing');
       echoLine(err);
@@ -46,7 +46,7 @@ function queryOverHttp(url, filename, response) {
     path: url,
     agent: false  // create a new agent just for this one request
   }, (res) => {
-    // Do stuff with response
+    res.setEncoding('utf8');
     let body = '';
     res.on('data', (chunk) => body += chunk);
     res.on('end', () => {
@@ -62,7 +62,7 @@ function handleRequest(request, response){
   fs.exists(filename, function(exists) {
     if(exists) {
       echoLine('Serving pickles from fs ' + filename);
-      fs.readFile(filename, function(err, data) {
+      fs.readFile(filename, 'utf8', function(err, data) {
         if(err) {
           // Awesome self repairing
           echoLine('Error while serving pickles :(, trying http');
