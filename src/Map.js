@@ -4,7 +4,7 @@ var ol = require('openlayers');
 require('../node_modules/openlayers/css/ol.css');
 
 // TODO: tämän voisi erottaa vielä omaan filuunsa (olisi siis esim Map.js ja MapControl.js)
-function initMap(stationSource, connectionSource, policeSource, thieveSource, attribution) {
+function initMap(stationSource, connectionSource, policeSource, villainSource, attribution) {
   // Varsinainen karttaotus
   console.log("Initializing map");
   var map = new ol.Map({
@@ -46,7 +46,7 @@ function initMap(stationSource, connectionSource, policeSource, thieveSource, at
       }),
       // Rosvot
       new ol.layer.Vector({
-        source: thieveSource,
+        source: villainSource,
         style: new ol.style.Style({
           image: new ol.style.Circle({
             radius: 3,

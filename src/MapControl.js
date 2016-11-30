@@ -15,6 +15,13 @@ function connectionToFeature(connection) {
   });
 }
 
+function actorToFeature(actor) {
+  return new ol.Feature({
+    'geometry': new ol.geom.Point(ol.proj.fromLonLat([actor.longitude, actor.latitude]))});
+}
+
+
+
 module.exports = function() {
   // Closure for holding source states
   var stationSource = new ol.source.Vector({
@@ -29,7 +36,7 @@ module.exports = function() {
       wrapX: false
   });
 
-  var thieveSource = new ol.source.Vector({
+  var villainSource = new ol.source.Vector({
       wrapX: false
   });
 
@@ -38,7 +45,7 @@ module.exports = function() {
   });
 
   // Initialize map
-  map(stationSource, connectionSource, policeSource, thieveSource, attribution);
+  map(stationSource, connectionSource, policeSource, villainSource, attribution);
 
   // Return object for commanding sources with access to state closure
   // We do not expose sources directly
@@ -50,6 +57,12 @@ module.exports = function() {
     drawConnections: function(connections) {
       console.log("Drawing " + connections.length + " connections");
       connectionSource.addFeatures(_.map(connections, connectionToFeature));
+    },
+    drawPolice: function(police) {
+      policeSource.addFeatures(_.map(police, actorToFeature));
+    },
+    drawVillains: function(villains) {
+      villainSource.addFeatures(_.map(villains, actorToFeature));
     }
   }
 }

@@ -2,6 +2,7 @@
 
 require('file?name=[name].[ext]!./index.html');
 var dataUtils = require('./DataUtils.js');
+var stateUtils = require('./StateUtils.js');
 var mapControl = require('./MapControl.js');
 var loadData = require('./Api.js');
 var moment = require('moment')
@@ -20,6 +21,11 @@ loadData(function(state) {
   mapControl.drawConnections(dataUtils.collectConnections(state));
   mapControl.drawStations(dataUtils.connectedStations(state));
 
+  state.actors = [
+    {type: 'police', name: 'Sorjonen', latitude: state.stations[0].latitude, longitude: state.stations[0].longitude },
+    {type: 'villain', name: 'Mr. X', latitude: state.stations[1].latitude, longitude: state.stations[1].longitude }
+  ];
+
   // THE game loop
   (function tick() {
     setTimeout(
@@ -29,6 +35,8 @@ loadData(function(state) {
         if(state.clockIs.unix() - startingTime.unix() > 1 * 24 * 60 * 60) {
           state.clockIs = startingTime.clone();
         }
+        mapControl.drawPolice(stateUtils.getActors(state, 'police'));
+        mapControl.drawVillains(stateUtils.getActors(state, 'villain'));
         document.getElementById("clock").innerHTML = state.clockIs.format();
 
         tick();
