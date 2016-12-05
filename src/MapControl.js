@@ -59,9 +59,11 @@ module.exports = function() {
       connectionSource.addFeatures(_.map(connections, connectionToFeature));
     },
     drawPolice: function(police) {
+      policeSource.clear();
       policeSource.addFeatures(_.map(police, actorToFeature));
     },
     drawVillains: function(villains) {
+      villainSource.clear();
       villainSource.addFeatures(_.map(villains, actorToFeature));
     }
   }

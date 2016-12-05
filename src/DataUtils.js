@@ -11,6 +11,15 @@ module.exports = {
     }
     throw Error("No such station: " + id);
   },
+  getTrainById(state, id) {
+      var a = _.find(state.timetable, function(s) {
+        return s.trainNumber === id;
+      });
+      if(a) {
+        return a;
+      }
+      throw Error("No such train: " + id);
+  },
   collectConnections: function(state) {
     // Collect every connection
     var allConnections = _.flatten(_.map(state.timetable, function(t) { return t.timeTableRows; })),
