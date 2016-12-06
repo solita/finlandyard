@@ -1,24 +1,24 @@
 'use strict';
 var _ = require('lodash');
+var R = require('ramda');
+
+var throwIfNull = (message, value) =>
+  R.ifElse(
+    R.isNil,
+    (_) => { throw Error(message)},
+    R.identity
+  )(value);
 
 module.exports = {
   getStationById: function(state, id) {
-    var a = _.find(state.stations, function(s) {
-      return s.stationShortCode === id;
-    });
-    if(a) {
-      return a;
-    }
-    throw Error("No such station: " + id);
+    return throwIfNull(
+      R.concat("No such station: ", id),
+      R.find(R.propEq('stationShortCode', id), state.stations));
   },
   getTrainById(state, id) {
-      var a = _.find(state.timetable, function(s) {
-        return s.trainNumber === id;
-      });
-      if(a) {
-        return a;
-      }
-      throw Error("No such train: " + id);
+    return throwIfNull(
+      R.concat("No such train: ", id),
+      R.find(R.propEq('trainNumber', id), state.timetable));
   },
   collectConnections: function(state) {
     // Collect every connection
