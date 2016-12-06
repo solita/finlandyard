@@ -3,23 +3,17 @@
 var map = require('./Map.js');
 var ol = require('openlayers');
 
-function stationToFeature(station) {
-  return new ol.Feature({
-    'geometry': new ol.geom.Point(ol.proj.fromLonLat([station.longitude, station.latitude]))
-  });
-}
+var stationToFeature = (station) => new ol.Feature({
+  'geometry': new ol.geom.Point(ol.proj.fromLonLat([station.longitude, station.latitude]))
+});
 
-function connectionToFeature(connection) {
-  return new ol.Feature({
-    'geometry': new ol.geom.LineString([ol.proj.fromLonLat(connection.from), ol.proj.fromLonLat(connection.to)])
-  });
-}
+var connectionToFeature = (connection) => new ol.Feature({
+  'geometry': new ol.geom.LineString([ol.proj.fromLonLat(connection.from), ol.proj.fromLonLat(connection.to)])
+});
 
-function actorToFeature(actor) {
-  return new ol.Feature({
-    'geometry': new ol.geom.Point(ol.proj.fromLonLat([actor.longitude, actor.latitude]))});
-}
-
+var actorToFeature = (actor) => new ol.Feature({
+  'geometry': new ol.geom.Point(ol.proj.fromLonLat([actor.longitude, actor.latitude]))
+});
 
 
 module.exports = function() {
