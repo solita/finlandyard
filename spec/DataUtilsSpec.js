@@ -5,7 +5,7 @@ var sb = require('./StateBuilder.js');
 
 describe("DataUtils", function() {
 
-  var stateUtils = require('../src/DataUtils.js');
+  var stateUtils = require('../src/state/DataUtils.js');
 
   describe("getStationById", function() {
     it("should throw if no station was found for id", function() {

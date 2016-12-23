@@ -4,7 +4,7 @@ var sb = require('./StateBuilder.js');
 
 describe("StateUtils", function() {
 
-  var stateUtils = require('../src/StateUtils.js');
+  var stateUtils = require('../src/state/StateUtils.js');
 
   describe("getActors", function() {
     it("should return actors of type", function() {
