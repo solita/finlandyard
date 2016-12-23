@@ -10,7 +10,8 @@ module.exports = {
         loaders: [
             { test: /\.js/, loader: 'babel-loader' },
             { test: /\.css/, loader: ExtractTextPlugin.extract("css") }
-        ]
+        ],
+        noParse: 'openlayers'
     },
     plugins: [
       new ExtractTextPlugin("styles.css")
