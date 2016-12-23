@@ -1,5 +1,6 @@
 'use strict';
 var _ = require('lodash');
+var R = require('ramda');
 var dataUtils = require('./DataUtils.js');
 var moment = require('moment');
 
@@ -42,7 +43,7 @@ function calculatePosition(state, actor) {
 
 module.exports = {
   getActors: function(state, type) {
-    return _.filter(state.actors, function(actor) { return actor.type === type; } );
+    return R.filter(R.propEq('type', type), state.actors);
   },
   calculateNewPositions: function(state) {
     return _.assign(state, {actors: _.map(state.actors, _.partial(calculatePosition, state))});
