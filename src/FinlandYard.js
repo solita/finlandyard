@@ -11,6 +11,17 @@ console.log("Starting up finland yard");
 
 var mapControl = mapControl();
 
+function visualizeStates(state) {
+  var container = document.getElementById("states");
+  container.innerHTML = '';
+  state.actors.forEach(function(actor) {
+    var iDiv = document.createElement('div');
+    iDiv.className = "statecontainer";
+    iDiv.innerHTML = JSON.stringify(actor, null, '   ');
+    container.appendChild(iDiv);
+  });
+}
+
 loadData(function(state) {
   if(state.timetable.length === 0) {
     console.error("No timetable rows found from api");
@@ -40,9 +51,10 @@ loadData(function(state) {
 
         mapControl.drawPolice(stateUtils.getActors(state, 'police'));
         mapControl.drawVillains(stateUtils.getActors(state, 'villain'));
-        document.getElementById("clock").innerHTML = state.clockIs.format();
 
+        document.getElementById("clock").innerHTML = state.clockIs.format();
+        visualizeStates(state);
         tick();
       },
-      100)})();
+      10)})();
 });
