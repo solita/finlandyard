@@ -1,7 +1,7 @@
 'use strict';
 
 var ol = require('openlayers');
-require('../node_modules/openlayers/css/ol.css');
+require('../../node_modules/openlayers/css/ol.css');
 
 // TODO: tämän voisi erottaa vielä omaan filuunsa (olisi siis esim Map.js ja MapControl.js)
 function initMap(stationSource, connectionSource, policeSource, villainSource, attribution) {

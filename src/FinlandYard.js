@@ -1,9 +1,9 @@
 'use strict';
 
 require('file?name=[name].[ext]!./index.html');
-var dataUtils = require('./DataUtils.js');
-var stateUtils = require('./StateUtils.js');
-var mapControl = require('./MapControl.js');
+var dataUtils = require('./state/DataUtils.js');
+var stateUtils = require('./state/StateUtils.js');
+var mapControl = require('./map/MapControl.js');
 var loadData = require('./Api.js');
 var moment = require('moment');
 
