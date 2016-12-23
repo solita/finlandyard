@@ -9,6 +9,8 @@ var throwIfNull = (message, value) =>
     R.identity
   )(value);
 
+
+
 module.exports = {
   getStationById: function(state, id) {
     return throwIfNull(
@@ -20,27 +22,35 @@ module.exports = {
       R.concat("No such train: ", id),
       R.find(R.propEq('trainNumber', id), state.timetable));
   },
+  stationCoordinates: function(state, id) {
+    var coords = R.juxt([R.prop('longitude'), R.prop('latitude')]);
+    // Wat?
+    return coords(module.exports.getStationById(state, id));
+  },
   collectConnections: function(state) {
-    // Collect every connection
-    var allConnections = _.flatten(_.map(state.timetable, function(t) { return t.timeTableRows; })),
+    // Partial for accessing coordinates from state
+    var coordsById = R.partial(this.stationCoordinates, [state]);
 
-    // Map connections with station coordinates
-    allConnections = _.map(allConnections, function(entry) {
-      var station = module.exports.getStationById(state, entry.stationShortCode);
-      return {
-        stationShortCode: entry.stationShortCode,
-        coords: [station.longitude, station.latitude]
-      }
-    });
+    var timeTableRows = R.compose(
+      // Map coordinates to stations
+      R.map(R.evolve({from: coordsById, to: coordsById})),
+      R.map((con) => {
+        return {from: R.head(con), to: R.last(con)}
+      }),
 
-    // Remove duplicates
-    allConnections = _.map(_.chunk(allConnections, 2), function(connection) {
-      var si = _.join(_.sortBy([connection[0].stationShortCode, connection[1].stationShortCode]), "");
-      return {sortIdentifier: si, from: connection[0].coords, to: connection[1].coords};
-    });
+      // Reduce all unique connections, unique is MUCH faster with strings, hence R.join
+      R.uniqBy(R.compose(R.join('-'), R.sortBy(R.identity))),
 
-    // Remove util data
-    return _.map(_.uniqBy(allConnections, "sortIdentifier"), function(e) { return _.omit(e, "sortIdentifier");});
+      // We know its [DEPARTURE, ARRIVAL, DEPARTURE, ARRVIVAL...]
+      // So we get collection of tuples [[HKI, PSL], [PSL, LKJ] ...]
+      R.splitEvery(2),
+
+      // Map every station id from routes: [HKI, PSL, PSL, LKJ, LKJ, JEK, JEK ....]
+      R.map(R.prop('stationShortCode')),
+      R.flatten,
+      R.map(R.prop('timeTableRows')));
+
+    return timeTableRows(state.timetable);
   },
   connectedStations: function(state) {
     var allConnectedStations =
