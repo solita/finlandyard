@@ -1,5 +1,4 @@
 'use strict';
-var _ = require('lodash');
 var R = require('ramda');
 
 var throwIfNull = (message, value) =>
@@ -8,8 +7,6 @@ var throwIfNull = (message, value) =>
     (_) => { throw Error(message)},
     R.identity
   )(value);
-
-
 
 module.exports = {
   getStationById: function(state, id) {
@@ -24,7 +21,6 @@ module.exports = {
   },
   stationCoordinates: function(state, id) {
     var coords = R.juxt([R.prop('longitude'), R.prop('latitude')]);
-    // Wat?
     return coords(module.exports.getStationById(state, id));
   },
   collectConnections: function(state) {
@@ -53,10 +49,16 @@ module.exports = {
     return timeTableRows(state.timetable);
   },
   connectedStations: function(state) {
-    var allConnectedStations =
-      _.flatten(_.map(state.timetable,
-        function(t) { return _.map(t.timeTableRows, "stationShortCode"); }));
-
-    return _.map(_.uniq(allConnectedStations), _.partial(module.exports.getStationById, state));
+    if(R.isNil(state.timetable)) {
+      return [];
+    }
+    var collector = R.compose(
+      R.map(R.partial(module.exports.getStationById, [state])),
+      R.uniqBy(R.identity),
+      R.map(R.prop('stationShortCode')),
+      R.flatten,
+      R.map(R.prop('timeTableRows'))
+    );
+    return collector(state.timetable);
   }
 }
