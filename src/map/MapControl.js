@@ -2,6 +2,7 @@
 
 var map = require('./Map.js');
 var ol = require('openlayers');
+var R = require('ramda');
 
 var stationToFeature = (station) => new ol.Feature({
   'geometry': new ol.geom.Point(ol.proj.fromLonLat([station.longitude, station.latitude]))
@@ -46,19 +47,19 @@ module.exports = function() {
   return {
     drawStations: function(stations) {
       console.log("Drawing " + stations.length + " stations");
-      stationSource.addFeatures(_.map(stations, stationToFeature));
+      stationSource.addFeatures(R.map(stationToFeature, stations));
     },
     drawConnections: function(connections) {
       console.log("Drawing " + connections.length + " connections");
-      connectionSource.addFeatures(_.map(connections, connectionToFeature));
+      connectionSource.addFeatures(R.map(connectionToFeature, connections));
     },
     drawPolice: function(police) {
       policeSource.clear();
-      policeSource.addFeatures(_.map(police, actorToFeature));
+      policeSource.addFeatures(R.map(actorToFeature, police));
     },
     drawVillains: function(villains) {
       villainSource.clear();
-      villainSource.addFeatures(_.map(villains, actorToFeature));
+      villainSource.addFeatures(R.map(actorToFeature, villains));
     }
   }
 }
