@@ -1,5 +1,6 @@
 'use strict';
 var R = require('ramda');
+var moment = require('moment');
 
 var throwIfNull = (message, value) =>
   R.ifElse(
@@ -22,6 +23,17 @@ module.exports = {
   stationCoordinates: function(state, id) {
     var coords = R.juxt([R.prop('longitude'), R.prop('latitude')]);
     return coords(module.exports.getStationById(state, id));
+  },
+  trainsLeavingFrom: function(state, stationShortCode) {
+    return R.filter(
+      R.compose(
+        R.allPass([
+          R.propEq('stationShortCode', stationShortCode),
+          (departure) => { return state.clockIs.unix() < moment(departure.scheduledTime).unix(); }
+        ]),
+        R.head,
+        R.prop('timeTableRows')),
+      state.timetable)
   },
   collectConnections: function(state) {
     // Partial for accessing coordinates from state

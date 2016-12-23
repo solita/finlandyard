@@ -6,6 +6,7 @@ var stateUtils = require('./state/StateUtils.js');
 var mapControl = require('./map/MapControl.js');
 var loadData = require('./Api.js');
 var moment = require('moment');
+var R = require('ramda');
 
 console.log("Starting up finland yard");
 
@@ -47,6 +48,23 @@ loadData(function(state) {
           state.clockIs = startingTime.clone();
         }
 
+        // Random AI (this can be turned into apply ai?)
+        var pickRandomTrain = R.map((actor) => {
+          if(actor.train) {
+            return actor;
+          }
+          var train = R.head(dataUtils.trainsLeavingFrom(state, actor.location));
+          if(R.isNil(train)) {
+            return actor;
+          }
+          console.log(actor.name + " takes train "
+            + train.trainNumber + " to " + R.last(train.timeTableRows).stationShortCode
+            + " from " + actor.location);
+          return R.merge(actor, {train: train.trainNumber })
+        });
+        state = R.evolve({'actors': pickRandomTrain}, state);
+
+
         state = stateUtils.calculateNewPositions(state);
 
         mapControl.drawPolice(stateUtils.getActors(state, 'police'));
@@ -56,5 +74,5 @@ loadData(function(state) {
         visualizeStates(state);
         tick();
       },
-      10)})();
+      50)})();
 });

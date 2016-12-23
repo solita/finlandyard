@@ -29,17 +29,32 @@ function getTrainLocationCoordinated(state, train) {
 
   return {
     latitude: arrival_station.latitude + porpotion * (departure_station.latitude - arrival_station.latitude),
-    longitude: arrival_station.longitude + porpotion * (departure_station.longitude - arrival_station.longitude)
+    longitude: arrival_station.longitude + porpotion * (departure_station.longitude - arrival_station.longitude),
+    // Location MUST be null if actor is in train
+    location: null
   };
 
 }
 
 function calculatePosition(state, actor) {
   if(actor.train) {
-    var trainLocation = getTrainLocationCoordinated(state, dataUtils.getTrainById(state, actor.train));
+    var actorTrain = dataUtils.getTrainById(state, actor.train);
+
+    // Train has not yet departed
+    if(state.clockIs.unix() < moment(R.head(actorTrain.timeTableRows).scheduledTime).unix()) {
+      var station = dataUtils.getStationById(state, actor.location);
+      return R.merge(actor, {latitude: station.latitude, longitude: station.longitude});
+    }
+    // Train has arrived
+    if(state.clockIs.unix() > moment(R.last(actorTrain.timeTableRows).scheduledTime).unix()) {
+      return R.merge(actor, {train: null, location: R.last(actorTrain.timeTableRows).stationShortCode});
+    }
+    // Train is somewhere along the route
+    var trainLocation = getTrainLocationCoordinated(state, actorTrain);
     if(!R.isNil(trainLocation)) {
       return R.merge(actor, trainLocation);
     }
+
     return actor;
   }
   var station = dataUtils.getStationById(state, actor.location);
