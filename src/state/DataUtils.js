@@ -5,7 +5,7 @@ var moment = require('moment');
 var throwIfNull = (message, value) =>
   R.ifElse(
     R.isNil,
-    (_) => { throw Error(message)},
+    (_) => {throw Error(message)},
     R.identity
   )(value);
 

@@ -34,8 +34,9 @@ loadData(function(state) {
   mapControl.drawStations(dataUtils.connectedStations(state));
 
   state.actors = [
-    {type: 'police', name: 'Sorjonen',  location: 'JNS' },
-    {type: 'villain', name: 'Mr. X', location: 'HKI', train: 1 }
+    {id: 1, type: 'police', name: 'Sorjonen',  location: 'JNS' },
+    {id: 2, type: 'villain', name: 'Mr. X', location: 'HKI', train: 1 },
+    {id: 3, type:'villain', name: 'Ms. Y', location: 'TPE'}
   ];
 
   // THE game loop
@@ -53,15 +54,25 @@ loadData(function(state) {
           if(actor.train) {
             return actor;
           }
-          var train = R.head(dataUtils.trainsLeavingFrom(state, actor.location));
+          var leavingTrains=dataUtils.trainsLeavingFrom(state, actor.location);
+          var number=Math.floor(Math.random()*6);
+          var train = R.nth(number)(leavingTrains);
           if(R.isNil(train)) {
             return actor;
           }
           console.log(actor.name + " takes train "
             + train.trainNumber + " to " + R.last(train.timeTableRows).stationShortCode
             + " from " + actor.location);
-          return R.merge(actor, {train: train.trainNumber })
+          var departTime=train.timeTableRows[0].scheduledTime;
+          return R.merge(actor, {train: train.trainNumber, departureTime: departTime.substr(departTime.indexOf('T')+1, 5) })
         });
+        //Check whether the villains are in the same location as police is (or in same train)
+        var police=stateUtils.getActors(state, 'police');
+        var caughtVillains=stateUtils.getCaughtVillains(state, police[0])
+        if(caughtVillains.length > 0) {
+          stateUtils.removeActors(state, caughtVillains);
+        }
+        
         state = R.evolve({'actors': pickRandomTrain}, state);
 
 

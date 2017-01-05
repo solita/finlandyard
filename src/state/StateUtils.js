@@ -47,7 +47,8 @@ function calculatePosition(state, actor) {
     }
     // Train has arrived
     if(state.clockIs.unix() > moment(R.last(actorTrain.timeTableRows).scheduledTime).unix()) {
-      return R.merge(actor, {train: null, location: R.last(actorTrain.timeTableRows).stationShortCode});
+      console.log(actor.name + ' arrived to ' + R.last(actorTrain.timeTableRows).stationShortCode + ' at ' + state.clockIs.toDate())
+      return R.merge(actor, {train: null, departureTime: null, location: R.last(actorTrain.timeTableRows).stationShortCode});
     }
     // Train is somewhere along the route
     var trainLocation = getTrainLocationCoordinated(state, actorTrain);
@@ -64,7 +65,29 @@ function calculatePosition(state, actor) {
 
 module.exports = {
   getActors: function(state, type) {
-    return R.filter(R.propEq('type', type), state.actors);
+    var result=R.filter(R.propEq('type', type), state.actors);
+    if(result.length ==0) {
+      debugger;
+    }
+    return result;
+  },
+  getCaughtVillains: function(state, police) {
+    var inLocation=R.filter(R.propEq('location', police.location), state.actors);
+    var onlyVillains=R.reject(R.propEq('type', 'police'), inLocation);
+    
+    if(police.train) {
+      var inPoliceTrain=R.filter(R.propEq('train', police.train), state.actors);
+      var excludingPolice=R.reject(R.propEq('type', 'police'), inPoliceTrain);
+      var found=R.union(excludingPolice, onlyVillains);
+      return found;
+    }
+    return onlyVillains;
+    
+  }, 
+  //NOTE!! Doesnt work yet!
+  removeActors: function(state, actorList) {
+    var newActors=R.filter(R.pick(actorList), state.actors)
+    state.actors=newActors;
   },
   calculateNewPositions: function(state) {
     return R.evolve({actors: R.map(R.partial(calculatePosition, [state]))}, state);
