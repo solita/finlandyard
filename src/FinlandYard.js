@@ -35,7 +35,7 @@ loadData(function(state) {
 
   state.actors = [
     {id: 1, type: 'police', name: 'Sorjonen',  location: 'JNS' },
-    {id: 2, type: 'villain', name: 'Mr. X', location: 'HKI', train: 1 },
+    {id: 2, type: 'villain', name: 'Mr. X', location: 'HKI'},
     {id: 3, type:'villain', name: 'Ms. Y', location: 'TPE'}
   ];
 
@@ -56,7 +56,6 @@ loadData(function(state) {
           }
           var leavingTrains=dataUtils.trainsLeavingFrom(state, actor.location);
           if(leavingTrains.length ==0) {
-            console.log("No trains leaving today from station " + actor.location);
             return actor;
           }
           var number=Math.floor(Math.random()*6);
@@ -70,6 +69,9 @@ loadData(function(state) {
 
           var departTime=train.timeTableRows[0].scheduledTime;
           console.log("Train will depart at " + departTime.substr(departTime.indexOf('T')+1, 5));
+          if(!actor.location) {
+            debugger;
+          }
           return R.merge(actor, {train: train.trainNumber, departureTime: departTime.substr(departTime.indexOf('T')+1, 5) })
         });
         //Check whether the villains are in the same location as police is (or in same train)
