@@ -55,6 +55,10 @@ loadData(function(state) {
             return actor;
           }
           var leavingTrains=dataUtils.trainsLeavingFrom(state, actor.location);
+          if(leavingTrains.length ==0) {
+            console.log("No trains leaving today from station " + actor.location);
+            return actor;
+          }
           var number=Math.floor(Math.random()*6);
           var train = R.nth(number)(leavingTrains);
           if(R.isNil(train)) {
@@ -63,7 +67,9 @@ loadData(function(state) {
           console.log(actor.name + " takes train "
             + train.trainNumber + " to " + R.last(train.timeTableRows).stationShortCode
             + " from " + actor.location);
+
           var departTime=train.timeTableRows[0].scheduledTime;
+          console.log("Train will depart at " + departTime.substr(departTime.indexOf('T')+1, 5));
           return R.merge(actor, {train: train.trainNumber, departureTime: departTime.substr(departTime.indexOf('T')+1, 5) })
         });
         //Check whether the villains are in the same location as police is (or in same train)
@@ -72,7 +78,7 @@ loadData(function(state) {
         if(caughtVillains.length > 0) {
           stateUtils.removeActors(state, caughtVillains);
         }
-        
+
         state = R.evolve({'actors': pickRandomTrain}, state);
 
 

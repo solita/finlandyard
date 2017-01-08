@@ -42,6 +42,10 @@ function calculatePosition(state, actor) {
 
     // Train has not yet departed
     if(state.clockIs.unix() < moment(R.head(actorTrain.timeTableRows).scheduledTime).unix()) {
+      if(!actor.location) {
+        console.log("No location found but about to merge");
+        debugger;
+      }
       var station = dataUtils.getStationById(state, actor.location);
       return R.merge(actor, {latitude: station.latitude, longitude: station.longitude});
     }
@@ -72,21 +76,24 @@ module.exports = {
     return result;
   },
   getCaughtVillains: function(state, police) {
-    var inLocation=R.filter(R.propEq('location', police.location), state.actors);
-    var onlyVillains=R.reject(R.propEq('type', 'police'), inLocation);
+    var villainsToBeCaught=new Array();
+    if(police.location) {
+      var inLocation=R.filter(R.propEq('location', police.location), state.actors);
+      villainsToBeCaught=R.reject(R.propEq('type', 'police'), inLocation);
+    }
     
     if(police.train) {
       var inPoliceTrain=R.filter(R.propEq('train', police.train), state.actors);
       var excludingPolice=R.reject(R.propEq('type', 'police'), inPoliceTrain);
-      var found=R.union(excludingPolice, onlyVillains);
+      var found=R.union(excludingPolice, villainsToBeCaught);
       return found;
     }
-    return onlyVillains;
+    return villainsToBeCaught;
     
-  }, 
-  //NOTE!! Doesnt work yet!
+  },
   removeActors: function(state, actorList) {
-    var newActors=R.filter(R.pick(actorList), state.actors)
+    var toDelete = n => actorList.indexOf(n) != -1;
+    var newActors=R.reject(toDelete, state.actors);
     state.actors=newActors;
   },
   calculateNewPositions: function(state) {

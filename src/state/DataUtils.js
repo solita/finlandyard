@@ -5,7 +5,7 @@ var moment = require('moment');
 var throwIfNull = (message, value) =>
   R.ifElse(
     R.isNil,
-    (_) => {throw Error(message)},
+    (_) => {debugger; throw Error(message)},
     R.identity
   )(value);
 
@@ -24,6 +24,7 @@ module.exports = {
     var coords = R.juxt([R.prop('longitude'), R.prop('latitude')]);
     return coords(module.exports.getStationById(state, id));
   },
+  // does this work for sure? Sometimes returns empty array in the morning for example for Rovaniemi
   trainsLeavingFrom: function(state, stationShortCode) {
     return R.filter(
       R.compose(
