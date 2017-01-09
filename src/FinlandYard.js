@@ -19,8 +19,16 @@ function visualizeStates(state) {
     var iDiv = document.createElement('div');
     iDiv.className = "statecontainer";
     iDiv.innerHTML = JSON.stringify(actor, null, '   ');
+
     container.appendChild(iDiv);
   });
+    state.caughtVillains.forEach(function(villain) {
+        var iDiv = document.createElement('div');
+        iDiv.className = "caughtContainer";
+        iDiv.innerHTML = JSON.stringify(villain, null, '   ');
+
+        container.appendChild(iDiv);
+    });
 }
 
 loadData(function(state) {
@@ -28,7 +36,8 @@ loadData(function(state) {
     console.error("No timetable rows found from api");
     return;
   }
-  var startingTime = moment(state.timetable[0].timeTableRows[0].scheduledTime);
+  var startingTime = moment(state.timetable[0].departureDate);
+  debugger;
   state.clockIs = startingTime.clone();
   mapControl.drawConnections(dataUtils.collectConnections(state));
   mapControl.drawStations(dataUtils.connectedStations(state));
@@ -38,6 +47,8 @@ loadData(function(state) {
     {id: 2, type: 'villain', name: 'Mr. X', location: 'HKI'},
     {id: 3, type:'villain', name: 'Ms. Y', location: 'TPE'}
   ];
+
+  state.caughtVillains=new Array();
 
   // THE game loop
   (function tick() {
@@ -91,7 +102,12 @@ loadData(function(state) {
 
         document.getElementById("clock").innerHTML = state.clockIs.format();
         visualizeStates(state);
-        tick();
+        if(state.actors.length > 1) {
+            tick();
+        } else {
+            console.log("Game over!");
+        }
+
       },
       50)})();
 });

@@ -88,6 +88,10 @@ module.exports = {
       var found=R.union(excludingPolice, villainsToBeCaught);
       return found;
     }
+    if(villainsToBeCaught.length > 0) {
+      villainsToBeCaught.forEach(function(villain) {state.caughtVillains.push(villain)});
+    }
+
     return villainsToBeCaught;
     
   },
