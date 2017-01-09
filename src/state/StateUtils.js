@@ -40,20 +40,21 @@ function calculatePosition(state, actor) {
   if(actor.train) {
     var actorTrain = dataUtils.getTrainById(state, actor.train);
 
-    // Train has not yet departed
-    if(state.clockIs.unix() < moment(R.head(actorTrain.timeTableRows).scheduledTime).unix()) {
-      if(!actor.location) {
-        console.log("No location found but about to merge");
-        debugger;
-      }
-      var station = dataUtils.getStationById(state, actor.location);
-      return R.merge(actor, {latitude: station.latitude, longitude: station.longitude});
-    }
+
     // Train has arrived
     if(state.clockIs.unix() > moment(R.last(actorTrain.timeTableRows).scheduledTime).unix()) {
       console.log(actor.name + ' arrived to ' + R.last(actorTrain.timeTableRows).stationShortCode + ' at ' + state.clockIs.toDate())
-      return R.merge(actor, {train: null, departureTime: null, location: R.last(actorTrain.timeTableRows).stationShortCode});
+      return R.merge(actor, {train: null, location: R.last(actorTrain.timeTableRows).stationShortCode, departed:null});
     }
+    //Train is leaving
+    if(state.clockIs.unix() == moment(R.head(actorTrain.timeTableRows).scheduledTime).unix()) {
+      actor= R.merge(actor, {departed:true})
+    }
+      // Train has not yet departed
+      if(!actor.departed) {
+          var station = dataUtils.getStationById(state, actor.location);
+          return R.merge(actor, {latitude: station.latitude, longitude: station.longitude});
+      }
     // Train is somewhere along the route
     var trainLocation = getTrainLocationCoordinated(state, actorTrain);
     if(!R.isNil(trainLocation)) {
@@ -90,6 +91,7 @@ module.exports = {
     }
     if(villainsToBeCaught.length > 0) {
       villainsToBeCaught.forEach(function(villain) {state.caughtVillains.push(villain)});
+        console.log(villainsToBeCaught[0].name + " got caught!");
     }
 
     return villainsToBeCaught;

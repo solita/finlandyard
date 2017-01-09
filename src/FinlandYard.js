@@ -66,7 +66,7 @@ loadData(function(state) {
             return actor;
           }
           var leavingTrains=dataUtils.trainsLeavingFrom(state, actor.location);
-          if(leavingTrains.length ==0) {
+          if(leavingTrains.length == 0) {
             return actor;
           }
           var number=Math.floor(Math.random()*6);
@@ -83,7 +83,7 @@ loadData(function(state) {
           if(!actor.location) {
             debugger;
           }
-          return R.merge(actor, {train: train.trainNumber, departureTime: departTime.substr(departTime.indexOf('T')+1, 5) })
+          return R.merge(actor, {train: train.trainNumber })
         });
         //Check whether the villains are in the same location as police is (or in same train)
         var police=stateUtils.getActors(state, 'police');
@@ -94,13 +94,12 @@ loadData(function(state) {
 
         state = R.evolve({'actors': pickRandomTrain}, state);
 
-
         state = stateUtils.calculateNewPositions(state);
 
         mapControl.drawPolice(stateUtils.getActors(state, 'police'));
         mapControl.drawVillains(stateUtils.getActors(state, 'villain'));
 
-        document.getElementById("clock").innerHTML = state.clockIs.format();
+        document.getElementById("clock").innerHTML = state.clockIs.toISOString();
         visualizeStates(state);
         if(state.actors.length > 1) {
             tick();
