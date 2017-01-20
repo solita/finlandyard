@@ -4,8 +4,20 @@
     <title>FINLANDYARD - the chase, the glory</title>
     <link rel="stylesheet" href="./styles.css" type="text/css"></link>
     <style>
+      .left {
+        width: 50%;
+        height: 500px;
+        float: left;
+      }
+      .map {
+        height:480px;
+      }
+      .states {
+        float:left;
+      }
       .statecontainer {
         float:left;
+        height:140px;
         display: block;
         unicode-bidi: embed;
         font-family: monospace;
@@ -29,12 +41,18 @@
         background-color: #eee;
         font-size: 8px;
       }
+      #log {
+        clear: both;
+      }
     </style>
   </head>
   <body>
-    <div id="map" class="map"></div>
-    <div id="clock" class="clock"></div>
+    <div class="left">
+      <div id="map" class="map"></div>
+      <div id="clock" class="clock"></div>
+    </div>
     <div id="states"></div>
+    <div id="log"></div>
     <script src="./bundle.js"></script>
   </body>
 </html>

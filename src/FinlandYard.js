@@ -4,6 +4,7 @@ require('file?name=[name].[ext]!./index.html');
 var dataUtils = require('./state/DataUtils.js');
 var stateUtils = require('./state/StateUtils.js');
 var mapControl = require('./map/MapControl.js');
+var log = require('./Log.js');
 var loadData = require('./Api.js');
 var moment = require('moment');
 var R = require('ramda');
@@ -55,7 +56,7 @@ loadData(function(state) {
       function() {
         // Edistä kelloa
         state.clockIs = state.clockIs.add(1, 'minutes');
-        if(state.clockIs.unix() - startingTime.unix() > 1 * 24 * 60 * 60 * 2) {
+        if(state.clockIs.unix() - startingTime.unix() > 1 * 24 * 60 * 60) {
           state.clockIs = startingTime.clone();
         }
 
@@ -73,14 +74,17 @@ loadData(function(state) {
           if(R.isNil(train)) {
             return actor;
           }
-          console.log(actor.name + " takes train "
-            + train.trainNumber + " to " + R.last(train.timeTableRows).stationShortCode
-            + " from " + actor.location);
-
+          actor = R.merge(actor, {train: train.trainNumber, destination: R.last(train.timeTableRows).stationShortCode });
           var departTime=train.timeTableRows[0].scheduledTime;
-          console.log("Train will depart at " + departTime.substr(departTime.indexOf('T')+1, 5));
+          console.log( dataUtils.getStationById(state, actor.location).stationName);
+          log.log(state.clockIs, actor.name + " takes train "
+            + train.trainNumber
+            + " from '" + dataUtils.getStationById(state, actor.location).stationName
+            + "' to '" + dataUtils.getStationById(state, actor.destination).stationName
+            + "' which departs at " + departTime.substr(departTime.indexOf('T')+1, 5))
 
-          return R.merge(actor, {train: train.trainNumber, destination: R.last(train.timeTableRows).stationShortCode });
+
+          return actor;
         });
 
         state = R.evolve({'actors': pickRandomTrain}, state);
