@@ -37,14 +37,17 @@ function getTrainLocationCoordinated(state, train) {
 }
 
 function calculatePosition(state, actor) {
+  if(actor.caught) {
+    return actor;
+  }
   if(actor.train) {
     var actorTrain = dataUtils.getTrainById(state, actor.train);
 
 
     // Train has arrived
-    if(state.clockIs.unix() > moment(R.last(actorTrain.timeTableRows).scheduledTime).unix()) {
+    if(state.clockIs.unix() > moment(R.find(R.propEq('stationShortCode', actor.destination), actorTrain.timeTableRows).scheduledTime).unix()) {
       console.log(actor.name + ' arrived to ' + R.last(actorTrain.timeTableRows).stationShortCode + ' at ' + state.clockIs.toDate())
-      return R.merge(actor, {train: null, location: R.last(actorTrain.timeTableRows).stationShortCode, departed:null});
+      return R.merge(actor, {train: null, destination: null, location: R.last(actorTrain.timeTableRows).stationShortCode, departed:null});
     }
     //Train is leaving
     if(state.clockIs.unix() == moment(R.head(actorTrain.timeTableRows).scheduledTime).unix()) {
@@ -71,9 +74,6 @@ function calculatePosition(state, actor) {
 module.exports = {
   getActors: function(state, type) {
     var result=R.filter(R.propEq('type', type), state.actors);
-    if(result.length ==0) {
-      debugger;
-    }
     return result;
   },
   applyStateChanges: function(state) {
@@ -95,8 +95,13 @@ module.exports = {
         (R.contains(actor.location, policesAreInCities) || R.contains(actor.train, policesAreInTrains) )) {
         return R.assoc('caught', true, actor);
       }
+      if(!actor.caught) {
+        return R.evolve({'freeMinutes': R.inc}, actor);
+      }
       return actor;
     }, state.actors);
+
+
     return state;
   },
   calculateNewPositions: function(state) {

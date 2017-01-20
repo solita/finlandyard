@@ -25,33 +25,29 @@ function visualizeStates(state) {
 
     container.appendChild(iDiv);
   });
-    state.caughtVillains.forEach(function(villain) {
-        var iDiv = document.createElement('div');
-        iDiv.className = "caughtContainer";
-        iDiv.innerHTML = JSON.stringify(villain, null, '   ');
-
-        container.appendChild(iDiv);
-    });
 }
-
+var stateAtom;
 loadData(function(state) {
+  stateAtom = state;
   if(state.timetable.length === 0) {
     console.error("No timetable rows found from api");
     return;
   }
-  var startingTime = moment(state.timetable[0].departureDate);
-  debugger;
+  var startingTime = moment(state.timetable[0].departureDate).subtract(1, 'minutes');
+
   state.clockIs = startingTime.clone();
   mapControl.drawConnections(dataUtils.collectConnections(state));
   mapControl.drawStations(dataUtils.connectedStations(state));
 
   state.actors = [
-    {id: 1, type: 'police', name: 'Sorjonen',  location: 'JNS', caught: false },
-    {id: 2, type: 'villain', name: 'Mr. X', location: 'HKI', caught: false },
-    {id: 3, type:'villain', name: 'Ms. Y', location: 'TPE', caught: false }
-  ];
+    {id: 1, type: 'police', name: 'Sorjonen',  location: 'JNS', caught: false, freeMinutes: 0 },
+    {id: 1, type: 'police', name: 'McNulty',  location: 'VAA', caught: false, freeMinutes: 0 },
+    {id: 1, type: 'police', name: 'Sipowitch',  location: 'TKU', caught: false, freeMinutes: 0 },
 
-  state.caughtVillains=new Array();
+    {id: 2, type: 'villain', name: 'Mr. X', location: 'HKI', caught: false, freeMinutes: 0 },
+    {id: 3, type: 'villain', name: 'Ms. Y', location: 'TPE', caught: false, freeMinutes: 0 },
+    {id: 3, type: 'villain', name: 'To moscow', location: 'HKI', train: 31, destination: "MVA", caught: false, freeMinutes: 0 },
+  ];
 
   // THE game loop
   (function tick() {
@@ -59,13 +55,13 @@ loadData(function(state) {
       function() {
         // Edistä kelloa
         state.clockIs = state.clockIs.add(1, 'minutes');
-        if(state.clockIs.unix() - startingTime.unix() > 1 * 24 * 60 * 60) {
+        if(state.clockIs.unix() - startingTime.unix() > 1 * 24 * 60 * 60 * 2) {
           state.clockIs = startingTime.clone();
         }
 
         // Random AI (this can be turned into apply ai?)
         var pickRandomTrain = R.map((actor) => {
-          if(actor.train) {
+          if(actor.train || actor.caught) {
             return actor;
           }
           var leavingTrains=dataUtils.trainsLeavingFrom(state, actor.location);
@@ -83,12 +79,10 @@ loadData(function(state) {
 
           var departTime=train.timeTableRows[0].scheduledTime;
           console.log("Train will depart at " + departTime.substr(departTime.indexOf('T')+1, 5));
-          if(!actor.location) {
-            debugger;
-          }
-          return R.merge(actor, {train: train.trainNumber })
+
+          return R.merge(actor, {train: train.trainNumber, destination: R.last(train.timeTableRows).stationShortCode });
         });
-        
+
         state = R.evolve({'actors': pickRandomTrain}, state);
 
         state = stateUtils.calculateNewPositions(state);
@@ -106,5 +100,5 @@ loadData(function(state) {
         }
 
       },
-      50)})();
+      10)})();
 });
