@@ -18,6 +18,9 @@ function visualizeStates(state) {
   state.actors.forEach(function(actor) {
     var iDiv = document.createElement('div');
     iDiv.className = "statecontainer";
+    if(actor.caught) {
+      iDiv.className = iDiv.className + " caught";
+    }
     iDiv.innerHTML = JSON.stringify(actor, null, '   ');
 
     container.appendChild(iDiv);
@@ -43,9 +46,9 @@ loadData(function(state) {
   mapControl.drawStations(dataUtils.connectedStations(state));
 
   state.actors = [
-    {id: 1, type: 'police', name: 'Sorjonen',  location: 'JNS' },
-    {id: 2, type: 'villain', name: 'Mr. X', location: 'HKI'},
-    {id: 3, type:'villain', name: 'Ms. Y', location: 'TPE'}
+    {id: 1, type: 'police', name: 'Sorjonen',  location: 'JNS', caught: false },
+    {id: 2, type: 'villain', name: 'Mr. X', location: 'HKI', caught: false },
+    {id: 3, type:'villain', name: 'Ms. Y', location: 'TPE', caught: false }
   ];
 
   state.caughtVillains=new Array();
@@ -85,16 +88,11 @@ loadData(function(state) {
           }
           return R.merge(actor, {train: train.trainNumber })
         });
-        //Check whether the villains are in the same location as police is (or in same train)
-        var police=stateUtils.getActors(state, 'police');
-        var caughtVillains=stateUtils.getCaughtVillains(state, police[0])
-        if(caughtVillains.length > 0) {
-          stateUtils.removeActors(state, caughtVillains);
-        }
-
+        
         state = R.evolve({'actors': pickRandomTrain}, state);
 
         state = stateUtils.calculateNewPositions(state);
+        state = stateUtils.applyStateChanges(state);
 
         mapControl.drawPolice(stateUtils.getActors(state, 'police'));
         mapControl.drawVillains(stateUtils.getActors(state, 'villain'));
