@@ -3,6 +3,7 @@
 var R = require('ramda');
 var dataUtils = require('./DataUtils.js');
 var moment = require('moment');
+var log = require('../Log.js');
 
 var isInBetween = (timestamp, e) => {
   return moment(e[0].scheduledTime).unix() <= timestamp && timestamp <= moment(e[1].scheduledTime).unix();
@@ -46,18 +47,18 @@ function calculatePosition(state, actor) {
 
     // Train has arrived
     if(state.clockIs.unix() > moment(R.find(R.propEq('stationShortCode', actor.destination), actorTrain.timeTableRows).scheduledTime).unix()) {
-      console.log(actor.name + ' arrived to ' + R.last(actorTrain.timeTableRows).stationShortCode + ' at ' + state.clockIs.toDate())
-      return R.merge(actor, {train: null, destination: null, location: R.last(actorTrain.timeTableRows).stationShortCode, departed:null});
+      log.log(state.clockIs, actor.name + ' arrived to ' + dataUtils.getStationById(state, actor.destination).stationName);
+      return R.merge(actor, {train: null, destination: null, location: actor.destination, departed:null});
     }
     //Train is leaving
     if(state.clockIs.unix() == moment(R.head(actorTrain.timeTableRows).scheduledTime).unix()) {
       actor= R.merge(actor, {departed:true})
     }
-      // Train has not yet departed
-      if(!actor.departed) {
-          var station = dataUtils.getStationById(state, actor.location);
-          return R.merge(actor, {latitude: station.latitude, longitude: station.longitude});
-      }
+    // Train has not yet departed
+    if(!actor.departed) {
+        var station = dataUtils.getStationById(state, actor.location);
+        return R.merge(actor, {latitude: station.latitude, longitude: station.longitude});
+    }
     // Train is somewhere along the route
     var trainLocation = getTrainLocationCoordinated(state, actorTrain);
     if(!R.isNil(trainLocation)) {

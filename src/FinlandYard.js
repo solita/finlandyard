@@ -27,6 +27,10 @@ function visualizeStates(state) {
     container.appendChild(iDiv);
   });
 }
+
+var randomNth = (coll) =>  R.nth(Math.floor(Math.random() * coll.length), coll);
+
+
 var stateAtom;
 loadData(function(state) {
   stateAtom = state;
@@ -41,13 +45,13 @@ loadData(function(state) {
   mapControl.drawStations(dataUtils.connectedStations(state));
 
   state.actors = [
-    {id: 1, type: 'police', name: 'Sorjonen',  location: 'JNS', caught: false, freeMinutes: 0 },
-    {id: 1, type: 'police', name: 'McNulty',  location: 'VAA', caught: false, freeMinutes: 0 },
-    {id: 1, type: 'police', name: 'Sipowitch',  location: 'TKU', caught: false, freeMinutes: 0 },
+    {id: 1, type: 'police', name: 'Sorjonen',  location: 'HKI', caught: false, freeMinutes: 0 },
+    //{id: 1, type: 'police', name: 'McNulty',  location: 'VAA', caught: false, freeMinutes: 0 },
+    //{id: 1, type: 'police', name: 'Sipowitch',  location: 'TKU', caught: false, freeMinutes: 0 },
 
-    {id: 2, type: 'villain', name: 'Mr. X', location: 'HKI', caught: false, freeMinutes: 0 },
-    {id: 3, type: 'villain', name: 'Ms. Y', location: 'TPE', caught: false, freeMinutes: 0 },
-    {id: 3, type: 'villain', name: 'To moscow', location: 'HKI', train: 31, destination: "MVA", caught: false, freeMinutes: 0 },
+    //{id: 2, type: 'villain', name: 'Mr. X', location: 'HKI', caught: false, freeMinutes: 0 },
+    //{id: 3, type: 'villain', name: 'Ms. Y', location: 'TPE', caught: false, freeMinutes: 0 },
+    //{id: 3, type: 'villain', name: 'To moscow', location: 'HKI', train: 31, destination: "MVA", caught: false, freeMinutes: 0 },
   ];
 
   // THE game loop
@@ -69,14 +73,18 @@ loadData(function(state) {
           if(leavingTrains.length == 0) {
             return actor;
           }
-          var number=Math.floor(Math.random()*6);
-          var train = R.nth(number)(leavingTrains);
+
+          var train = randomNth(leavingTrains);
           if(R.isNil(train)) {
             return actor;
           }
-          actor = R.merge(actor, {train: train.trainNumber, destination: R.last(train.timeTableRows).stationShortCode });
+          var chosenDestination = randomNth(R.filter(R.propEq('trainStopping', true), R.tail(train.timeTableRows)));
+          console.log(chosenDestination);
+          actor = R.merge(actor, {train: train.trainNumber,
+            destination: chosenDestination.stationShortCode});
+          console.log(actor);
           var departTime=train.timeTableRows[0].scheduledTime;
-          console.log( dataUtils.getStationById(state, actor.location).stationName);
+
           log.log(state.clockIs, actor.name + " takes train "
             + train.trainNumber
             + " from '" + dataUtils.getStationById(state, actor.location).stationName
@@ -97,11 +105,8 @@ loadData(function(state) {
 
         document.getElementById("clock").innerHTML = state.clockIs.toISOString();
         visualizeStates(state);
-        if(state.actors.length > 1) {
-            tick();
-        } else {
-            console.log("Game over!");
-        }
+        tick();
+
 
       },
       10)})();
