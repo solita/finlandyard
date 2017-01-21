@@ -75,8 +75,7 @@ describe("DataUtils", function() {
             sb.departure("ID-2"),
             sb.arrival("ID-1"))
         .build();
-        // Broken
-      //expect(stateUtils.collectConnections(s).length).toEqual(1);
+      expect(stateUtils.collectConnections(s).length).toEqual(1);
     });
   });
 

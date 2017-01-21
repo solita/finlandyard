@@ -31,14 +31,14 @@ function visualizeStates(state) {
 var randomNth = (coll) =>  R.nth(Math.floor(Math.random() * coll.length), coll);
 
 
-var stateAtom;
 loadData(function(state) {
-  stateAtom = state;
   if(state.timetable.length === 0) {
     console.error("No timetable rows found from api");
     return;
   }
   var startingTime = moment(state.timetable[0].departureDate).subtract(1, 'minutes');
+
+  state.timetable = R.reject(R.propEq('trainType', 'HL'), state.timetable);
 
   state.clockIs = startingTime.clone();
   mapControl.drawConnections(dataUtils.collectConnections(state));
@@ -71,10 +71,12 @@ loadData(function(state) {
           }
           var leavingTrains=dataUtils.trainsLeavingFrom(state, actor.location);
           if(leavingTrains.length == 0) {
+            //log.log(state.clockIs, "N0 trains leaving, is this bad?")
             return actor;
           }
 
           var train = randomNth(leavingTrains);
+          console.log(train);
           if(R.isNil(train)) {
             return actor;
           }
