@@ -9,6 +9,15 @@ var throwIfNull = (message, value) =>
     R.identity
   )(value);
 
+// Drops until from sequence until fn is truthy. First truthy element is also dropped!
+var dropUntil = (fn, coll) =>
+  R.reduce((acc, value) => {
+    if(fn(value)) {
+      return R.reduced(R.tail(acc));
+    } else {
+      return R.tail(acc);
+    }
+  }, coll, coll);
 
 module.exports = {
   getStationById: function(state, id) {
@@ -38,6 +47,11 @@ module.exports = {
         R.filter(R.propEq('type', 'DEPARTURE')),
         R.prop('timeTableRows')),
       state.timetable)
+  },
+  getPossibleHoppingOffStations: function(train, actorLocation) {
+    return R.map(R.prop('stationShortCode'), R.filter(
+      R.allPass([R.propEq('trainStopping', true), R.propEq('type', 'ARRIVAL')]),
+      dropUntil(R.propEq('stationShortCode', actorLocation), train.timeTableRows)));
   },
   collectConnections: function(state) {
     // Partial for accessing coordinates from state

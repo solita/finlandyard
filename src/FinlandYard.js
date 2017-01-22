@@ -5,6 +5,7 @@ var dataUtils = require('./state/DataUtils.js');
 var stateUtils = require('./state/StateUtils.js');
 var mapControl = require('./map/MapControl.js');
 var log = require('./Log.js');
+var AI = require('./AI.js');
 var loadData = require('./Api.js');
 var moment = require('moment');
 var R = require('ramda');
@@ -28,17 +29,6 @@ function visualizeStates(state) {
   });
 }
 
-var randomNth = (coll) =>  R.nth(Math.floor(Math.random() * coll.length), coll);
-
-var dropUntil = (fn, coll) =>
-  R.reduce((acc, value) => {
-    if(fn(value)) {
-      return R.reduced(R.tail(acc));
-    } else {
-      return R.tail(acc);
-    }
-  }, coll, coll);
-
 // Evolves departure/arrival as moment instance (instead of raw string value)
 var scheduleEntryToMoment = R.evolve({'scheduledTime': (rtime) => moment(rtime)});
 
@@ -47,6 +37,15 @@ var processTimesToMomentInstances =
  R.map((timetableEntry) => R.assoc('timeTableRows',
           R.map(scheduleEntryToMoment, R.prop('timeTableRows', timetableEntry)), timetableEntry));
 
+var createContext = (state) => {
+  return {
+    knownVillainLocations:
+      R.compose(
+        R.reject(R.isNil()),
+        R.map(R.prop('location')),
+        R.reject(R.propEq('caught', true)))(stateUtils.getActors(state, 'villain'))
+  };
+}
 /**
  * Game callback after api-operations
  */
@@ -67,13 +66,10 @@ loadData(function(state) {
   mapControl.drawStations(dataUtils.connectedStations(state));
 
   state.actors = [
-    {id: 1, type: 'police', name: 'Sorjonen',  location: 'JNS', caught: false, freeMinutes: 0 },
-    {id: 1, type: 'police', name: 'McNulty',  location: 'VAA', caught: false, freeMinutes: 0 },
-    {id: 1, type: 'police', name: 'Sipowitch',  location: 'TKU', caught: false, freeMinutes: 0 },
-
-    {id: 2, type: 'villain', name: 'Mr. X', location: 'HKI', caught: false, freeMinutes: 0 },
-    {id: 3, type: 'villain', name: 'Ms. Y', location: 'TPE', caught: false, freeMinutes: 0 },
-    {id: 3, type: 'villain', name: 'Badmouth', location: 'HKI', caught: false, freeMinutes: 0 },
+    {id: 1, type: 'police', name: 'Sorjonen',  location: 'JNS', caught: false, freeMinutes: 0, aifn: AI.hunter },
+    {id: 2, type: 'villain', name: 'Mr. X', location: 'HKI', caught: false, freeMinutes: 0, aifn: AI.noop },
+    {id: 3, type: 'villain', name: 'Ms. Y', location: 'TPE', caught: false, freeMinutes: 0, aifn: AI.noop },
+    {id: 3, type: 'villain', name: 'Badmouth', location: 'TKU', caught: false, freeMinutes: 0, aifn: AI.noop },
   ];
 
   // THE game loop
@@ -85,52 +81,31 @@ loadData(function(state) {
         if(state.clockIs.unix() - startingTime.unix() > 1 * 24 * 60 * 60) {
           state.clockIs = startingTime.clone();
         }
-        // Random AI (this can be turned into apply ai?)
-        var pickRandomTrain = R.map((actor) => {
+
+        // Applies ai functions
+        var applyAI = R.map((actor) => {
+          // AI is not applied when travelling or caught
+
           if(actor.train || actor.caught) {
             return actor;
           }
-
-          var leavingTrains=dataUtils.trainsLeavingFrom(state, actor.location);
-          if(leavingTrains.length == 0) {
-            //log.log(state.clockIs, "N0 trains leaving, is this bad?")
-            return actor;
+          var action = actor.aifn(state, createContext(state), actor);
+          switch(action.type) {
+            case 'IDLE':
+              return actor;
+            case 'TRAIN':
+              // Logging this is somewhat tricky
+              return R.merge(actor, {train: action.trainNumber, destination: action.destination});
+            default:
+              log.log(state.clockIs, "HAHA, " + actor.name + " barfs!!!");
           }
-
-          var train = randomNth(leavingTrains);
-          console.log(train);
-          if(R.isNil(train)) {
-            return actor;
-          }
-
-          var chosenDestination = randomNth(
-            R.filter(
-              R.allPass([R.propEq('trainStopping', true), R.propEq('type', 'ARRIVAL')]),
-              dropUntil(
-                R.propEq('stationShortCode', actor.location), train.timeTableRows)
-            ));
-
-          actor = R.merge(actor, {train: train.trainNumber,
-            destination: chosenDestination.stationShortCode});
-
-          var departTime=R.find(R.propEq('stationShortCode', actor.location), train.timeTableRows).scheduledTime;
-          var arrivalTime=R.find(R.propEq('stationShortCode', actor.destination), train.timeTableRows).scheduledTime;
-
-          log.log(state.clockIs, actor.name + " takes train "
-            + train.trainNumber
-            + " from '" + dataUtils.getStationById(state, actor.location).stationName
-            + "' to '" + dataUtils.getStationById(state, actor.destination).stationName
-            + "' which departs at " + moment(departTime).toISOString()
-            + " and arrives at" + moment(arrivalTime).toISOString())
-
-
-          return actor;
         });
 
-        state = R.evolve({'actors': pickRandomTrain}, state);
+        // Apply ai functions
+        state = R.evolve({'actors': applyAI}, state);
 
-        state = stateUtils.calculateNewPositions(state);
         state = stateUtils.applyStateChanges(state);
+        state = stateUtils.calculateNewPositions(state);
 
         mapControl.drawPolice(stateUtils.getActors(state, 'police'));
         mapControl.drawVillains(stateUtils.getActors(state, 'villain'));
