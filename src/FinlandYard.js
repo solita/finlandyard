@@ -67,9 +67,9 @@ loadData(function(state) {
 
   state.actors = [
     {id: 1, type: 'police', name: 'Sorjonen',  location: 'JNS', caught: false, freeMinutes: 0, aifn: AI.hunter },
-    {id: 2, type: 'villain', name: 'Mr. X', location: 'HKI', caught: false, freeMinutes: 0, aifn: AI.noop },
-    {id: 3, type: 'villain', name: 'Ms. Y', location: 'TPE', caught: false, freeMinutes: 0, aifn: AI.noop },
-    {id: 3, type: 'villain', name: 'Badmouth', location: 'TKU', caught: false, freeMinutes: 0, aifn: AI.noop },
+    {id: 2, type: 'villain', name: 'Mr. X', location: 'HKI', caught: false, freeMinutes: 0, aifn: AI.random },
+    {id: 3, type: 'villain', name: 'Ms. Y', location: 'TPE', caught: false, freeMinutes: 0, aifn: AI.random },
+    {id: 3, type: 'villain', name: 'Badmouth', location: 'TKU', caught: false, freeMinutes: 0, aifn: AI.random },
   ];
 
   // THE game loop

@@ -59,7 +59,7 @@ module.exports = function() {
     },
     drawVillains: function(villains) {
       villainSource.clear();
-      villainSource.addFeatures(R.map(actorToFeature, villains));
+      villainSource.addFeatures(R.map(actorToFeature, R.reject(R.propEq('caught', true), villains)));
     }
   }
 }
