@@ -19,7 +19,7 @@ function departure(stationId, scheduledTime) {
   return {
     stationShortCode: stationId,
     type: "DEPARTURE",
-    scheduledTime: scheduledTime.toISOString()
+    scheduledTime: scheduledTime
   }
 }
 
@@ -30,7 +30,7 @@ function arrival(stationId, scheduledTime) {
   return {
     stationShortCode: stationId,
     type: "ARRIVAL",
-    scheduledTime: scheduledTime.toISOString()
+    scheduledTime: scheduledTime
   }
 }
 

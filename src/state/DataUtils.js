@@ -9,6 +9,7 @@ var throwIfNull = (message, value) =>
     R.identity
   )(value);
 
+
 module.exports = {
   getStationById: function(state, id) {
     return throwIfNull(
@@ -24,7 +25,6 @@ module.exports = {
     var coords = R.juxt([R.prop('longitude'), R.prop('latitude')]);
     return coords(module.exports.getStationById(state, id));
   },
-  // does this work for sure? Sometimes returns empty array in the morning for example for Rovaniemi
   trainsLeavingFrom: function(state, stationShortCode) {
     return R.filter(
       R.compose(
@@ -33,12 +33,8 @@ module.exports = {
           if(R.isNil(v)) {
             return false;
           }
-          return state.clockIs.unix() < moment(v.scheduledTime).unix();
+          return state.clockIs.unix() < v.scheduledTime.unix();
         },
-        /*R.allPass([
-          R.find(R.propEq('stationShortCode', stationShortCode)),
-          (departure) => { return state.clockIs.unix() < moment(departure.scheduledTime).unix(); }
-        ]),*/
         R.filter(R.propEq('type', 'DEPARTURE')),
         R.prop('timeTableRows')),
       state.timetable)

@@ -39,21 +39,17 @@ var dropUntil = (fn, coll) =>
     }
   }, coll, coll);
 
-var processTimes = (timetable, month, day) => {
-  return R.map((t) => {
-    return R.merge(t, {'timeTableRows':
-      R.map(R.evolve({'scheduledTime': (rtime) => {
+// Evolves departure/arrival as moment instance (instead of raw string value)
+var scheduleEntryToMoment = R.evolve({'scheduledTime': (rtime) => moment(rtime)});
 
-        var c = moment(rtime);
-        c.month(month);
-        c.day(day);
-        return c.toISOString();
-      }}), t.timeTableRows)
-    });
+// Maps all timetables as moment instances
+var processTimesToMomentInstances =
+ R.map((timetableEntry) => R.assoc('timeTableRows',
+          R.map(scheduleEntryToMoment, R.prop('timeTableRows', timetableEntry)), timetableEntry));
 
-  }, timetable);
-}
-
+/**
+ * Game callback after api-operations
+ */
 loadData(function(state) {
   if(state.timetable.length === 0) {
     console.error("No timetable rows found from api");
@@ -61,7 +57,8 @@ loadData(function(state) {
   }
   state.timetable = R.reject(R.propEq('trainType', 'HL'), state.timetable);
   var startingTime = moment(state.timetable[0].timeTableRows[0].scheduledTime);
-  //state.timetable = processTimes(state.timetable, startingTime.month(), startingTime.day());
+  //console.log(processTimesToMomentInstances(state.timetable));
+  state.timetable = processTimesToMomentInstances(state.timetable);
 
   var startingTime = startingTime.subtract(1, 'minutes');
 

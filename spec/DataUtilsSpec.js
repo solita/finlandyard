@@ -133,7 +133,6 @@ describe("DataUtils", function() {
           sb.arrival('STATION-3', moment({hour: 8, minute: 16}))))
         .build();
       s.clockIs = moment({hour: 5, minute: 10});
-
       expect(stateUtils.trainsLeavingFrom(s, "STATION-2").length).toEqual(1);
     });
   });
