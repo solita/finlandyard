@@ -1,6 +1,7 @@
 'use strict';
 
 var _ = require('lodash');
+var moment = require('moment');
 
 function station(id, longitude, latitude) {
   return {
@@ -11,17 +12,25 @@ function station(id, longitude, latitude) {
   }
 }
 
-function departure(stationId) {
+function departure(stationId, scheduledTime) {
+  if(!scheduledTime) {
+    scheduledTime = moment();
+  }
   return {
     stationShortCode: stationId,
-    type: "DEPARTURE"
+    type: "DEPARTURE",
+    scheduledTime: scheduledTime.toISOString()
   }
 }
 
-function arrival(stationId) {
+function arrival(stationId, scheduledTime) {
+  if(!scheduledTime) {
+    scheduledTime = moment();
+  }
   return {
     stationShortCode: stationId,
-    type: "ARRIVAL"
+    type: "ARRIVAL",
+    scheduledTime: scheduledTime.toISOString()
   }
 }
 
@@ -37,7 +46,7 @@ function state() {
       },
       withTimetableEntry:function(id) {
         stuff.timetable = _.concat(stuff.timetable,
-          { trainId: id,
+          { trainNumber: id,
             timeTableRows: Array.prototype.slice.call(arguments).slice(1)
           });
         return this;

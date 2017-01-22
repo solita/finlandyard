@@ -1,6 +1,6 @@
 'use strict';
 
-var _ = require('lodash');
+var moment = require('moment');
 var sb = require('./StateBuilder.js');
 
 describe("DataUtils", function() {
@@ -96,6 +96,45 @@ describe("DataUtils", function() {
             sb.arrival("ID-2"))
         .build();
       expect(stateUtils.connectedStations(s).length).toEqual(2);
+    });
+  });
+
+  describe("trainsLeavingFrom", function() {
+    it('Should find leaving trains when one is leaving and clock is before departure', function() {
+      var s = sb.state()
+        .withStation(sb.station("STATION-1", 14.24444, 42.24242))
+        .withStation(sb.station("STATION-2", 62.24444, 41.24242))
+        .withTimetableEntry('TRAIN-1',
+          sb.departure('STATION-1', moment({hour: 5, minute: 10})),
+          sb.arrival('STATION-2', moment({hour: 6, minute: 16})))
+        .build();
+      s.clockIs = moment({hour: 4, minute: 10});
+      expect(stateUtils.trainsLeavingFrom(s, "STATION-1").length).toEqual(1);
+    });
+    it('Should not find already left trains', function() {
+      var s = sb.state()
+        .withStation(sb.station("STATION-1", 14.24444, 42.24242))
+        .withStation(sb.station("STATION-2", 62.24444, 41.24242))
+        .withTimetableEntry('TRAIN-1',
+          sb.departure('STATION-1', moment({hour: 5, minute: 10})),
+          sb.arrival('STATION-2', moment({hour: 6, minute: 16})))
+        .build();
+      s.clockIs = moment({hour: 7, minute: 10});
+      expect(stateUtils.trainsLeavingFrom(s, "STATION-1").length).toEqual(0);
+    });
+    it('Should find trains actor can jump into', function() {
+      var s = sb.state()
+        .withStation(sb.station("STATION-1", 14.24444, 42.24242))
+        .withStation(sb.station("STATION-2", 62.24444, 41.24242))
+        .withTimetableEntry('TRAIN-1',
+          sb.departure('STATION-1', moment({hour: 5, minute: 10})),
+          sb.arrival('STATION-2', moment({hour: 6, minute: 16})),
+          sb.departure('STATION-2', moment({hour: 6, minute: 19}),
+          sb.arrival('STATION-3', moment({hour: 8, minute: 16}))))
+        .build();
+      s.clockIs = moment({hour: 5, minute: 10});
+
+      expect(stateUtils.trainsLeavingFrom(s, "STATION-2").length).toEqual(1);
     });
   });
 });

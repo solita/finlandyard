@@ -28,11 +28,18 @@ module.exports = {
   trainsLeavingFrom: function(state, stationShortCode) {
     return R.filter(
       R.compose(
-        R.allPass([
-          R.propEq('stationShortCode', stationShortCode),
+        (a) => {
+          var v = R.find(R.propEq('stationShortCode', stationShortCode), a);
+          if(R.isNil(v)) {
+            return false;
+          }
+          return state.clockIs.unix() < moment(v.scheduledTime).unix();
+        },
+        /*R.allPass([
+          R.find(R.propEq('stationShortCode', stationShortCode)),
           (departure) => { return state.clockIs.unix() < moment(departure.scheduledTime).unix(); }
-        ]),
-        R.head,
+        ]),*/
+        R.filter(R.propEq('type', 'DEPARTURE')),
         R.prop('timeTableRows')),
       state.timetable)
   },

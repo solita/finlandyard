@@ -41,24 +41,14 @@ function calculatePosition(state, actor) {
   if(actor.caught) {
     return actor;
   }
-  if(actor.train) {
+  if(actor.location) {
+    // If actor is in location, this should NEVER be rewritten
+    var station = dataUtils.getStationById(state, actor.location);
+    actor = R.merge(actor, {latitude: station.latitude, longitude: station.longitude});
+
+  } else if(actor.train) {
     var actorTrain = dataUtils.getTrainById(state, actor.train);
 
-
-    // Train has arrived
-    if(state.clockIs.unix() > moment(R.find(R.propEq('stationShortCode', actor.destination), actorTrain.timeTableRows).scheduledTime).unix()) {
-      log.log(state.clockIs, actor.name + ' arrived to ' + dataUtils.getStationById(state, actor.destination).stationName);
-      return R.merge(actor, {train: null, destination: null, location: actor.destination, departed:null});
-    }
-    //Train is leaving
-    if(state.clockIs.unix() == moment(R.head(actorTrain.timeTableRows).scheduledTime).unix()) {
-      actor= R.merge(actor, {departed:true})
-    }
-    // Train has not yet departed
-    if(!actor.departed) {
-        var station = dataUtils.getStationById(state, actor.location);
-        return R.merge(actor, {latitude: station.latitude, longitude: station.longitude});
-    }
     // Train is somewhere along the route
     var trainLocation = getTrainLocationCoordinated(state, actorTrain);
     if(!R.isNil(trainLocation)) {
@@ -67,8 +57,8 @@ function calculatePosition(state, actor) {
 
     return actor;
   }
-  var station = dataUtils.getStationById(state, actor.location);
-  return R.merge(actor, {latitude: station.latitude, longitude: station.longitude});
+
+  return actor;
 
 }
 
@@ -98,6 +88,28 @@ module.exports = {
       }
       if(!actor.caught) {
         return R.evolve({'freeMinutes': R.inc}, actor);
+      }
+      return actor;
+    }, state.actors);
+
+
+    state.actors = R.map(actor => {
+      if(actor.train) {
+        var actorTrain = dataUtils.getTrainById(state, actor.train);
+        // Actor has selected train but is waiting for it
+        if(actor.location &&
+           state.clockIs.unix() > moment(R.find(R.propEq('stationShortCode', actor.location), actorTrain.timeTableRows).scheduledTime).unix()) {
+          var station = dataUtils.getStationById(state, actor.location);
+          log.log(state.clockIs, actor.name + ' departs from ' + station.stationName);
+          return R.merge(actor, {location: null});
+        }
+        // Actor is in train and waiting for arrival
+        if(!actor.location &&
+           state.clockIs.unix() > moment(R.find(R.propEq('stationShortCode', actor.destination), actorTrain.timeTableRows).scheduledTime).unix()) {
+           var station = dataUtils.getStationById(state, actor.destination);
+           log.log(state.clockIs, actor.name + ' arrives tos ' + station.stationName);
+          return R.merge(actor, {location: actor.destination, destination: null, train: null});
+        }
       }
       return actor;
     }, state.actors);
