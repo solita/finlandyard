@@ -113,7 +113,12 @@ loadData(function(state) {
         document.getElementById("clock").innerHTML = state.clockIs.toISOString();
         visualizeStates(state);
 
-        tick();
+        if(stateUtils.gameOver(state)) {
+          alert('Game over, villains caught');
+          // TODO: post to scoreboard
+        } else {
+          tick();
+        }
 
 
       },

@@ -119,5 +119,8 @@ module.exports = {
   },
   calculateNewPositions: function(state) {
     return R.evolve({actors: R.map(R.partial(calculatePosition, [state]))}, state);
+  },
+  gameOver: function(state) {
+    return R.all(R.propEq('caught', true), this.getActors(state, 'villain'));
   }
 }
