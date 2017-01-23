@@ -7,7 +7,7 @@ var randomNth = (coll) =>  R.nth(Math.floor(Math.random() * coll.length), coll);
 var randomAI = (state, context, actor) => {
 
 
-  var leavingTrains=dataUtils.trainsLeavingFrom(state, actor.location);
+  var leavingTrains=dataUtils.trainsLeavingFrom(state.clockIs, actor.location);
   if(leavingTrains.length == 0) {
       return Actions.idle();
   }
@@ -25,7 +25,7 @@ var randomAI = (state, context, actor) => {
 }
 
 var hunterAI = (state, context, actor) => {
-  var leaving = dataUtils.trainsLeavingFrom(state, actor.location);
+  var leaving = dataUtils.trainsLeavingFrom(state.clockIs, actor.location);
   var huntthis = R.find((train) => R.contains(R.head(context.knownVillainLocations), dataUtils.getPossibleHoppingOffStations(train, actor.location)), leaving);
   if(R.isNil(huntthis)) {
     return Actions.idle();
@@ -38,8 +38,12 @@ var noopAI = (state, context, actor) => {
 }
 
 var prettyStupidVillain = (state, context, actor) => {
+
   if(R.contains(actor.location, context.policeDestinations)) {
-    var train = dataUtils.nextLeavingTrain(state, actor.location);
+    var train = dataUtils.nextLeavingTrain(state.clockIs, actor.location);
+    if(!train) {
+      return Actions.idle();
+    }
     var possibleStops = dataUtils.getPossibleHoppingOffStations(train, actor.location);
     var hopOff = R.last(possibleStops);
     if(R.contains(hopOff,  context.policeDestinations) || R.contains(hopOff, context.knownPoliceLocations)) {
@@ -47,6 +51,7 @@ var prettyStupidVillain = (state, context, actor) => {
     }
     return Actions.train(train.trainNumber, hopOff);
   }
+
   return Actions.idle();
 }
 

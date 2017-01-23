@@ -57,19 +57,22 @@ var createContext = (state) => {
 /**
  * Game callback after api-operations
  */
-loadData(function(state) {
-  if(state.timetable.length === 0) {
+loadData(function(data) {
+  if(data.timetable.length === 0) {
     console.error("No timetable rows found from api");
     return;
   }
-  state.timetable = R.reject(R.propEq('trainType', 'HL'), state.timetable);
-  var startingTime = moment(state.timetable[0].timeTableRows[0].scheduledTime);
+  data.timetable = R.reject(R.propEq('trainType', 'HL'), data.timetable);
+  var startingTime = moment(data.timetable[0].timeTableRows[0].scheduledTime);
 
-  state.timetable = processTimesToMomentInstances(state.timetable);
+  data.timetable = processTimesToMomentInstances(data.timetable);
 
-  mapControl.drawConnections(dataUtils.collectConnections(state));
-  mapControl.drawStations(dataUtils.connectedStations(state));
+  dataUtils.initData(data);
 
+  mapControl.drawConnections(dataUtils.collectConnections());
+  mapControl.drawStations(dataUtils.connectedStations());
+
+  var state = {};
   state.actors = ActorBridge.actors();
 
 
@@ -93,7 +96,13 @@ loadData(function(state) {
           if(actor.train || actor.caught) {
             return actor;
           }
-          var action = actor.aifn(state, createContext(state), actor);
+          try {
+            var action = actor.aifn(state, createContext(state), actor);
+          } catch (error) {
+            log.log(state.clockIs, "Haha, doesn't work for " + actor.name + " throws an exception");
+            console.error(error);
+            return actor;
+          }
           switch(action.type) {
             case 'IDLE':
               return actor;
@@ -106,7 +115,6 @@ loadData(function(state) {
                 log.log(state.clockIs, "Haha, doesn't work for " + actor.name + " destination null in command");
                 return actor;
               }
-              console.log(action.destination);
               // Logging this is somewhat tricky
               return R.merge(actor, {train: action.trainNumber, destination: action.destination});
             default:

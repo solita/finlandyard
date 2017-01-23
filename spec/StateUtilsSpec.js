@@ -7,6 +7,7 @@ var log = require('../src/Log.js');
 describe("StateUtils", function() {
 
   var stateUtils = require('../src/state/StateUtils.js');
+  var dataUtils = require('../src/state/DataUtils.js');
 
   beforeEach(function() {
     spyOn(log, 'log');
@@ -55,6 +56,7 @@ describe("StateUtils", function() {
           sb.departure('STATION-2', moment({hour: 5, minute: 10})),
           sb.arrival('STATION-1', moment({hour: 6, minute: 16})))
         .build();
+      dataUtils.initData(state);  
       state.actors = [
           {type: "villain", name: "x", caught: false, train: 'TRAIN-1', destination: 'STATION-2', location: null},
           {type: "police", name: "y", caught: false, train: 'TRAIN-2',  destination: 'STATION-1', location: null}];

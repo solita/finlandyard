@@ -19,44 +19,55 @@ var dropUntil = (fn, coll) =>
     }
   }, coll, coll);
 
+var state = {};
+
 module.exports = {
-  getStationById: function(state, id) {
+  initData: function(data) {
+    state = data;
+  },
+  getStationById: R.memoize(function(id) {
     return throwIfNull(
       R.concat("No such station: ", id),
       R.find(R.propEq('stationShortCode', id), state.stations));
-  },
-  getTrainById(state, id) {
+  }),
+  getTrainById: R.memoize(function(id) {
     return throwIfNull(
       R.concat("No such train: ", id),
       R.find(R.propEq('trainNumber', id), state.timetable));
-  },
-  stationCoordinates: function(state, id) {
+  }),
+  stationCoordinates: function(id) {
     var coords = R.juxt([R.prop('longitude'), R.prop('latitude')]);
-    return coords(module.exports.getStationById(state, id));
+    return coords(module.exports.getStationById(id));
   },
   findTrainDeparture: function(train, location) {
-    return R.find(R.propEq('stationShortCode', location), train.timeTableRows);
+    return R.find(R.allPass([R.propEq('stationShortCode', location), R.propEq('type', 'DEPARTURE')]), train.timeTableRows);
   },
-  trainsLeavingFrom: function(state, stationShortCode) {
-    return R.filter(
+  findTrainArrival: function(train, location) {
+    return R.find(R.allPass([R.propEq('stationShortCode', location), R.propEq('type', 'ARRIVAL')]), train.timeTableRows);
+  },
+  trainsLeavingFrom: function(clockIs, stationShortCode) {
+
+    var x = R.filter(
       R.compose(
         (a) => {
           var v = R.find(R.propEq('stationShortCode', stationShortCode), a);
           if(R.isNil(v)) {
             return false;
           }
-          return state.clockIs.unix() < v.scheduledTime.unix();
+          return clockIs.unix() < v.scheduledTime.unix();
         },
         R.filter(R.propEq('type', 'DEPARTURE')),
         R.prop('timeTableRows')),
       state.timetable);
+
+      return x;
   },
   getPossibleHoppingOffStations: function(train, actorLocation) {
     return R.map(R.prop('stationShortCode'), R.filter(
       R.allPass([R.propEq('trainStopping', true), R.propEq('type', 'ARRIVAL')]),
       dropUntil(R.propEq('stationShortCode', actorLocation), train.timeTableRows)));
   },
-  connectionCountFromStation: function(state, stationShortCode) {
+  connectionCountFromStation: function(stationShortCode) {
     return R.filter(
       R.compose(
         (a) => {
@@ -67,8 +78,8 @@ module.exports = {
         R.prop('timeTableRows')),
       state.timetable).length;
   },
-  nextLeavingTrain: function(state, location) {
-    var trains = this.trainsLeavingFrom(state, location);
+  nextLeavingTrain: function(clockIs, location) {
+    var trains = this.trainsLeavingFrom(clockIs, location);
     return R.reduce((currentlyNext, train) => {
       if(this.findTrainDeparture(train, location).scheduledTime.unix() < this.findTrainDeparture(currentlyNext, location).scheduledTime.unix()) {
         return train;
@@ -76,9 +87,9 @@ module.exports = {
       return currentlyNext;
     }, R.head(trains), R.tail(trains));
   },
-  collectConnections: function(state) {
+  collectConnections: function() {
     // Partial for accessing coordinates from state
-    var coordsById = R.partial(this.stationCoordinates, [state]);
+    var coordsById = R.partial(this.stationCoordinates, []);
 
     var timeTableRows = R.compose(
       // Map coordinates to stations
@@ -101,12 +112,12 @@ module.exports = {
 
     return timeTableRows(state.timetable);
   },
-  connectedStations: function(state) {
+  connectedStations: function() {
     if(R.isNil(state.timetable)) {
       return [];
     }
     var collector = R.compose(
-      R.map(R.partial(module.exports.getStationById, [state])),
+      R.map(R.partial(module.exports.getStationById, [])),
       R.uniqBy(R.identity),
       R.map(R.prop('stationShortCode')),
       R.flatten,

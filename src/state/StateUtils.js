@@ -10,6 +10,7 @@ var isInBetween = (timestamp, e) => {
 }
 
 function getTrainLocationCoordinated(state, train) {
+
   // Find the gap train is between in currently
   var d = R.find(
     R.partial(isInBetween, [state.clockIs.unix()]),
@@ -21,8 +22,8 @@ function getTrainLocationCoordinated(state, train) {
     return null;
   }
   // Calculate the coordinated train is at in given time
-  var departure_station = dataUtils.getStationById(state, R.head(d).stationShortCode);
-  var arrival_station =  dataUtils.getStationById(state, R.last(d).stationShortCode);
+  var departure_station = dataUtils.getStationById(R.head(d).stationShortCode);
+  var arrival_station =  dataUtils.getStationById(R.last(d).stationShortCode);
   var leaving = R.head(d).scheduledTime.unix();
   var arriving = R.last(d).scheduledTime.unix();
 
@@ -43,11 +44,11 @@ function calculatePosition(state, actor) {
   }
   if(actor.location) {
     // If actor is in location, this should NEVER be rewritten
-    var station = dataUtils.getStationById(state, actor.location);
+    var station = dataUtils.getStationById(actor.location);
     actor = R.merge(actor, {latitude: station.latitude, longitude: station.longitude});
 
   } else if(actor.train) {
-    var actorTrain = dataUtils.getTrainById(state, actor.train);
+    var actorTrain = dataUtils.getTrainById(actor.train);
 
     // Train is somewhere along the route
     var trainLocation = getTrainLocationCoordinated(state, actorTrain);
@@ -95,18 +96,18 @@ module.exports = {
 
     state.actors = R.map(actor => {
       if(actor.train) {
-        var actorTrain = dataUtils.getTrainById(state, actor.train);
+        var actorTrain = dataUtils.getTrainById(actor.train);
         // Actor has selected train but is waiting for it
         if(actor.location &&
            state.clockIs.unix() > R.find(R.propEq('stationShortCode', actor.location), actorTrain.timeTableRows).scheduledTime.unix()) {
-          var station = dataUtils.getStationById(state, actor.location);
+          var station = dataUtils.getStationById(actor.location);
           log.log(state.clockIs, actor.name + ' departs from ' + station.stationName);
           return R.merge(actor, {location: null});
         }
         // Actor is in train and waiting for arrival
         if(!actor.location &&
            state.clockIs.unix() > R.find(R.propEq('stationShortCode', actor.destination), actorTrain.timeTableRows).scheduledTime.unix()) {
-           var station = dataUtils.getStationById(state, actor.destination);
+           var station = dataUtils.getStationById(actor.destination);
            log.log(state.clockIs, actor.name + ' arrives tos ' + station.stationName);
           return R.merge(actor, {location: actor.destination, destination: null, train: null});
         }

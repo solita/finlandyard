@@ -5,22 +5,25 @@ var sb = require('./StateBuilder.js');
 
 describe("DataUtils", function() {
 
-  var stateUtils = require('../src/state/DataUtils.js');
+  var dataUtils = require('../src/state/DataUtils.js');
 
   describe("getStationById", function() {
     it("should throw if no station was found for id", function() {
       var s = sb.state().build();
-      expect(function() { stateUtils.getStationById(s, "STATIONID")}).toThrow(new Error("No such station: STATIONID"));
+      dataUtils.initData(s);
+      expect(function() { dataUtils.getStationById("STATIONID")}).toThrow(new Error("No such station: STATIONID"));
     });
 
     it("should return station with id", function() {
       var s = sb.state().withStation(sb.station("STATIONID")).build();
-      expect(stateUtils.getStationById(s, "STATIONID").stationShortCode).toEqual("STATIONID");
+      dataUtils.initData(s);
+      expect(dataUtils.getStationById( "STATIONID").stationShortCode).toEqual("STATIONID");
     });
 
     it("should return correct station with id", function() {
       var s = sb.state().withStation(sb.station("STATION-1")).withStation(sb.station("STATION-2")).build();
-      expect(stateUtils.getStationById(s, "STATION-2").stationShortCode).toEqual("STATION-2");
+      dataUtils.initData(s);
+      expect(dataUtils.getStationById("STATION-2").stationShortCode).toEqual("STATION-2");
     });
   });
 
@@ -33,7 +36,8 @@ describe("DataUtils", function() {
             sb.departure("ID-1"),
             sb.arrival("ID-2"))
         .build();
-      expect(stateUtils.collectConnections(s))
+      dataUtils.initData(s);
+      expect(dataUtils.collectConnections())
         .toEqual([{from: [14.24444, 42.24242], to: [43.42424, 13.2424]}]);
     });
     it("Should collect transitive connections between stations", function() {
@@ -47,7 +51,8 @@ describe("DataUtils", function() {
             sb.departure("ID-2"),
             sb.arrival("ID-3"))
         .build();
-      expect(stateUtils.collectConnections(s))
+      dataUtils.initData(s);
+      expect(dataUtils.collectConnections())
         .toEqual([{from: [14.24444, 42.24242], to: [43.42424, 13.2424]}, {from: [43.42424, 13.2424], to: [46.42424, 34.2424]}]);
     });
     it("Should pick connection only once for different routes", function() {
@@ -61,8 +66,8 @@ describe("DataUtils", function() {
             sb.departure("ID-1"),
             sb.arrival("ID-2"))
         .build();
-
-      expect(stateUtils.collectConnections(s).length).toEqual(1);
+      dataUtils.initData(s);
+      expect(dataUtils.collectConnections().length).toEqual(1);
     });
     it("Should pick connection only once for opposite routes", function() {
       var s = sb.state()
@@ -75,7 +80,8 @@ describe("DataUtils", function() {
             sb.departure("ID-2"),
             sb.arrival("ID-1"))
         .build();
-      expect(stateUtils.collectConnections(s).length).toEqual(1);
+      dataUtils.initData(s);
+      expect(dataUtils.collectConnections().length).toEqual(1);
     });
   });
 
@@ -84,7 +90,8 @@ describe("DataUtils", function() {
       var s = sb.state()
         .withStation(sb.station("ID-1", 14.24444, 42.24242))
         .build();
-      expect(stateUtils.connectedStations(s).length).toEqual(0);
+      dataUtils.initData(s);
+      expect(dataUtils.connectedStations().length).toEqual(0);
     });
     it("Should return stations in timetable", function() {
       var s = sb.state()
@@ -95,7 +102,8 @@ describe("DataUtils", function() {
             sb.departure("ID-1"),
             sb.arrival("ID-2"))
         .build();
-      expect(stateUtils.connectedStations(s).length).toEqual(2);
+      dataUtils.initData(s);
+      expect(dataUtils.connectedStations().length).toEqual(2);
     });
   });
 
@@ -108,8 +116,9 @@ describe("DataUtils", function() {
           sb.departure('STATION-1', moment({hour: 5, minute: 10})),
           sb.arrival('STATION-2', moment({hour: 6, minute: 16})))
         .build();
-      s.clockIs = moment({hour: 4, minute: 10});
-      expect(stateUtils.trainsLeavingFrom(s, "STATION-1").length).toEqual(1);
+      dataUtils.initData(s);
+      var clockIs = moment({hour: 4, minute: 10});
+      expect(dataUtils.trainsLeavingFrom(clockIs, "STATION-1").length).toEqual(1);
     });
     it('Should not find already left trains', function() {
       var s = sb.state()
@@ -119,8 +128,9 @@ describe("DataUtils", function() {
           sb.departure('STATION-1', moment({hour: 5, minute: 10})),
           sb.arrival('STATION-2', moment({hour: 6, minute: 16})))
         .build();
-      s.clockIs = moment({hour: 7, minute: 10});
-      expect(stateUtils.trainsLeavingFrom(s, "STATION-1").length).toEqual(0);
+      dataUtils.initData(s);
+      var clockIs = moment({hour: 7, minute: 10});
+      expect(dataUtils.trainsLeavingFrom(clockIs, "STATION-1").length).toEqual(0);
     });
     it('Should find trains actor can jump into', function() {
       var s = sb.state()
@@ -132,8 +142,9 @@ describe("DataUtils", function() {
           sb.departure('STATION-2', moment({hour: 6, minute: 19}),
           sb.arrival('STATION-3', moment({hour: 8, minute: 16}))))
         .build();
-      s.clockIs = moment({hour: 5, minute: 10});
-      expect(stateUtils.trainsLeavingFrom(s, "STATION-2").length).toEqual(1);
+      dataUtils.initData(s);  
+      var clockIs = moment({hour: 5, minute: 10});
+      expect(dataUtils.trainsLeavingFrom(clockIs, "STATION-2").length).toEqual(1);
     });
   });
 });
