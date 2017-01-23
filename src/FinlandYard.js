@@ -40,13 +40,16 @@ var processTimesToMomentInstances =
  R.map((timetableEntry) => R.assoc('timeTableRows',
           R.map(scheduleEntryToMoment, R.prop('timeTableRows', timetableEntry)), timetableEntry));
 
+var getLocations = (state, type, prop) => R.compose(
+        R.reject(R.isNil()),
+        R.map(R.prop(prop)),
+        R.reject(R.propEq('caught', true)))(stateUtils.getActors(state, type));
+
 var createContext = (state) => {
   return {
-    knownVillainLocations:
-      R.compose(
-        R.reject(R.isNil()),
-        R.map(R.prop('location')),
-        R.reject(R.propEq('caught', true)))(stateUtils.getActors(state, 'villain'))
+    knownVillainLocations: getLocations(state, 'villain', 'location'),
+    knownPoliceLocations: getLocations(state, 'police', 'location'),
+    policeDestinations: getLocations(state, 'police', 'destination'),
   };
 }
 
@@ -95,6 +98,15 @@ loadData(function(state) {
             case 'IDLE':
               return actor;
             case 'TRAIN':
+              if(!action.trainNumber) {
+                log.log(state.clockIs, "Haha, doesn't work for " + actor.name + " trainNumber null in command");
+                return actor;
+              }
+              if(!action.destination) {
+                log.log(state.clockIs, "Haha, doesn't work for " + actor.name + " destination null in command");
+                return actor;
+              }
+              console.log(action.destination);
               // Logging this is somewhat tricky
               return R.merge(actor, {train: action.trainNumber, destination: action.destination});
             default:

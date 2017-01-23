@@ -34,6 +34,9 @@ module.exports = {
     var coords = R.juxt([R.prop('longitude'), R.prop('latitude')]);
     return coords(module.exports.getStationById(state, id));
   },
+  findTrainDeparture: function(train, location) {
+    return R.find(R.propEq('stationShortCode', location), train.timeTableRows);
+  },
   trainsLeavingFrom: function(state, stationShortCode) {
     return R.filter(
       R.compose(
@@ -46,12 +49,32 @@ module.exports = {
         },
         R.filter(R.propEq('type', 'DEPARTURE')),
         R.prop('timeTableRows')),
-      state.timetable)
+      state.timetable);
   },
   getPossibleHoppingOffStations: function(train, actorLocation) {
     return R.map(R.prop('stationShortCode'), R.filter(
       R.allPass([R.propEq('trainStopping', true), R.propEq('type', 'ARRIVAL')]),
       dropUntil(R.propEq('stationShortCode', actorLocation), train.timeTableRows)));
+  },
+  connectionCountFromStation: function(state, stationShortCode) {
+    return R.filter(
+      R.compose(
+        (a) => {
+          var v = R.find(R.propEq('stationShortCode', stationShortCode), a);
+          return !R.isNil(v);
+        },
+        R.filter(R.propEq('type', 'DEPARTURE')),
+        R.prop('timeTableRows')),
+      state.timetable).length;
+  },
+  nextLeavingTrain: function(state, location) {
+    var trains = this.trainsLeavingFrom(state, location);
+    return R.reduce((currentlyNext, train) => {
+      if(this.findTrainDeparture(train, location).scheduledTime.unix() < this.findTrainDeparture(currentlyNext, location).scheduledTime.unix()) {
+        return train;
+      }
+      return currentlyNext;
+    }, R.head(trains), R.tail(trains));
   },
   collectConnections: function(state) {
     // Partial for accessing coordinates from state
