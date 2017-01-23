@@ -23,7 +23,6 @@ var randomAI = (state, context, actor) => {
 }
 
 var hunterAI = (state, context, actor) => {
-  console.log(context);
   var leaving = dataUtils.trainsLeavingFrom(state, actor.location);
   var huntthis = R.find((train) => R.contains(R.head(context.knownVillainLocations), dataUtils.getPossibleHoppingOffStations(train, actor.location)), leaving);
   if(R.isNil(huntthis)) {
