@@ -5,10 +5,13 @@ var dataUtils = require('./state/DataUtils.js');
 var stateUtils = require('./state/StateUtils.js');
 var mapControl = require('./map/MapControl.js');
 var log = require('./Log.js');
-var AI = require('./AI.js');
 var loadData = require('./Api.js');
 var moment = require('moment');
 var R = require('ramda');
+var ActorBridge = require('./ActorBridge.js');
+
+function requireAll(r) { r.keys().forEach(r); }
+requireAll(require.context('./actors/', true, /\.js$/));
 
 console.log("Starting up finland yard");
 
@@ -46,6 +49,8 @@ var createContext = (state) => {
         R.reject(R.propEq('caught', true)))(stateUtils.getActors(state, 'villain'))
   };
 }
+
+
 /**
  * Game callback after api-operations
  */
@@ -56,21 +61,17 @@ loadData(function(state) {
   }
   state.timetable = R.reject(R.propEq('trainType', 'HL'), state.timetable);
   var startingTime = moment(state.timetable[0].timeTableRows[0].scheduledTime);
-  //console.log(processTimesToMomentInstances(state.timetable));
+
   state.timetable = processTimesToMomentInstances(state.timetable);
 
-  var startingTime = startingTime.subtract(1, 'minutes');
-
-  state.clockIs = startingTime.clone();
   mapControl.drawConnections(dataUtils.collectConnections(state));
   mapControl.drawStations(dataUtils.connectedStations(state));
 
-  state.actors = [
-    {id: 1, type: 'police', name: 'Sorjonen',  location: 'JNS', caught: false, freeMinutes: 0, aifn: AI.hunter },
-    {id: 2, type: 'villain', name: 'Mr. X', location: 'HKI', caught: false, freeMinutes: 0, aifn: AI.random },
-    {id: 3, type: 'villain', name: 'Ms. Y', location: 'TPE', caught: false, freeMinutes: 0, aifn: AI.random },
-    {id: 3, type: 'villain', name: 'Badmouth', location: 'TKU', caught: false, freeMinutes: 0, aifn: AI.random },
-  ];
+  state.actors = ActorBridge.actors();
+
+
+  var startingTime = startingTime.subtract(1, 'minutes');
+  state.clockIs = startingTime.clone();
 
   // THE game loop
   (function tick() {
