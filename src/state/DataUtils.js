@@ -35,6 +35,9 @@ module.exports = {
       R.concat("No such train: ", id),
       R.find(R.propEq('trainNumber', id), state.timetable));
   }),
+  assertAction(action) {
+    return R.contains(action.destination, R.map(R.prop('stationShortCode'), this.getTrainById(action.trainNumber).timeTableRows));
+  },
   stationCoordinates: function(id) {
     var coords = R.juxt([R.prop('longitude'), R.prop('latitude')]);
     return coords(module.exports.getStationById(id));
@@ -54,6 +57,7 @@ module.exports = {
           if(R.isNil(v)) {
             return false;
           }
+          //return true;
           return clockIs.unix() < v.scheduledTime.unix();
         },
         R.filter(R.propEq('type', 'DEPARTURE')),

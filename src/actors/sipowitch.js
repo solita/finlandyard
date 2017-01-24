@@ -17,7 +17,7 @@ ActorBridge.registerActor('police', 'sipowitch', 'JNS', function(state, context,
       var villainLocation = context.knownVillainLocations[a];
       if( R.contains(villainLocation, possibleHops)) {
         var arrival = dataUtils.findTrainArrival(possibleTrain, villainLocation).scheduledTime;
-        if(!timeToGetThere || timeToGetThere.unix() > arrival.unix()) {
+        if(!timeToGetThere || timeToGetThere.isBefore(arrival)) {
           train = possibleTrain;
           destination = villainLocation;
           timeToGetThere = arrival;
@@ -27,7 +27,8 @@ ActorBridge.registerActor('police', 'sipowitch', 'JNS', function(state, context,
   }
 
   if(!R.isNil(train)) {
-    console.log("NICE, catching that dude in " + destination);
+    console.log("NICE, catching that dude in " + destination + " departure: " +
+      dataUtils.findTrainArrival(train, destination).scheduledTime.toISOString());
     return Actions.train(train.trainNumber, destination);
   }
   console.log("Retreating...");
@@ -66,9 +67,10 @@ ActorBridge.registerActor('police', 'sipowitch', 'JNS', function(state, context,
     console.log('Retreating to ' + retreatingTo);
     return Actions.train(usingTrain.trainNumber, retreatingTo);
   }
-  console.log("Fuck, I'm stuck, I'll just hop to first train");
+  console.log("I'm stuck, I'll just hop to first train");
   var train = dataUtils.nextLeavingTrain(state.clockIs, actor.location);
   if(!train) {
+    console.log("No trains leaving... " + state.clockIs.toISOString());
     return Actions.idle();
   }
   var possibleStops = dataUtils.getPossibleHoppingOffStations(train, actor.location);

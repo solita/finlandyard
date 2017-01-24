@@ -34,7 +34,10 @@ var hunterAI = (state, context, actor) => {
 }
 
 var noopAI = (state, context, actor) => {
-  return Actions.idle();
+  console.log(state.clockIs.toISOString())
+  var train = dataUtils.nextLeavingTrain(state.clockIs, actor.location);
+  console.log('train leaves: ' + dataUtils.findTrainDeparture(train, actor.location).scheduledTime.toISOString());
+  return Actions.train(train.trainNumber, R.last(dataUtils.getPossibleHoppingOffStations(train, actor.location)));
 }
 
 var prettyStupidVillain = (state, context, actor) => {
@@ -47,7 +50,7 @@ var prettyStupidVillain = (state, context, actor) => {
     var possibleStops = dataUtils.getPossibleHoppingOffStations(train, actor.location);
     var hopOff = R.last(possibleStops);
     if(R.contains(hopOff,  context.policeDestinations) || R.contains(hopOff, context.knownPoliceLocations)) {
-      hopOff = randomNth(R.tail(R.reverse(possibleStops)));
+      hopOff = randomNth(R.reverse(possibleStops));
     }
     return Actions.train(train.trainNumber, hopOff);
   }

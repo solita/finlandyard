@@ -2,6 +2,7 @@
 
 var _ = require('lodash');
 var moment = require('moment');
+var clock = require('../src/Clock.js');
 
 function station(id, longitude, latitude) {
   return {
@@ -30,7 +31,7 @@ function arrival(stationId, scheduledTime) {
   return {
     stationShortCode: stationId,
     type: "ARRIVAL",
-    scheduledTime: scheduledTime
+    scheduledTime: clock(scheduledTime.hours(), scheduledTime.minutes())
   }
 }
 
