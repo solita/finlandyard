@@ -5,8 +5,8 @@ var Actions = require('../Actions.js');
 
 
 
-ActorBridge.registerActor('police', 'sipowitch', 'JNS', function(state, context, actor) {
-  var leaving = dataUtils.trainsLeavingFrom(state.clockIs, actor.location);
+ActorBridge.registerActor('police', 'sipowitch', 'JNS', function(clockIs, context, actor) {
+  var leaving = dataUtils.trainsLeavingFrom(clockIs, actor.location);
   var train = null;
   var destination = null;
   var timeToGetThere = null;
@@ -68,9 +68,9 @@ ActorBridge.registerActor('police', 'sipowitch', 'JNS', function(state, context,
     return Actions.train(usingTrain, retreatingTo);
   }
   console.log("I'm stuck, I'll just hop to first train");
-  var train = dataUtils.nextLeavingTrain(state.clockIs, actor.location);
+  var train = dataUtils.nextLeavingTrain(clockIs, actor.location);
   if(!train) {
-    console.log("No trains leaving... " + state.clockIs.asString());
+    console.log("No trains leaving... " + clockIs.asString());
     return Actions.idle();
   }
   var possibleStops = dataUtils.getPossibleHoppingOffStations(train, actor.location);

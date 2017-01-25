@@ -104,7 +104,7 @@ loadData(function(data) {
             return actor;
           }
           try {
-            var action = actor.aifn(state, createContext(state), actor);
+            var action = actor.aifn(R.clone(state.clockIs), createContext(state), actor);
           } catch (error) {
             log.log(state.clockIs, "Haha, doesn't work for " + actor.name + " throws an exception");
             console.error(error);
