@@ -1,3 +1,4 @@
+var R = require('ramda');
 
 module.exports = function(h, m) {
   var hour = h;
@@ -25,8 +26,18 @@ module.exports = function(h, m) {
     unix: function() {
       return hour * 60 + minutes;
     },
-    toISOString: function() {
-      return hour + ":" + minutes;
+    asString: function() {
+      var str = "";
+      if(hour < 10) {
+        str += "0";
+      }
+      str += hour + ":";
+
+      if(minutes < 10) {
+        str += "0";
+      }
+      str += minutes;
+      return str;
     },
     isBefore: function(ref) {
       if(hour > 12 && ref.hour() < 12) {

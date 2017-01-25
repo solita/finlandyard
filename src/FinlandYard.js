@@ -128,8 +128,8 @@ loadData(function(data) {
               }
               // Logging this is somewhat tricky
               log.log(state.clockIs, actor.name + " decides to leave to " + action.destination + " with train " + action.trainNumber +
-                " departure " + dataUtils.findTrainDeparture(dataUtils.getTrainById(action.trainNumber), actor.location).scheduledTime.toISOString() +
-                " arrival " + dataUtils.findTrainArrival(dataUtils.getTrainById(action.trainNumber), action.destination).scheduledTime.toISOString());
+                " departure " + dataUtils.findTrainDeparture(dataUtils.getTrainById(action.trainNumber), actor.location).scheduledTime.asString() +
+                " arrival " + dataUtils.findTrainArrival(dataUtils.getTrainById(action.trainNumber), action.destination).scheduledTime.asString());
               return R.merge(actor, {train: action.trainNumber, destination: action.destination});
             default:
               log.log(state.clockIs, "HAHA, " + actor.name + " barfs!!!");
@@ -145,7 +145,7 @@ loadData(function(data) {
         mapControl.drawPolice(stateUtils.getActors(state, 'police'));
         mapControl.drawVillains(stateUtils.getActors(state, 'villain'));
 
-        document.getElementById("clock").innerHTML = state.clockIs.toISOString();
+        document.getElementById("clock").innerHTML = state.clockIs.asString();
         visualizeStates(state);
 
         if(stateUtils.gameOver(state)) {

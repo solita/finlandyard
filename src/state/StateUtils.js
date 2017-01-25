@@ -20,7 +20,7 @@ function getTrainLocationCoordinated(state, train) {
   if(R.isNil(d)) {
     // This is the situation where actor is marked to be in train
     // but train is not currently moving
-    // console.log("Train missing! " + state.clockIs.toISOString());
+    // console.log("Train missing! " + state.clockIs.asString());
     return null;
   }
   // Calculate the coordinated train is at in given time
