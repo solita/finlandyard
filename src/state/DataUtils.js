@@ -57,8 +57,7 @@ module.exports = {
           if(R.isNil(v)) {
             return false;
           }
-          //return true;
-          return clockIs.unix() < v.scheduledTime.unix();
+          return clockIs.isBefore(v.scheduledTime);
         },
         R.filter(R.propEq('type', 'DEPARTURE')),
         R.prop('timeTableRows')),
@@ -90,6 +89,9 @@ module.exports = {
       }
       return currentlyNext;
     }, R.head(trains), R.tail(trains));
+  },
+  howCanIGetTo: function(from, to) {
+    // This should return via locations
   },
   collectConnections: function() {
     // Partial for accessing coordinates from state

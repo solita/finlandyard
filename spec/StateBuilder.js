@@ -15,7 +15,7 @@ function station(id, longitude, latitude) {
 
 function departure(stationId, scheduledTime) {
   if(!scheduledTime) {
-    scheduledTime = moment();
+    scheduledTime = clock(1, 1);
   }
   return {
     stationShortCode: stationId,
@@ -26,12 +26,12 @@ function departure(stationId, scheduledTime) {
 
 function arrival(stationId, scheduledTime) {
   if(!scheduledTime) {
-    scheduledTime = moment();
+    scheduledTime = clock(1, 1);
   }
   return {
     stationShortCode: stationId,
     type: "ARRIVAL",
-    scheduledTime: clock(scheduledTime.hours(), scheduledTime.minutes())
+    scheduledTime: scheduledTime
   }
 }
 
