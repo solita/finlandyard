@@ -29,7 +29,7 @@ ActorBridge.registerActor('police', 'sipowitch', 'JNS', function(state, context,
   if(!R.isNil(train)) {
     console.log("NICE, catching that dude in " + destination + " departure: " +
       dataUtils.findTrainArrival(train, destination).scheduledTime.asString());
-    return Actions.train(train.trainNumber, destination);
+    return Actions.train(train, destination);
   }
   console.log("Retreating...");
   var retreatingTo = null;
@@ -65,7 +65,7 @@ ActorBridge.registerActor('police', 'sipowitch', 'JNS', function(state, context,
   }
   if(retreatingTo && usingTrain) {
     console.log('Retreating to ' + retreatingTo);
-    return Actions.train(usingTrain.trainNumber, retreatingTo);
+    return Actions.train(usingTrain, retreatingTo);
   }
   console.log("I'm stuck, I'll just hop to first train");
   var train = dataUtils.nextLeavingTrain(state.clockIs, actor.location);
@@ -76,5 +76,5 @@ ActorBridge.registerActor('police', 'sipowitch', 'JNS', function(state, context,
   var possibleStops = dataUtils.getPossibleHoppingOffStations(train, actor.location);
   var hopOff = R.last(possibleStops);
   console.log("It's going to " + hopOff + ' at ' + dataUtils.findTrainArrival(train, hopOff).scheduledTime.asString());
-  return Actions.train(train.trainNumber, hopOff);
+  return Actions.train(train, hopOff);
 });

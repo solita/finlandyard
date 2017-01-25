@@ -6,7 +6,6 @@ var randomNth = (coll) =>  R.nth(Math.floor(Math.random() * coll.length), coll);
 
 var randomAI = (state, context, actor) => {
 
-
   var leavingTrains=dataUtils.trainsLeavingFrom(state.clockIs, actor.location);
   if(leavingTrains.length == 0) {
       return Actions.idle();
@@ -21,23 +20,11 @@ var randomAI = (state, context, actor) => {
   if(R.isNil(chosenDestination)) {
       return Actions.idle();
   }
-  return Actions.train(train.trainNumber, chosenDestination);
-}
-
-var hunterAI = (state, context, actor) => {
-  var leaving = dataUtils.trainsLeavingFrom(state.clockIs, actor.location);
-  var huntthis = R.find((train) => R.contains(R.head(context.knownVillainLocations), dataUtils.getPossibleHoppingOffStations(train, actor.location)), leaving);
-  if(R.isNil(huntthis)) {
-    return Actions.idle();
-  }
-  return Actions.train(huntthis.trainNumber, R.head(context.knownVillainLocations));
+  return Actions.train(train, chosenDestination);
 }
 
 var noopAI = (state, context, actor) => {
-  console.log(state.clockIs.toISOString())
-  var train = dataUtils.nextLeavingTrain(state.clockIs, actor.location);
-  console.log('train leaves: ' + dataUtils.findTrainDeparture(train, actor.location).scheduledTime.toISOString());
-  return Actions.train(train.trainNumber, R.last(dataUtils.getPossibleHoppingOffStations(train, actor.location)));
+  return Actions.idle();
 }
 
 var prettyStupidVillain = (state, context, actor) => {
@@ -52,7 +39,7 @@ var prettyStupidVillain = (state, context, actor) => {
     if(R.contains(hopOff,  context.policeDestinations) || R.contains(hopOff, context.knownPoliceLocations)) {
       hopOff = randomNth(R.reverse(possibleStops));
     }
-    return Actions.train(train.trainNumber, hopOff);
+    return Actions.train(train, hopOff);
   }
 
   return Actions.idle();
@@ -61,6 +48,5 @@ var prettyStupidVillain = (state, context, actor) => {
 module.exports = {
   random: randomAI,
   noop: noopAI,
-  hunter: hunterAI,
   villain: prettyStupidVillain
 }
