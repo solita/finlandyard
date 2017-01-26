@@ -5,7 +5,7 @@ var dataUtils = require('./state/DataUtils.js');
 var stateUtils = require('./state/StateUtils.js');
 var mapControl = require('./map/MapControl.js');
 var log = require('./Log.js');
-var loadData = require('./Api.js');
+var api = require('./Api.js');
 var moment = require('moment');
 var R = require('ramda');
 var ActorBridge = require('./ActorBridge.js');
@@ -64,7 +64,7 @@ var createContext = (state) => {
 /**
  * Game callback after api-operations
  */
-loadData(function(data) {
+api.loadData(function(data) {
   if(data.timetable.length === 0) {
     console.error("No timetable rows found from api");
     return;
@@ -149,8 +149,8 @@ loadData(function(data) {
         visualizeStates(state);
 
         if(stateUtils.gameOver(state)) {
-          alert('Game over, villains caught');
-          // TODO: post to scoreboard
+          api.postResults(state.actors, document.getElementById("clock"));
+          return;
         } else {
           tick();
         }
