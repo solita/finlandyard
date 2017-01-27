@@ -148,7 +148,7 @@ describe("DataUtils", function() {
     });
   });
 
-  xdescribe("howCanIGetTo", function() {
+  describe("howCanIGetTo", function() {
     it('Should find without transition', function() {
       var s = sb.state()
         .withStation(sb.station("STATION-1", 14.24444, 42.24242))

@@ -21,9 +21,37 @@ var dropUntil = (fn, coll) =>
 
 var state = {};
 
+var stationConnections = {};
+
 module.exports = {
   initData: function(data) {
     state = data;
+    state.timetable.map(function(train) {
+      var x = R.reduce((acc, departure) => {
+        return R.assoc(departure.stationShortCode, module.exports.getPossibleHoppingOffStations(train, departure.stationShortCode), acc);
+      }, {},  R.filter(R.propEq('type', 'DEPARTURE'), train.timeTableRows));
+      R.forEach((key) => {
+        if(stationConnections[key]) {
+          stationConnections[key] = R.uniq(R.concat(stationConnections[key], R.prop(key, x)));
+        } else {
+          stationConnections[key] = R.prop(key, x);
+        }
+      }, R.keys(x));
+    });
+  },
+  howCanIGetTo: function(from, to) {
+    var possibleDestinations = R.prop(from, stationConnections);
+    if(R.contains(to, possibleDestinations)) {
+      return "FROMHERE";
+    }
+    var viaList = [];
+    for(var i = 0; i < possibleDestinations.length; i++) {
+      var destination = possibleDestinations[i];
+      if(R.prop(destination, stationConnections) && R.contains(to, R.prop(destination, stationConnections))) {
+        viaList.push(destination);
+      }
+    }
+    return viaList;
   },
   getStationById: R.memoize(function(id) {
     return throwIfNull(
@@ -90,9 +118,7 @@ module.exports = {
       return currentlyNext;
     }, R.head(trains), R.tail(trains));
   },
-  howCanIGetTo: function(from, to) {
-    // This should return via locations
-  },
+
   collectConnections: function() {
     // Partial for accessing coordinates from state
     var coordsById = R.partial(this.stationCoordinates, []);

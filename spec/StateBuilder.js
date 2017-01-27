@@ -20,6 +20,7 @@ function departure(stationId, scheduledTime) {
   return {
     stationShortCode: stationId,
     type: "DEPARTURE",
+    trainStopping: true,
     scheduledTime: scheduledTime
   }
 }
@@ -31,6 +32,7 @@ function arrival(stationId, scheduledTime) {
   return {
     stationShortCode: stationId,
     type: "ARRIVAL",
+    trainStopping: true,
     scheduledTime: scheduledTime
   }
 }
