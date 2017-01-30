@@ -110,7 +110,7 @@ module.exports = {
         if(!actor.location &&
            state.clockIs.isSame(dataUtils.findTrainArrival(dataUtils.getTrainById(actor.train), actor.destination).scheduledTime)) {
            var station = dataUtils.getStationById(actor.destination);
-           log.log(state.clockIs, actor.name + ' arrives tos ' + actor.destination);
+           log.log(state.clockIs, actor.name + ' arrives to ' + actor.destination);
           return R.merge(actor, {location: actor.destination, destination: null, train: null});
         }
       }
