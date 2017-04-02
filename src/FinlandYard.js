@@ -45,7 +45,7 @@ var scheduleEntryToMoment = R.evolve({'scheduledTime': (rtime) =>  {
 
 // Maps all timetables as moment instances
 var processTimesToMomentInstances =
- R.map((timetableEntry) => R.assoc('timeTableRows',
+ R.map((timetableEntry) =>  R.assoc('timeTableRows',
           R.map(scheduleEntryToMoment, R.prop('timeTableRows', timetableEntry)), timetableEntry));
 
 var getLocations = (state, type, prop) => R.compose(
@@ -70,8 +70,15 @@ api.loadData(function(data) {
     return;
   }
   data.timetable = R.reject(R.propEq('trainType', 'HL'), data.timetable);
+  console.log(data.timetable.length);
+
+  var lenss = R.lensProp('timeTableRows')
+  //This is a bit ugly, to filter a station away but needed now because the station doesn't exist anymore but shows up in the data
+  data.timetable=R.map(train => R.set(lenss, R.reject(R.propEq('stationShortCode', 'LÄH'),train.timeTableRows),train))(data.timetable);
+  console.log(data.timetable.length);
 
   data.timetable = processTimesToMomentInstances(data.timetable);
+
 
   console.log(data.timetable);
 
@@ -86,7 +93,7 @@ api.loadData(function(data) {
   state.clockIs = clock(4, 0);
 
   // THE game loop
-  (function tick() {
+  function tick() {
     setTimeout(
       function() {
         // Edistä kelloa
@@ -157,5 +164,8 @@ api.loadData(function(data) {
 
 
       },
-      5)})();
+      5)};
+  window.StartGame=tick;
 });
+
+
