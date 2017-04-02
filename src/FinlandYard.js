@@ -70,17 +70,15 @@ api.loadData(function(data) {
     return;
   }
   data.timetable = R.reject(R.propEq('trainType', 'HL'), data.timetable);
-  console.log(data.timetable.length);
 
   var lenss = R.lensProp('timeTableRows')
   //This is a bit ugly, to filter a station away but needed now because the station doesn't exist anymore but shows up in the data
   data.timetable=R.map(train => R.set(lenss, R.reject(R.propEq('stationShortCode', 'LÄH'),train.timeTableRows),train))(data.timetable);
-  console.log(data.timetable.length);
 
   data.timetable = processTimesToMomentInstances(data.timetable);
 
 
-  console.log(data.timetable);
+  //console.log(data.timetable);
 
   dataUtils.initData(data);
 
@@ -90,6 +88,7 @@ api.loadData(function(data) {
   var state = {};
 
   state.clockIs = clock(4, 0);
+  help()
 
   // THE game loop
   function tick() {
@@ -173,7 +172,13 @@ api.loadData(function(data) {
 
     tick();
   }
+
+  function help() {
+    console.log("Welcome to play Finland Yard -game! One can start game by calling function startGame. It takes two parameters: amount of polices and amount of villains. If you need to see these " +
+        "instructions again, just call help function. Enjoy!")
+  }
   window.startGame=startGame;
+  window.help=help;
 });
 
 
