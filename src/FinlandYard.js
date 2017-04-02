@@ -12,7 +12,7 @@ var ActorBridge = require('./ActorBridge.js');
 var clock = require('./Clock.js');
 
 function requireAll(r) { r.keys().forEach(r); }
-requireAll(require.context('./actors/', true, /\.js$/));
+//requireAll(require.context('./actors/', true, /\.js$/));
 
 console.log("Starting up finland yard");
 
@@ -88,7 +88,6 @@ api.loadData(function(data) {
   mapControl.drawStations(dataUtils.connectedStations());
 
   var state = {};
-  state.actors = ActorBridge.actors();
 
   state.clockIs = clock(4, 0);
 
@@ -106,7 +105,6 @@ api.loadData(function(data) {
         // Applies ai functions
         var applyAI = R.map((actor) => {
           // AI is not applied when travelling or caught
-
           if(actor.train || actor.caught) {
             return actor;
           }
@@ -165,7 +163,17 @@ api.loadData(function(data) {
 
       },
       5)};
-  window.StartGame=tick;
+
+  function startGame(amountPolice, amountVillain) {
+    var stations=dataUtils.connectedStations();
+    ActorBridge.createVillains(amountVillain, stations);
+    ActorBridge.createPolices(amountPolice, stations);
+    state.actors=ActorBridge.actors();
+    debugger;
+
+    tick();
+  }
+  window.startGame=startGame;
 });
 
 
