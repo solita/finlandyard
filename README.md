@@ -73,3 +73,6 @@ https://rata.digitraffic.fi/api/v1/schedules?departure_date=2015-03-01
 Periaatteessa kai tuo json sisältäisi kaiken mitä "yhden päivän pyörittämiseen" tarvitaan?
 
 ![Reitit](https://github.com/annisall/finlandyard/planning_docs/routes.png?raw=true "Reitit")
+
+## Pelaaminen
+Avaa javascript console chromessa, jossa ohjeet
