@@ -1,6 +1,7 @@
 var dataUtils = require('./state/DataUtils.js');
 var R = require('ramda');
 var Actions = require('./Actions.js');
+var Dijkstra = require('./Dijkstra.js');
 
 var randomNth = (coll) =>  R.nth(Math.floor(Math.random() * coll.length), coll);
 
@@ -21,6 +22,10 @@ var randomAI = (clockIs, context, actor) => {
       return Actions.idle();
   }
   return Actions.train(train, chosenDestination);
+}
+
+var dijkstraAI=(clockIs, context, actor) => {
+
 }
 
 var noopAI = (clockIs, context, actor) => {

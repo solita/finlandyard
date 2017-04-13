@@ -11,6 +11,8 @@ var R = require('ramda');
 var ActorBridge = require('./ActorBridge.js');
 var clock = require('./Clock.js');
 
+var Dijkstra = require('./Dijkstra.js');
+
 function requireAll(r) { r.keys().forEach(r); }
 //requireAll(require.context('./actors/', true, /\.js$/));
 
@@ -90,6 +92,8 @@ api.loadData(function(data) {
   state.clockIs = clock(4, 0);
   help()
 
+  Dijkstra.run(state.clockIs,'HKI', '');
+
   // THE game loop
   function tick() {
     setTimeout(
@@ -152,6 +156,8 @@ api.loadData(function(data) {
         document.getElementById("clock").innerHTML = state.clockIs.asString();
         visualizeStates(state);
 
+
+
         if(stateUtils.gameOver(state)) {
           api.postResults(state.actors, document.getElementById("clock"));
           return;
@@ -168,7 +174,6 @@ api.loadData(function(data) {
     ActorBridge.createVillains(amountVillain, stations);
     ActorBridge.createPolices(amountPolice, stations);
     state.actors=ActorBridge.actors();
-    debugger;
 
     tick();
   }
