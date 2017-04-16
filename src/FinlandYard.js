@@ -92,7 +92,7 @@ api.loadData(function(data) {
   state.clockIs = clock(4, 0);
   help()
 
-  Dijkstra.run(state.clockIs,'HKI', '');
+  Dijkstra.run(state.clockIs,'HKI', 'TPE');
 
   // THE game loop
   function tick() {
