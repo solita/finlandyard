@@ -156,5 +156,8 @@ module.exports = {
       R.map(R.prop('timeTableRows'))
     );
     return collector(state.timetable);
+  },
+  getAllStations: function() {
+    return state.timetable
   }
 }

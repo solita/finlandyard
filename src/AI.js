@@ -5,6 +5,8 @@ var Dijkstra = require('./Dijkstra.js');
 
 var randomNth = (coll) =>  R.nth(Math.floor(Math.random() * coll.length), coll);
 
+var route=null;
+
 var randomAI = (clockIs, context, actor) => {
 
   var leavingTrains=dataUtils.trainsLeavingFrom(clockIs, actor.location);
@@ -25,6 +27,31 @@ var randomAI = (clockIs, context, actor) => {
 }
 
 var dijkstraAI=(clockIs, context, actor) => {
+  if(!route || route.length ==0) {
+    var from=actor.location;
+    var to=context.knownVillainLocations[0]
+    if(from == to) {
+      return Actions.idle()
+    }
+    route=Dijkstra.run(clockIs, from, to)
+    debugger;
+  }
+  var from=actor.location;
+  var nextDestination=route[0]
+  route.shift()
+  if(from==to) {
+    return Actions.idle();
+  }
+  if(!nextDestination) {
+    return Actions.idle()
+  }
+  var train=dataUtils.getTrainById(nextDestination.trainNumber)
+  if(train == null) {
+    return Actions.idle();
+  }
+  return Actions.train(train, nextDestination.name)
+
+
 
 }
 
@@ -53,5 +80,6 @@ var prettyStupidVillain = (clockIs, context, actor) => {
 module.exports = {
   random: randomAI,
   noop: noopAI,
-  villain: prettyStupidVillain
+  villain: prettyStupidVillain,
+  dijkstra: dijkstraAI
 }

@@ -92,8 +92,6 @@ api.loadData(function(data) {
   state.clockIs = clock(4, 0);
   help()
 
-  Dijkstra.run(state.clockIs,'HKI', 'TPE');
-
   // THE game loop
   function tick() {
     setTimeout(
@@ -169,10 +167,10 @@ api.loadData(function(data) {
       },
       5)};
 
-  function startGame(amountPolice, amountVillain) {
-    var stations=dataUtils.connectedStations();
-    ActorBridge.createVillains(amountVillain, stations);
-    ActorBridge.createPolices(amountPolice, stations);
+  function startGame(amountPolice, amountVillain, algo) {
+    var stations=dataUtils.connectedStations()
+    ActorBridge.createVillains(amountVillain, dataUtils.getAllStations(), stations);
+    ActorBridge.createPolices(amountPolice, stations, algo);
     state.actors=ActorBridge.actors();
 
     tick();
