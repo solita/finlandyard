@@ -5,7 +5,7 @@ var Dijkstra = require('./Dijkstra.js');
 
 var randomNth = (coll) =>  R.nth(Math.floor(Math.random() * coll.length), coll);
 
-var route=null;
+var route=[];
 
 var randomAI = (clockIs, context, actor) => {
 
@@ -27,24 +27,30 @@ var randomAI = (clockIs, context, actor) => {
 }
 
 var dijkstraAI=(clockIs, context, actor) => {
-  if(!route || route.length ==0) {
+  console.log(actor.name)
+  var routeObj=R.find(R.propEq('actor', actor.name), route)
+  if(!routeObj || routeObj.route.length ==0) {
+    console.log('Get route for ' + actor.name + '!')
     var from=actor.location;
-    var to=context.knownVillainLocations[0]
+    var villainInd=Math.floor(Math.random()*context.knownVillainLocations.length);
+    var to=context.knownVillainLocations[villainInd]
     if(from == to) {
       return Actions.idle()
     }
-    route=Dijkstra.run(clockIs, from, to)
-    debugger;
+    var dijsktraRes=Dijkstra.run(clockIs, from, to);
+    route.push({actor: actor.name, route: dijsktraRes})
+    routeObj={actor:actor.name, route: dijsktraRes}
   }
   var from=actor.location;
-  var nextDestination=route[0]
-  route.shift()
+  var nextDestination=routeObj.route[0]
+  routeObj.route.shift()
   if(from==to) {
     return Actions.idle();
   }
   if(!nextDestination) {
     return Actions.idle()
   }
+
   var train=dataUtils.getTrainById(nextDestination.trainNumber)
   if(train == null) {
     return Actions.idle();

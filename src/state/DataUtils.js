@@ -71,7 +71,11 @@ module.exports = {
     return coords(module.exports.getStationById(id));
   },
   findTrainDeparture: function(train, location) {
-    return R.find(R.allPass([R.propEq('stationShortCode', location), R.propEq('type', 'DEPARTURE')]), train.timeTableRows);
+    var retu=R.find(R.allPass([R.propEq('stationShortCode', location), R.propEq('type', 'DEPARTURE')]), train.timeTableRows)
+    if(!retu) {
+      debugger;
+    }
+    return retu;
   },
   findTrainArrival: function(train, location) {
     return R.find(R.allPass([R.propEq('stationShortCode', location), R.propEq('type', 'ARRIVAL')]), train.timeTableRows);

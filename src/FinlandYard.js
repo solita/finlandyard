@@ -116,6 +116,7 @@ api.loadData(function(data) {
             console.error(error);
             return actor;
           }
+          //debugger;
           switch(action.type) {
             case 'IDLE':
               return actor;
@@ -169,7 +170,7 @@ api.loadData(function(data) {
 
   function startGame(amountPolice, amountVillain, algo) {
     var stations=dataUtils.connectedStations()
-    ActorBridge.createVillains(amountVillain, dataUtils.getAllStations(), stations);
+    ActorBridge.createVillains(amountVillain, dataUtils.getAllStations(), stations, algo);
     ActorBridge.createPolices(amountPolice, stations, algo);
     state.actors=ActorBridge.actors();
 

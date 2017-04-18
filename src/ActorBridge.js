@@ -4,7 +4,7 @@ var R = require('ramda');
 
 var villainNames=['BadMouth','Mongoose','Luke','Annie', 'Lisa', 'Hannibal' , 'Darth']
 var policeNames=['Police1','Police2','Police3','Police4', 'Police5', 'Police6' , 'Police7']
-var sensibleCities=['HKI', 'TKU', 'TPE', 'RI', 'HL', 'ROI', 'KKN', 'OL', 'KE']
+//var sensibleCities=['HKI', 'TKU', 'TPE', 'RI', 'HL', 'ROI', 'KKN', 'OL', 'KE']
 var endStation=[]
 var noPassengers=[]
 
@@ -24,12 +24,10 @@ var registerActor=function(type, name, location, aifn) {
 
 var addToStations=function(train) {
   if(endStation.indexOf(R.find(R.propEq('name', train), endStation)) < 0 && noPassengers.indexOf(R.find(R.propEq('stationShortCode', train), noPassengers)) < 0) {
-    //console.log('Ei ollut vielä ' + train)
     endStation.push({name: train, count: 1})
   } else if(endStation.indexOf(R.find(R.propEq('name', train), endStation)) >=0) {
     var foundInd=endStation.indexOf(R.find(R.propEq('name', train), endStation))
     endStation[foundInd].count=endStation[foundInd].count+1
-    //console.log('Oli jo ' + train)
   }
 
 
@@ -50,7 +48,8 @@ var filterCities= function(trains) {
   endStation=R.filter(isOverFive, endStation)
   endStation=R.map(train => train.name, endStation)
   endStation.splice(endStation.indexOf("KOK"), 1);
-  //debugger;
+  endStation.splice(endStation.indexOf("VNA"), 1);
+  debugger;
 }
 
 var removeStationsNoPassengers=function(stations) {
@@ -61,7 +60,7 @@ module.exports = {
   actors: function() {
     return actors;
   },
-  createVillains: function(amount, connections, stations) {
+  createVillains: function(amount, connections, stations, algo) {
     actors=[]
     if(endStation.length ==0) {
       removeStationsNoPassengers(stations);
@@ -71,9 +70,13 @@ module.exports = {
       amount = villainNames.length
     }
     //stations=R.filter(R.propEq('passengerTraffic', true), stations)
+    var selectedAI=AI.noop
+    if(algo == 'rand') {
+      selectedAI=AI.random
+    }
     for(var i =0; i < amount; i++) {
       var selectedStation=Math.floor(Math.random()*endStation.length)
-      registerActor('villain', villainNames[i], endStation[selectedStation] ,AI.noop);
+      registerActor('villain', villainNames[i], endStation[selectedStation] ,selectedAI);
     }
   },
   createPolices: function (amount, stations, selectedAI) {
@@ -84,6 +87,9 @@ module.exports = {
       var selectedStation=Math.floor(Math.random()*endStation.length)
       if(selectedAI == 'dij') {
         selectedAI=AI.dijkstra;
+
+      } else if(selectedAI=='rand'){
+        selectedAI=AI.random;
 
       }
 

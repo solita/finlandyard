@@ -41,15 +41,13 @@ var runDijkstra = (clockIs,from, to) => {
     paths.splice(shortIndex, 1)
     var currentNode=currShortest[currShortest.length-1]
     if(currentNode.name==to) {
-      debugger;
       currShortest.shift()
+      console.log(currShortest)
       return currShortest;
     }
 
     var neighbors=getNeighborsWithDistances(currentNode.arrivalTime, currentNode, currShortest[0].arrivalTime, to)
     neighbors=R.reject(train => (R.filter(R.propEq('name', train.name))(paths).length >0), neighbors)
-    var lenss=R.lensProp('timeTo')
-    //neighbors=R.map(train => R.set(lenss, (train.timeTo+(train.arrivalTime.unix()-currShortest[0].arrivalTime.unix())), train))(neighbors)
     R.forEach(neighbor=>addNeighbor(paths, neighbor, currShortest))(neighbors)
 
   }
@@ -61,6 +59,7 @@ function getNeighborsWithDistances(clockIs, currentNode, startTime,to) {
   var lenss = R.lensProp('timeTableRows')
   var filteredTrains=R.map(train => R.set(lenss, R.filter(R.propEq('type', 'ARRIVAL'),train.timeTableRows),train))(trains);
   filteredTrains=R.map(train => R.set(lenss, R.filter(R.propEq('trainStopping', true),train.timeTableRows),train))(filteredTrains);
+  filteredTrains=R.map(train => R.set(lenss, R.reject(R.propEq('countryCode', 'RU'),train.timeTableRows),train))(filteredTrains);
   var neighbors=[]
   for(i=0; i < filteredTrains.length; i++) {
     var found=R.find(R.propEq('stationShortCode', to),filteredTrains[i].timeTableRows)
@@ -69,20 +68,16 @@ function getNeighborsWithDistances(clockIs, currentNode, startTime,to) {
       foundInd=filteredTrains[i].timeTableRows.indexOf(found)
     }
     var firstStation=filteredTrains[i].timeTableRows[foundInd]
-    if(firstStation.scheduledTime.unix() < clockIs.unix()) {
-      firstStation=R.reject(row => row.scheduledTime.unix() < clockIs.unix(),filteredTrains[i].timeTableRows)[filteredTrains[i].timeTableRows.length -1]
-    }
 
     if(!firstStation) {
       continue;
     }
-    if(firstStation.name==to) {
-      debugger;
-    }
     var arrival=firstStation.scheduledTime
     var number=filteredTrains[i].trainNumber
-    var weight=arrival.unix()-startTime.unix()
-
+    var weight=currentNode.arrivalTime.unix() + (arrival.unix()-clockIs.unix())
+    if(firstStation.scheduledTime.unix() < clockIs.unix()) {
+      weight=(24 * 60 * 60 * 1000) - Math.abs(firstStation.scheduledTime.unix() - clockIs.unix());
+    }
     var tobe={trainNumber: number, arrivalTime: arrival, timeTo: weight, name: firstStation.stationShortCode}
     var found=R.filter(R.propEq('name',tobe.name), neighbors)
     if(found.length > 0) {
@@ -96,11 +91,7 @@ function getNeighborsWithDistances(clockIs, currentNode, startTime,to) {
     }
 
   }
-  if(neighbors.length ==0) {
-    debugger;
-  }
-  console.log(neighbors.length)
-  //debugger;
+
   return neighbors
 }
 
