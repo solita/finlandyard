@@ -11,7 +11,7 @@ function addNeighbor(paths, neighbor, currShortest) {
 }
 
 var runDijkstra = (clockIs,from, to) => {
-  console.log('Searching for a route from ' + from + ' to ' + to)
+  console.log('Searching for a routeList from ' + from + ' to ' + to)
   var nodes=dataUtils.connectedStations();
   if(!R.find(R.propEq('stationShortCode', from))(nodes)) {
     console.log('Ei löytynyt asemaa ' + from + '!')
@@ -41,8 +41,9 @@ var runDijkstra = (clockIs,from, to) => {
     paths.splice(shortIndex, 1)
     var currentNode=currShortest[currShortest.length-1]
     if(currentNode.name==to) {
+      //console.log(currShortest)
       currShortest.shift()
-      console.log(currShortest)
+
       return currShortest;
     }
 

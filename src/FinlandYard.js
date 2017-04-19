@@ -178,8 +178,10 @@ api.loadData(function(data) {
   }
 
   function help() {
-    console.log("Welcome to play Finland Yard -game! One can start game by calling function startGame. It takes two parameters: amount of polices and amount of villains. If you need to see these " +
-        "instructions again, just call help function. Enjoy!")
+    console.log("Welcome to play Finland Yard -game! One can start game by calling function startGame. \n" +
+    "It takes three parameters: amount of polices, amount of villains and which search method you want to use. \n" +
+    "Available methods are random search (param: 'rand'), smarter search (param: 'smart') and the search from VR (param: 'vr') + \n" +
+    "If you need to see these instructions again, just call help function. Enjoy!")
   }
   window.startGame=startGame;
   window.help=help;

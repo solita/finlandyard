@@ -49,7 +49,6 @@ var filterCities= function(trains) {
   endStation=R.map(train => train.name, endStation)
   endStation.splice(endStation.indexOf("KOK"), 1);
   endStation.splice(endStation.indexOf("VNA"), 1);
-  debugger;
 }
 
 var removeStationsNoPassengers=function(stations) {
@@ -79,23 +78,26 @@ module.exports = {
       registerActor('villain', villainNames[i], endStation[selectedStation] ,selectedAI);
     }
   },
-  createPolices: function (amount, stations, selectedAI) {
+  createPolices: function (amount, stations, algo) {
     if(amount > policeNames.length || amount < 1) {
       amount=policeNames.length
     }
     for(var i =0; i < amount; i++) {
       var selectedStation=Math.floor(Math.random()*endStation.length)
-      if(selectedAI == 'dij') {
+      if(algo == 'smart') {
         selectedAI=AI.dijkstra;
 
-      } else if(selectedAI=='rand'){
+      } else if(algo=='rand'){
+        selectedAI=AI.random;
+
+      } else {
+        console.log("Invalid search method " + algo + "! We choose random for you then")
         selectedAI=AI.random;
 
       }
 
       registerActor('police', policeNames[i], endStation[selectedStation] ,selectedAI);
     }
-    debugger;
 
   }
 }

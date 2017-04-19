@@ -52,7 +52,7 @@ function calculatePosition(state, actor) {
   } else if(actor.train) {
     var actorTrain = dataUtils.getTrainById(actor.train);
 
-    // Train is somewhere along the route
+    // Train is somewhere along the routeList
     var trainLocation = getTrainLocationCoordinated(state, actorTrain);
     if(!R.isNil(trainLocation)) {
       return R.merge(actor, trainLocation);
