@@ -27,7 +27,7 @@ var randomAI = (clockIs, context, actor) => {
 }
 
 const dijkstraAI=(clockIs, context, actor) => {
-  console.log(actor.name)
+  //console.log(actor.name)
   var routeObj = routeMap[actor.name];
   if(!routeObj || routeObj.route.length ==0) {
     var from=actor.location;
@@ -42,6 +42,10 @@ const dijkstraAI=(clockIs, context, actor) => {
   }
   var from=actor.location;
   var nextDestination=routeObj.route[0]
+  if(!nextDestination) {
+    return Actions.idle()
+  }
+  console.log(actor.name+' travelling from ' + from + ' to ' + nextDestination.name)
   routeObj.route.shift()
   if(from==to) {
     return Actions.idle();

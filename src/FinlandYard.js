@@ -134,9 +134,9 @@ api.loadData(function(data) {
                 return actor;
               }
               // Logging this is somewhat tricky
-              log.log(state.clockIs, actor.name + " decides to leave to " + action.destination + " with train " + action.trainNumber +
-                " departure " + dataUtils.findTrainDeparture(dataUtils.getTrainById(action.trainNumber), actor.location).scheduledTime.asString() +
-                " arrival " + dataUtils.findTrainArrival(dataUtils.getTrainById(action.trainNumber), action.destination).scheduledTime.asString());
+              //log.log(state.clockIs, actor.name + " decides to leave to " + action.destination + " with train " + action.trainNumber +
+              //  " departure " + dataUtils.findTrainDeparture(dataUtils.getTrainById(action.trainNumber), actor.location).scheduledTime.asString() +
+              //  " arrival " + dataUtils.findTrainArrival(dataUtils.getTrainById(action.trainNumber), action.destination).scheduledTime.asString());
               return R.merge(actor, {train: action.trainNumber, destination: action.destination});
             default:
               log.log(state.clockIs, "HAHA, " + actor.name + " barfs!!!");
@@ -158,7 +158,17 @@ api.loadData(function(data) {
 
 
         if(stateUtils.gameOver(state)) {
+          var timespent=state.actors[(state.actors).length-1].freeMinutes
+          if(timespent > 60) {
+            let hours=parseInt(timespent/60);
+            let leftovermins=timespent-(hours*60)
+            console.log('All villains caught in ' + hours + ' hours and ' + leftovermins + ' mins')
+          } else {
+            console.log('All villains caught in ' + timespent + ' minutes')
+          }
+
           api.postResults(state.actors, document.getElementById("clock"));
+          window.setTimeout(function(){location.reload(true);}, 10500);
           return;
         } else {
           tick();
@@ -180,8 +190,8 @@ api.loadData(function(data) {
   function help() {
     console.log("Welcome to play Finland Yard -game! One can start game by calling function startGame. \n" +
     "It takes three parameters: amount of polices, amount of villains and which search method you want to use. \n" +
-    "Available methods are random search (param: 'rand'), smarter search (param: 'smart') and the search from VR (param: 'vr') + \n" +
-    "If you need to see these instructions again, just call help function. Enjoy!")
+    "Available methods are random search (param: 'rand'), smarter search (param: 'smart') and the search from VR (param: 'vr') \n" +
+    "Enjoy!")
   }
   window.startGame=startGame;
   window.help=help;

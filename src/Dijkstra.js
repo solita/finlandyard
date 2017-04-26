@@ -11,7 +11,6 @@ function addNeighbor(paths, neighbor, currShortest) {
 }
 
 var runDijkstra = (clockIs,from, to) => {
-  console.log('Searching for a routeList from ' + from + ' to ' + to)
   var nodes=dataUtils.connectedStations();
   if(!R.find(R.propEq('stationShortCode', from))(nodes)) {
     console.log('Ei löytynyt asemaa ' + from + '!')
@@ -28,6 +27,7 @@ var runDijkstra = (clockIs,from, to) => {
   while(true) {
     if(paths.length ==0) {
       console.log('Nothing found, this must be a mistake')
+      console.log('This occurred while trying to find a path from ' + from + ' to ' + to)
       return paths;
     }
     var distances=R.map(path => path[path.length-1].timeTo)(paths)
@@ -41,7 +41,6 @@ var runDijkstra = (clockIs,from, to) => {
     paths.splice(shortIndex, 1)
     var currentNode=currShortest[currShortest.length-1]
     if(currentNode.name==to) {
-      //console.log(currShortest)
       currShortest.shift()
 
       return currShortest;
@@ -61,6 +60,7 @@ function getNeighborsWithDistances(clockIs, currentNode, startTime,to) {
   var filteredTrains=R.map(train => R.set(lenss, R.filter(R.propEq('type', 'ARRIVAL'),train.timeTableRows),train))(trains);
   filteredTrains=R.map(train => R.set(lenss, R.filter(R.propEq('trainStopping', true),train.timeTableRows),train))(filteredTrains);
   filteredTrains=R.map(train => R.set(lenss, R.reject(R.propEq('countryCode', 'RU'),train.timeTableRows),train))(filteredTrains);
+  filteredTrains=R.filter(R.propEq('timetableType', 'REGULAR'), filteredTrains);
   var neighbors=[]
   for(i=0; i < filteredTrains.length; i++) {
     var found=R.find(R.propEq('stationShortCode', to),filteredTrains[i].timeTableRows)

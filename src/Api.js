@@ -39,7 +39,10 @@ function loadData(fireCallback) {
     console.log("Stations loaded. " + stations.length + " stations");
     state.stations = stations;
   });
-  doAsyncJsonRequest("http://localhost:8000/api/v1/schedules?departure_date=2017-04-18", function(timetable) {
+  var today = new Date();
+  var date = today.getFullYear()+'-0'+(today.getMonth()+1)+'-'+today.getDate();
+  console.log(date)
+  doAsyncJsonRequest("http://localhost:8000/api/v1/schedules?departure_date=" + date, function(timetable) {
     console.log("Timetable loaded. Contains " + timetable.length);
     state.timetable = timetable;
   });
