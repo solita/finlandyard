@@ -40,7 +40,7 @@ function loadData(fireCallback) {
     state.stations = stations;
   });
   var today = new Date();
-  var date = today.getFullYear()+'-0'+(today.getMonth()+1)+'-'+today.getDate();
+  var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
   console.log(date)
   doAsyncJsonRequest("http://localhost:8000/api/v1/schedules?departure_date=" + date, function(timetable) {
     console.log("Timetable loaded. Contains " + timetable.length);
