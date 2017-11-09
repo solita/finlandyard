@@ -5,8 +5,8 @@ var Actions = require('../Actions.js');
 
 
 
-ActorBridge.registerActor('police', 'sipowitch', 'JNS', function(state, context, actor) {
-  var leaving = dataUtils.trainsLeavingFrom(state.clockIs, actor.location);
+ActorBridge.registerActor('police', 'sipowitch', 'JNS', function(clockIs, context, actor) {
+  var leaving = dataUtils.trainsLeavingFrom(clockIs, actor.location);
   var train = null;
   var destination = null;
   var timeToGetThere = null;
@@ -17,7 +17,7 @@ ActorBridge.registerActor('police', 'sipowitch', 'JNS', function(state, context,
       var villainLocation = context.knownVillainLocations[a];
       if( R.contains(villainLocation, possibleHops)) {
         var arrival = dataUtils.findTrainArrival(possibleTrain, villainLocation).scheduledTime;
-        if(!timeToGetThere || timeToGetThere.unix() > arrival.unix()) {
+        if(!timeToGetThere || timeToGetThere.isBefore(arrival)) {
           train = possibleTrain;
           destination = villainLocation;
           timeToGetThere = arrival;
@@ -27,8 +27,9 @@ ActorBridge.registerActor('police', 'sipowitch', 'JNS', function(state, context,
   }
 
   if(!R.isNil(train)) {
-    console.log("NICE, catching that dude in " + destination);
-    return Actions.train(train.trainNumber, destination);
+    console.log("NICE, catching that dude in " + destination + " departure: " +
+      dataUtils.findTrainArrival(train, destination).scheduledTime.asString());
+    return Actions.train(train, destination);
   }
   console.log("Retreating...");
   var retreatingTo = null;
@@ -64,15 +65,16 @@ ActorBridge.registerActor('police', 'sipowitch', 'JNS', function(state, context,
   }
   if(retreatingTo && usingTrain) {
     console.log('Retreating to ' + retreatingTo);
-    return Actions.train(usingTrain.trainNumber, retreatingTo);
+    return Actions.train(usingTrain, retreatingTo);
   }
-  console.log("Fuck, I'm stuck, I'll just hop to first train");
-  var train = dataUtils.nextLeavingTrain(state.clockIs, actor.location);
+  console.log("I'm stuck, I'll just hop to first train");
+  var train = dataUtils.nextLeavingTrain(clockIs, actor.location);
   if(!train) {
+    console.log("No trains leaving... " + clockIs.asString());
     return Actions.idle();
   }
   var possibleStops = dataUtils.getPossibleHoppingOffStations(train, actor.location);
   var hopOff = R.last(possibleStops);
-  console.log("It's going to " + hopOff + ' at ' + dataUtils.findTrainArrival(train, hopOff).scheduledTime.toISOString());
-  return Actions.train(train.trainNumber, hopOff);
+  console.log("It's going to " + hopOff + ' at ' + dataUtils.findTrainArrival(train, hopOff).scheduledTime.asString());
+  return Actions.train(train, hopOff);
 });

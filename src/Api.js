@@ -17,13 +17,29 @@ function doAsyncJsonRequest(url, cb) {
   xhr.send(null);
 }
 
+function postResults(actors, container) {
+  var xhr = new XMLHttpRequest();
+  xhr.open( "POST", "http://localhost:8000/results", true );
+  xhr.onload = function(e) {
+    if (xhr.readyState === 4) {
+      if (xhr.status === 200) {
+        container.innerHTML = 'Villains caught! THANKS! Results posted to backend.';
+      } else {
+          console.error(xhr.statusText);
+          throw "Couldn't fetch data"
+      }
+    }
+  }
+  xhr.send(JSON.stringify(actors));
+}
+
 function loadData(fireCallback) {
   var state = {};
   doAsyncJsonRequest("http://localhost:8000/api/v1/metadata/stations", function(stations) {
     console.log("Stations loaded. " + stations.length + " stations");
     state.stations = stations;
   });
-  doAsyncJsonRequest("http://localhost:8000/api/v1/schedules?departure_date=2016-11-24", function(timetable) {
+  doAsyncJsonRequest("http://localhost:8000/api/v1/schedules?departure_date=2017-11-01", function(timetable) {
     console.log("Timetable loaded. Contains " + timetable.length);
     state.timetable = timetable;
   });
@@ -39,4 +55,7 @@ function loadData(fireCallback) {
       100)})();
 }
 
-module.exports = loadData;
+module.exports = {
+  loadData: loadData,
+  postResults: postResults
+};

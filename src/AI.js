@@ -4,10 +4,9 @@ var Actions = require('./Actions.js');
 
 var randomNth = (coll) =>  R.nth(Math.floor(Math.random() * coll.length), coll);
 
-var randomAI = (state, context, actor) => {
+var randomAI = (clockIs, context, actor) => {
 
-
-  var leavingTrains=dataUtils.trainsLeavingFrom(state.clockIs, actor.location);
+  var leavingTrains=dataUtils.trainsLeavingFrom(clockIs, actor.location);
   if(leavingTrains.length == 0) {
       return Actions.idle();
   }
@@ -21,35 +20,26 @@ var randomAI = (state, context, actor) => {
   if(R.isNil(chosenDestination)) {
       return Actions.idle();
   }
-  return Actions.train(train.trainNumber, chosenDestination);
+  return Actions.train(train, chosenDestination);
 }
 
-var hunterAI = (state, context, actor) => {
-  var leaving = dataUtils.trainsLeavingFrom(state.clockIs, actor.location);
-  var huntthis = R.find((train) => R.contains(R.head(context.knownVillainLocations), dataUtils.getPossibleHoppingOffStations(train, actor.location)), leaving);
-  if(R.isNil(huntthis)) {
-    return Actions.idle();
-  }
-  return Actions.train(huntthis.trainNumber, R.head(context.knownVillainLocations));
-}
-
-var noopAI = (state, context, actor) => {
+var noopAI = (clockIs, context, actor) => {
   return Actions.idle();
 }
 
-var prettyStupidVillain = (state, context, actor) => {
+var prettyStupidVillain = (clockIs, context, actor) => {
 
   if(R.contains(actor.location, context.policeDestinations)) {
-    var train = dataUtils.nextLeavingTrain(state.clockIs, actor.location);
+    var train = dataUtils.nextLeavingTrain(clockIs, actor.location);
     if(!train) {
       return Actions.idle();
     }
     var possibleStops = dataUtils.getPossibleHoppingOffStations(train, actor.location);
     var hopOff = R.last(possibleStops);
     if(R.contains(hopOff,  context.policeDestinations) || R.contains(hopOff, context.knownPoliceLocations)) {
-      hopOff = randomNth(R.tail(R.reverse(possibleStops)));
+      hopOff = randomNth(R.reverse(possibleStops));
     }
-    return Actions.train(train.trainNumber, hopOff);
+    return Actions.train(train, hopOff);
   }
 
   return Actions.idle();
@@ -58,6 +48,5 @@ var prettyStupidVillain = (state, context, actor) => {
 module.exports = {
   random: randomAI,
   noop: noopAI,
-  hunter: hunterAI,
   villain: prettyStupidVillain
 }

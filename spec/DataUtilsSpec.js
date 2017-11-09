@@ -1,7 +1,7 @@
 'use strict';
 
-var moment = require('moment');
 var sb = require('./StateBuilder.js');
+var clock = require('../src/Clock.js');
 
 describe("DataUtils", function() {
 
@@ -113,11 +113,11 @@ describe("DataUtils", function() {
         .withStation(sb.station("STATION-1", 14.24444, 42.24242))
         .withStation(sb.station("STATION-2", 62.24444, 41.24242))
         .withTimetableEntry('TRAIN-1',
-          sb.departure('STATION-1', moment({hour: 5, minute: 10})),
-          sb.arrival('STATION-2', moment({hour: 6, minute: 16})))
+          sb.departure('STATION-1', clock(5, 10)),
+          sb.arrival('STATION-2', clock(5, 17)))
         .build();
       dataUtils.initData(s);
-      var clockIs = moment({hour: 4, minute: 10});
+      var clockIs = clock(4, 10);
       expect(dataUtils.trainsLeavingFrom(clockIs, "STATION-1").length).toEqual(1);
     });
     it('Should not find already left trains', function() {
@@ -125,11 +125,11 @@ describe("DataUtils", function() {
         .withStation(sb.station("STATION-1", 14.24444, 42.24242))
         .withStation(sb.station("STATION-2", 62.24444, 41.24242))
         .withTimetableEntry('TRAIN-1',
-          sb.departure('STATION-1', moment({hour: 5, minute: 10})),
-          sb.arrival('STATION-2', moment({hour: 6, minute: 16})))
+          sb.departure('STATION-1', clock(5, 10)),
+          sb.arrival('STATION-2', clock(5, 16)))
         .build();
       dataUtils.initData(s);
-      var clockIs = moment({hour: 7, minute: 10});
+      var clockIs = clock(7, 10);
       expect(dataUtils.trainsLeavingFrom(clockIs, "STATION-1").length).toEqual(0);
     });
     it('Should find trains actor can jump into', function() {
@@ -137,14 +137,43 @@ describe("DataUtils", function() {
         .withStation(sb.station("STATION-1", 14.24444, 42.24242))
         .withStation(sb.station("STATION-2", 62.24444, 41.24242))
         .withTimetableEntry('TRAIN-1',
-          sb.departure('STATION-1', moment({hour: 5, minute: 10})),
-          sb.arrival('STATION-2', moment({hour: 6, minute: 16})),
-          sb.departure('STATION-2', moment({hour: 6, minute: 19}),
-          sb.arrival('STATION-3', moment({hour: 8, minute: 16}))))
+          sb.departure('STATION-1', clock(5, 10)),
+          sb.arrival('STATION-2', clock(6, 16)),
+          sb.departure('STATION-2', clock(6, 19),
+          sb.arrival('STATION-3', clock(8, 16))))
         .build();
-      dataUtils.initData(s);  
-      var clockIs = moment({hour: 5, minute: 10});
+      dataUtils.initData(s);
+      var clockIs = clock(5, 10);
       expect(dataUtils.trainsLeavingFrom(clockIs, "STATION-2").length).toEqual(1);
+    });
+  });
+
+  describe("howCanIGetTo", function() {
+    it('Should find without transition', function() {
+      var s = sb.state()
+        .withStation(sb.station("STATION-1", 14.24444, 42.24242))
+        .withStation(sb.station("STATION-2", 62.24444, 41.24242))
+        .withTimetableEntry('TRAIN-1',
+          sb.departure('STATION-1', clock(5, 10)),
+          sb.arrival('STATION-2', clock(6, 16)))
+        .build();
+      dataUtils.initData(s);
+      expect(dataUtils.howCanIGetTo("STATION-1", "STATION-2")).toEqual("FROMHERE");
+    });
+    it('Should find one transition', function() {
+      var s = sb.state()
+        .withStation(sb.station("STATION-1", 14.24444, 42.24242))
+        .withStation(sb.station("STATION-2", 62.24444, 41.24242))
+        .withStation(sb.station("STATION-3", 61.24444, 21.24242))
+        .withTimetableEntry('TRAIN-1',
+          sb.departure('STATION-1', clock(5, 10)),
+          sb.arrival('STATION-2', clock(6, 16)))
+        .withTimetableEntry('TRAIN-2',
+          sb.departure('STATION-2', clock(6, 20)),
+          sb.arrival('STATION-3', clock(7, 16)))
+        .build();
+      dataUtils.initData(s);
+      expect(dataUtils.howCanIGetTo("STATION-1", "STATION-3")[0]).toEqual("STATION-2");
     });
   });
 });

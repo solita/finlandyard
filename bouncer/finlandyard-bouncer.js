@@ -3,6 +3,7 @@
 var http = require('http');
 var fs = require('fs');
 var crypto = require('crypto');
+var R = require('ramda');
 
 // Port proxy is bound to
 const PORT=8000;
@@ -56,8 +57,59 @@ function queryOverHttp(url, filename, response) {
   });
 }
 
+function postResultsOnFly(req) {
+  var data = '';
+  req.on('data', function(chunk) {
+    data += chunk;
+  });
+  req.on('end', function() {
+
+    var s = R.compose(
+      // :D
+      R.map((r) => { return {player: r.name, score: r.freeMinutes}; }),
+      R.project(['name', 'freeMinutes']),
+      R.filter(R.propEq('type', 'police'))
+    )(JSON.parse(data));
+    echoLine("Received results:");
+    echoLine(s);
+    if(process.env['RESULTS_HOST']) {
+      echoLine("Posting results to " + process.env['RESULTS_HOST']);
+      var r = http.request({
+        hostname: process.env['RESULTS_HOST'],
+        port: process.env['RESULTS_PORT'],
+        path: process.env['RESULTS_PATH'],
+        method: 'POST',
+        agent: false,  // create a new agent just for this one request,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }, (res) => {
+        res.setEncoding('utf8');
+        echoLine('Sent: ' + res.statusCode);
+        let body = '';
+        res.on('data', (chunk) => body += chunk);
+        res.on('end', () => {
+          echoLine(body);
+        })
+      });
+      r.write(JSON.stringify(s));
+      r.end();
+    } else {
+      echoLine("No 'RESULTS_HOST' in env, refusing to post");
+    }
+  });
+}
+
 //We need a function which handles requests and send response
 function handleRequest(request, response){
+  if(request.method === 'POST' && request.url === '/results') {
+    postResultsOnFly(request);
+    response.setHeader('content-type', 'text/plain; charset=utf-8');
+    response.setHeader('Access-Control-Allow-Origin', '*');
+    response.end("Thanks for playing come again");
+    return;
+
+  }
   let filename = persistentFileName(request.url);
   fs.exists(filename, function(exists) {
     if(exists) {
