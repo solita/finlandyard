@@ -1,6 +1,6 @@
 'use strict';
 
-require('file?name=[name].[ext]!./index.html');
+require('file-loader?name=[name].[ext]!./index.html');
 var dataUtils = require('./state/DataUtils.js');
 var stateUtils = require('./state/StateUtils.js');
 var mapControl = require('./map/MapControl.js');
@@ -145,8 +145,8 @@ api.loadData(function(data) {
         mapControl.drawPolice(stateUtils.getActors(state, 'police'));
         mapControl.drawVillains(stateUtils.getActors(state, 'villain'));
 
-        document.getElementById("clock").innerHTML = state.clockIs.asString();
-        visualizeStates(state);
+        //document.getElementById("clock").innerHTML = state.clockIs.asString();
+        //nvisualizeStates(state);
 
         if(stateUtils.gameOver(state)) {
           api.postResults(state.actors, document.getElementById("clock"));
@@ -156,6 +156,5 @@ api.loadData(function(data) {
         }
 
 
-      },
-      5)})();
+      }, 1)})();
 });

@@ -23,7 +23,7 @@ function postResults(actors, container) {
   xhr.onload = function(e) {
     if (xhr.readyState === 4) {
       if (xhr.status === 200) {
-        container.innerHTML = 'Villains caught! THANKS! Results posted to backend.';
+        // container.innerHTML = 'Villains caught! THANKS! Results posted to backend.';
       } else {
           console.error(xhr.statusText);
           throw "Couldn't fetch data"
