@@ -13,14 +13,13 @@ function fitLongitude(v) {
   return rangeFit(v, 20, 42, 0, 1000);
 }
 
-var policeObjects = {};
-var villainObjects = {};
-var textObjects = {};
-
 module.exports = function() {
 
-  // Return object for commanding sources with access to state closure
-  // We do not expose sources directly
+  var policeObjects = {};
+  var villainObjects = {};
+  var textObjects = {};
+  var policeSirenCounter = 0;
+
   return {
     drawStations: function(stations) {
       console.log("Drawing " + stations.length + " stations");
@@ -29,7 +28,7 @@ module.exports = function() {
           var stationCircle = new fabric.Circle({
               top : fitLatitude(station.latitude),
               left : fitLongitude(station.longitude),
-              radius: 1.2,
+              radius: 1,
               fill : 'black'
           });
           canvas.add(stationCircle);
@@ -45,8 +44,7 @@ module.exports = function() {
         var d = [fitLongitude(connection.from[0]) + 1, fitLatitude(connection.from[1]) + 1,
                 fitLongitude(connection.to[0]) + 1, fitLatitude(connection.to[1]) + 1];
         var line = new fabric.Line(d, {
-          fill: 'red',
-          stroke: 'green',
+          stroke: '#aaa',
           strokeWidth: 1,
           selectable: false
         });
@@ -58,10 +56,7 @@ module.exports = function() {
       polices.forEach(function(p) {
         if(!policeObjects[p.name]) {
           var police = new fabric.Circle({
-              top : fitLatitude(p.latitude),
-              left : fitLongitude(p.longitude),
-              radius: 2,
-              fill : 'blue'
+              radius: 2
           });
           var text = new fabric.Text(p.name + ' ' + p.destination, {
             top : fitLatitude(p.latitude),
@@ -76,20 +71,28 @@ module.exports = function() {
         var policeObject = policeObjects[p.name];
         policeObject.top = fitLatitude(p.latitude);
         policeObject.left = fitLongitude(p.longitude);
+        policeObject.set({fill: policeSirenCounter < 10 ? 'blue' : 'red'});
+        policeSirenCounter++;
+        if(policeSirenCounter === 20) {
+          policeSirenCounter = 0;
+        }
+
         var textObject = textObjects[p.name];
-        textObject.top = fitLatitude(p.latitude);
-        textObject.left = fitLongitude(p.longitude);
+        textObject.top = fitLatitude(p.latitude) - 6;
+        textObject.left = fitLongitude(p.longitude) + 6;
+        textObject.text = p.name + ' ' + (p.location || '') + (p.destination ? '->' + p.destination : '');
       });
       canvas.renderAll();
     },
     drawVillains: function(villains) {
       villains.forEach(function(v) {
+        if(v.caught) {
+          return;
+        }
         if(!villainObjects[v.name]) {
           var villain = new fabric.Circle({
-              top : fitLatitude(v.latitude) + 20,
-              left : fitLongitude(v.longitude) - 20,
               radius: 2,
-              fill : 'red'
+              fill : 'green'
           });
           var text = new fabric.Text(v.name + ' ' + v.destination, {
             top : fitLatitude(v.latitude),
@@ -105,9 +108,12 @@ module.exports = function() {
         villainObject.top = fitLatitude(v.latitude);
         villainObject.left = fitLongitude(v.longitude);
         var textObject = textObjects[v.name];
-        textObject.top = fitLatitude(v.latitude);
-        textObject.left = fitLongitude(v.longitude);
+        textObject.top = fitLatitude(v.latitude) - 6;
+        textObject.left = fitLongitude(v.longitude) + 6;
+        textObject.text = v.name + ' ' + (v.location || '') + (v.destination ? '->' + v.destination : '');
       });
+    },
+    render: function() {
       canvas.renderAll();
     }
   }
