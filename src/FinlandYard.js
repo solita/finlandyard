@@ -1,6 +1,6 @@
 'use strict';
 
-require('file?name=[name].[ext]!./index.html');
+require('file-loader?name=[name].[ext]!./index.html');
 var dataUtils = require('./state/DataUtils.js');
 var stateUtils = require('./state/StateUtils.js');
 var mapControl = require('./map/MapControl.js');
@@ -73,8 +73,6 @@ api.loadData(function(data) {
 
   data.timetable = processTimesToMomentInstances(data.timetable);
 
-  console.log(data.timetable);
-
   dataUtils.initData(data);
 
   mapControl.drawConnections(dataUtils.collectConnections());
@@ -89,11 +87,7 @@ api.loadData(function(data) {
   (function tick() {
     setTimeout(
       function() {
-        // Edistä kelloa
-        /*state.clockIs = state.clockIs.add(1, 'minutes');
-        if(state.clockIs.unix() - startingTime.unix() > 1 * 24 * 60 * 60) {
-          state.clockIs = startingTime.clone();
-        }*/
+        // Proceed
         state.clockIs.tick();
 
         // Applies ai functions
@@ -144,11 +138,13 @@ api.loadData(function(data) {
 
         mapControl.drawPolice(stateUtils.getActors(state, 'police'));
         mapControl.drawVillains(stateUtils.getActors(state, 'villain'));
-
-        document.getElementById("clock").innerHTML = state.clockIs.asString();
-        visualizeStates(state);
+        mapControl.drawClock(state.clockIs);
+        mapControl.render();
+        //document.getElementById("clock").innerHTML = state.clockIs.asString();
+        //nvisualizeStates(state);
 
         if(stateUtils.gameOver(state)) {
+          console.log('Game over');
           api.postResults(state.actors, document.getElementById("clock"));
           return;
         } else {
@@ -156,6 +152,5 @@ api.loadData(function(data) {
         }
 
 
-      },
-      5)})();
+      }, 1)})();
 });
