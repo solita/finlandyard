@@ -73,8 +73,6 @@ api.loadData(function(data) {
 
   data.timetable = processTimesToMomentInstances(data.timetable);
 
-  console.log(data.timetable);
-
   dataUtils.initData(data);
 
   mapControl.drawConnections(dataUtils.collectConnections());
@@ -140,6 +138,7 @@ api.loadData(function(data) {
 
         mapControl.drawPolice(stateUtils.getActors(state, 'police'));
         mapControl.drawVillains(stateUtils.getActors(state, 'villain'));
+        mapControl.drawClock(state.clockIs);
         mapControl.render();
         //document.getElementById("clock").innerHTML = state.clockIs.asString();
         //nvisualizeStates(state);
@@ -153,5 +152,5 @@ api.loadData(function(data) {
         }
 
 
-      }, 10)})();
+      }, 1)})();
 });

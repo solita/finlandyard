@@ -4,7 +4,7 @@ var R = require('ramda');
 var rangeFit = require('range-fit');
 var fabric = require('fabric').fabric;
 
-var canvas = new fabric.StaticCanvas('canvas');
+
 
 function fitLatitude(v) {
   return 1000 - rangeFit(v, 58, 68, 0, 1000);
@@ -15,9 +15,24 @@ function fitLongitude(v) {
 
 module.exports = function() {
 
+  /* The canvas */
+  var canvas = new fabric.StaticCanvas('canvas');
+
+  /* Clock render object */
+  var clockObject = new fabric.Text('', {
+    top : 250,
+    left : 400,
+    fontSize: 12
+  });
+  canvas.add(clockObject);
+
+  /* Polices */
   var policeObjects = {};
+  /* Villains */
   var villainObjects = {};
+  /* Name labels */
   var textObjects = {};
+  /* Counter for police sirens */
   var policeSirenCounter = 0;
 
   return {
@@ -52,6 +67,9 @@ module.exports = function() {
       });
 
     },
+    drawClock: function(clockIs) {
+      clockObject.text = clockIs.asString();
+    },
     drawPolice: function(polices) {
       polices.forEach(function(p) {
         if(!policeObjects[p.name]) {
@@ -72,21 +90,25 @@ module.exports = function() {
         policeObject.top = fitLatitude(p.latitude);
         policeObject.left = fitLongitude(p.longitude);
         policeObject.set({fill: policeSirenCounter < 10 ? 'blue' : 'red'});
-        policeSirenCounter++;
-        if(policeSirenCounter === 20) {
-          policeSirenCounter = 0;
-        }
+
 
         var textObject = textObjects[p.name];
         textObject.top = fitLatitude(p.latitude) - 6;
         textObject.left = fitLongitude(p.longitude) + 6;
         textObject.text = p.name + ' ' + (p.location || '') + (p.destination ? '->' + p.destination : '');
+        textObject.setColor(policeSirenCounter > 10 ? 'blue' : 'red');
+        policeSirenCounter++;
+        if(policeSirenCounter === 20) {
+          policeSirenCounter = 0;
+        }
       });
       canvas.renderAll();
     },
     drawVillains: function(villains) {
       villains.forEach(function(v) {
         if(v.caught) {
+          var textObject = textObjects[v.name];
+          textObject.setColor('#ccc');
           return;
         }
         if(!villainObjects[v.name]) {
