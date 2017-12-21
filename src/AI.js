@@ -27,6 +27,10 @@ var noopAI = (clockIs, context, actor) => {
   return Actions.idle();
 }
 
+var crime = (clockIs, context, actor) => {
+  return Actions.crime();
+}
+
 var prettyStupidVillain = (clockIs, context, actor) => {
 
   if(R.contains(actor.location, context.policeDestinations)) {
@@ -45,8 +49,10 @@ var prettyStupidVillain = (clockIs, context, actor) => {
   return Actions.idle();
 }
 
+
 module.exports = {
   random: randomAI,
   noop: noopAI,
+  crime: crime,
   villain: prettyStupidVillain
 }

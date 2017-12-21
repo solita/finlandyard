@@ -12,5 +12,8 @@ module.exports = {
       trainNumber = train.trainNumber;
     }
     return {type: 'TRAIN', trainNumber: trainNumber, destination: stationShortCode};
+  },
+  crime: function() {
+    return {type: 'CRIME'};
   }
 }
