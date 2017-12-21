@@ -107,6 +107,8 @@ api.loadData(function(data) {
           switch(action.type) {
             case 'IDLE':
               return actor;
+            case 'CRIME':
+              return R.evolve({money: R.add(1)}, actor)
             case 'TRAIN':
               if(R.isNil(action.trainNumber)) {
                 log.log(state.clockIs, "Haha, doesn't work for " + actor.name + " trainNumber null in command");
