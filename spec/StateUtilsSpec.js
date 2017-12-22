@@ -1,28 +1,25 @@
 'use strict';
 
+const expect = require('chai').expect
 var sb = require('./StateBuilder.js');
 var moment = require('moment');
 var log = require('../src/Log.js');
 
-describe("StateUtils", function() {
+describe("state/StateUtils.js", function() {
 
   var stateUtils = require('../src/state/StateUtils.js');
   var dataUtils = require('../src/state/DataUtils.js');
 
-  beforeEach(function() {
-    spyOn(log, 'log');
-  });
-
-  describe("getActors", function() {
+  describe("getActors()", function() {
     it("should return actors of type", function() {
       expect(stateUtils.getActors({ actors: [
         {name: 'jack', type: 'villain'},
         {name: 'kim', type: 'police'}]}, 'villain'))
-        .toEqual([{name: 'jack', type: 'villain'}]);
+        .to.deep.equal([{name: 'jack', type: 'villain'}]);
     });
   });
 
-  describe("applyStateChanges", function() {
+  describe("applyStateChanges()", function() {
     it("should not mark villain caught if there are no police in same location", function() {
       var state = {
         actors: [
@@ -31,8 +28,8 @@ describe("StateUtils", function() {
         ]
       };
       var newState = stateUtils.applyStateChanges(state);
-      expect(newState.actors[0].caught).toBe(false);
-      expect(newState.actors[1].caught).toBe(false);
+      expect(newState.actors[0].caught).to.be.false;
+      expect(newState.actors[1].caught).to.be.false;
     });
     it("Should mark villain caught if in same location than police", function() {
       var state = {
@@ -42,8 +39,8 @@ describe("StateUtils", function() {
         ]
       };
       var newState = stateUtils.applyStateChanges(state);
-      expect(newState.actors[0].caught).toBe(true);
-      expect(newState.actors[1].caught).toBe(false);
+      expect(newState.actors[0].caught).to.be.true;
+      expect(newState.actors[1].caught).to.be.false;
     });
     it("Should not mark villain caught if in in train without police", function() {
       var state = sb.state()
@@ -56,14 +53,14 @@ describe("StateUtils", function() {
           sb.departure('STATION-2', moment({hour: 5, minute: 10})),
           sb.arrival('STATION-1', moment({hour: 6, minute: 16})))
         .build();
-      dataUtils.initData(state);  
+      dataUtils.initData(state);
       state.actors = [
           {type: "villain", name: "x", caught: false, train: 'TRAIN-1', destination: 'STATION-2', location: null},
           {type: "police", name: "y", caught: false, train: 'TRAIN-2',  destination: 'STATION-1', location: null}];
       state.clockIs = moment({hour: 5, minute: 9});
       var newState = stateUtils.applyStateChanges(state);
-      expect(newState.actors[0].caught).toBe(false);
-      expect(newState.actors[1].caught).toBe(false);
+      expect(newState.actors[0].caught).to.be.false;
+      expect(newState.actors[1].caught).to.be.false;
     });
     it("Should mark villain caught if in same train than police", function() {
       var state = sb.state()
@@ -82,8 +79,8 @@ describe("StateUtils", function() {
       state.clockIs = moment({hour: 5, minute: 9});
 
       var newState = stateUtils.applyStateChanges(state);
-      expect(newState.actors[0].caught).toBe(true);
-      expect(newState.actors[1].caught).toBe(false);
+      expect(newState.actors[0].caught).to.be.true;
+      expect(newState.actors[1].caught).to.be.false;
     });
     it("Should work correctly with multiple actors caughting", function() {
       var state = sb.state()
@@ -111,22 +108,22 @@ describe("StateUtils", function() {
       state.clockIs = moment({hour: 5, minute: 9});
 
       var newState = stateUtils.applyStateChanges(state);
-      expect(newState.actors[0].caught).toBe(true); // Police in same train
-      expect(newState.actors[1].caught).toBe(false); // police
-      expect(newState.actors[2].caught).toBe(false); // no police in train
-      expect(newState.actors[3].caught).toBe(false); // police
-      expect(newState.actors[4].caught).toBe(true); // Police in same city
-      expect(newState.actors[5].caught).toBe(false); // Police
-      expect(newState.actors[6].caught).toBe(false); // another villain in same city
-      expect(newState.actors[7].caught).toBe(false); // Police
-      expect(newState.actors[8].caught).toBe(false); // another villain in same city
-      expect(newState.actors[9].caught).toBe(false); // Police
+      expect(newState.actors[0].caught).to.be.true; // Police in same train
+      expect(newState.actors[1].caught).to.be.false; // police
+      expect(newState.actors[2].caught).to.be.false; // no police in train
+      expect(newState.actors[3].caught).to.be.false; // police
+      expect(newState.actors[4].caught).to.be.true; // Police in same city
+      expect(newState.actors[5].caught).to.be.false; // Police
+      expect(newState.actors[6].caught).to.be.false; // another villain in same city
+      expect(newState.actors[7].caught).to.be.false; // Police
+      expect(newState.actors[8].caught).to.be.false; // another villain in same city
+      expect(newState.actors[9].caught).to.be.false; // Police
     });
   });
 
 
 
-  describe('calculateNewPositions', function() {
+  describe('calculateNewPositions()', function() {
     it('should not alter actor if trains has not left yet', function() {
       var s = sb.state()
         .withStation(sb.station("STATION-1", 14.24444, 42.24242))
