@@ -18,20 +18,6 @@ console.log("Starting up finland yard");
 
 var mapControl = mapControl();
 
-function visualizeStates(state) {
-  var container = document.getElementById("states");
-  container.innerHTML = '';
-  state.actors.forEach(function(actor) {
-    var iDiv = document.createElement('div');
-    iDiv.className = "statecontainer";
-    if(actor.caught) {
-      iDiv.className = iDiv.className + " caught";
-    }
-    iDiv.innerHTML = JSON.stringify(actor, null, '   ');
-
-    container.appendChild(iDiv);
-  });
-}
 
 // Evolves departure/arrival as moment instance (instead of raw string value)
 var scheduleEntryToMoment = R.evolve({'scheduledTime': (rtime) =>  {
@@ -142,8 +128,7 @@ api.loadData(function(data) {
         mapControl.drawVillains(stateUtils.getActors(state, 'villain'));
         mapControl.drawClock(state.clockIs);
         mapControl.render();
-        //document.getElementById("clock").innerHTML = state.clockIs.asString();
-        //nvisualizeStates(state);
+      
 
         if(stateUtils.gameOver(state)) {
           console.log('Game over');

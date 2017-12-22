@@ -16,4 +16,8 @@ Start the game and run timetable proxy by
 npm run dev+proxy
 ```
 
-TODO
+Run tests
+
+```
+npm run test
+```
