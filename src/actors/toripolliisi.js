@@ -14,7 +14,6 @@ ActorBridge.registerActor('police', 'Jari Aarnio', 'TKU', function (clockIs, con
   for (var i = 0; i < context.knownVillainLocations.length; i++) {
     var villainLocation = context.knownVillainLocations[i];
     var station = dataUtils.getStationById(villainLocation);
-    console.log("From " + actor.location + " to " + villainLocation);
     var dist = distance(currentStation.latitude, currentStation.longitude, station.latitude, station.longitude);
 
     if (dist < shortest && dist > 0) {
@@ -23,39 +22,41 @@ ActorBridge.registerActor('police', 'Jari Aarnio', 'TKU', function (clockIs, con
     }
   }
   var route = dataUtils.howCanIGetTo(actor.location, selectedVillainLocation);
-  if (route == "FROMHERE") {
-    console.log(actor.name + " goes to closest villain with one train");
-    var leaving = dataUtils.trainsLeavingFrom(clockIs, actor.location);
-    var train = null;
-    var destination = null;
-    var timeToGetThere = null;
+  var destination = selectedVillainLocation;
+  if (route != "FROMHERE") {
+    console.log(route[0])
+    debugger;
+    destination = route[0]
+  }
+  console.log(actor.name + " goes to closest villain with one train");
+  var leaving = dataUtils.trainsLeavingFrom(clockIs, actor.location);
+  var train = null;
 
-    for (var i = 0; i < leaving.length; i++) {
-      var possibleTrain = leaving[i];
-      var possibleHops = dataUtils.getPossibleHoppingOffStations(possibleTrain, actor.location);
-      if (R.contains(selectedVillainLocation, possibleHops)) {
-        debugger;
-        var arrival = dataUtils.findTrainArrival(possibleTrain, selectedVillainLocation).scheduledTime;
-        if (!timeToGetThere || timeToGetThere.isBefore(arrival)) {
-          train = possibleTrain;
-          destination = villainLocation;
-          timeToGetThere = arrival;
+  var timeToGetThere = null;
 
-        }
+  for (var i = 0; i < leaving.length; i++) {
+    var possibleTrain = leaving[i];
+    var possibleHops = dataUtils.getPossibleHoppingOffStations(possibleTrain, actor.location);
+    if (R.contains(destination, possibleHops)) {
+      var arrival = dataUtils.findTrainArrival(possibleTrain, destination).scheduledTime;
+      if (!timeToGetThere || timeToGetThere.isBefore(arrival)) {
+        train = possibleTrain;
+        timeToGetThere = arrival;
+
       }
     }
-    return Actions.train(train, destination);
-  } else {
-    console.log(actor.name + " can't go to closest with one train")
-    console.log(route)
+
+
   }
 
   if (!R.isNil(train)) {
-    console.log("NICE, catching that dude in " + destination + " departure: " +
+    console.log(actor.name +" leaving from " + actor.location + " to " + destination + ", departure: " +
         dataUtils.findTrainArrival(train, destination).scheduledTime.asString());
     return Actions.train(train, destination);
   }
-  leaving = dataUtils.trainsLeavingFrom(clockIs, actor.location);
+  console.log("Jari idlaa")
+  return Actions.idle()
+  /*leaving = dataUtils.trainsLeavingFrom(clockIs, actor.location);
   var retreatingTo = null;
   var usingTrain = null;
   for (var i = 0; i < leaving.length; i++) {
@@ -83,7 +84,7 @@ ActorBridge.registerActor('police', 'Jari Aarnio', 'TKU', function (clockIs, con
       break;
     }
     if (R.contains('OUL', hops)) {
-      retreatingTo = 'TPE';
+      retreatingTo = 'OUL';
       usingTrain = possibleTrain;
       break;
     }
@@ -91,7 +92,17 @@ ActorBridge.registerActor('police', 'Jari Aarnio', 'TKU', function (clockIs, con
   if (retreatingTo && usingTrain) {
     console.log('Retreating to ' + retreatingTo);
     return Actions.train(usingTrain, retreatingTo);
+  }*/
+  console.log(actor.name + " is stuck, he'll just hop to first train");
+  var train = dataUtils.nextLeavingTrain(clockIs, actor.location);
+  if (!train) {
+    console.log("No trains leaving... " + clockIs.asString());
+    return Actions.idle();
   }
+  var possibleStops = dataUtils.getPossibleHoppingOffStations(train, actor.location);
+  var hopOff = R.last(possibleStops);
+  console.log("It's going to " + hopOff + ' at ' + dataUtils.findTrainArrival(train, hopOff).scheduledTime.asString());
+  return Actions.train(train, hopOff);
 
 })
 ;
@@ -115,5 +126,6 @@ function distance(lat1, lon1, lat2, lon2, unit) {
 }
 
 var astar = (start, goal) => {
+  console.log("Use astar to find the route from " + start + " to " + goal);
 
 }

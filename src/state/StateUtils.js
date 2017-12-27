@@ -87,6 +87,9 @@ module.exports = {
     state.actors = R.map(actor => {
       if(R.propEq('type', 'villain', actor) &&
         (R.contains(actor.location, policesAreInCities) || R.contains(actor.train, policesAreInTrains) )) {
+        if(!actor.caught) {
+         console.log(actor.name +" got caught!");
+        }
         return R.assoc('caught', true, actor);
       }
       if(!actor.caught) {
