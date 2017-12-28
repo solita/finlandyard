@@ -71,24 +71,34 @@ module.exports = {
     return result;
   },
   applyStateChanges: function(state) {
-
-    var policesAreInCities = R.compose(
-      R.map(R.prop('location')),
-      R.reject(R.propEq('location', null)),
-      R.filter(R.propEq('type', 'police'))
+    var policesAreInCitiesAll = R.compose(
+        R.reject(R.propEq('location', null)),
+        R.filter(R.propEq('type', 'police'))
     )(state.actors);
 
-    var policesAreInTrains = R.compose(
-      R.map(R.prop('train')),
-      R.filter(R.propEq('location', null)),
-      R.filter(R.propEq('type', 'police'))
+    var policesAreInTrainsAll = R.compose(
+        R.filter(R.propEq('location', null)),
+        R.filter(R.propEq('type', 'police'))
     )(state.actors);
+
+    var policeLocationInCities = R.map(R.prop('location'))(policesAreInCitiesAll);
+
+    var policeLocationInTrains= R.map(R.prop('train'))(policesAreInTrainsAll);
 
     state.actors = R.map(actor => {
       if(R.propEq('type', 'villain', actor) &&
-        (R.contains(actor.location, policesAreInCities) || R.contains(actor.train, policesAreInTrains) )) {
+        (R.contains(actor.location, policeLocationInCities) || R.contains(actor.train, policeLocationInTrains) )) {
         if(!actor.caught) {
-         console.log(actor.name +" got caught!");
+          var policeCity=R.filter(R.propEq('location', actor.location))(policesAreInCitiesAll);
+          var policeTrain=R.filter(R.propEq('train', actor.train))(policesAreInTrainsAll);
+          var police=policeCity.concat(policeTrain);
+          if(!police[0].stats) {
+            police[0].stats=0
+          }
+          police[0].stats++;
+
+          debugger;
+         console.log(actor.name +" got caught by " + police[0].name + "!");
         }
         return R.assoc('caught', true, actor);
       }

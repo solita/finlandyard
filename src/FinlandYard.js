@@ -136,6 +136,7 @@ api.loadData(function(data) {
         state = stateUtils.applyStateChanges(state);
         state = stateUtils.calculateNewPositions(state);
 
+
         mapControl.drawPolice(stateUtils.getActors(state, 'police'));
         mapControl.drawVillains(stateUtils.getActors(state, 'villain'));
         mapControl.drawClock(state.clockIs);
@@ -145,6 +146,10 @@ api.loadData(function(data) {
 
         if(stateUtils.gameOver(state)) {
           console.log('Game over');
+          var printStats = police => console.log(police.name + " caught " + police.stats + " villains")
+          var polices=R.filter(R.propEq('type', 'police'))(state.actors)
+          R.forEach(printStats, polices)
+
           api.postResults(state.actors, document.getElementById("clock"));
           return;
         } else {
