@@ -1,9 +1,9 @@
 'use strict';
 
-var R = require('ramda');
-var rangeFit = require('range-fit');
-var fabric = require('fabric').fabric;
-
+const R = require('ramda');
+const rangeFit = require('range-fit');
+const fabric = require('fabric').fabric;
+const CommonUtils = require('../state/CommonUtils.js');
 
 
 function fitLatitude(v) {
@@ -105,7 +105,7 @@ module.exports = function() {
         }
       });
       canvas.renderAll();
-    },
+    }.bind(this),
     drawVillains: function(villains) {
       villains.forEach(function(v, index) {
         if(v.caught) {
@@ -152,6 +152,13 @@ module.exports = function() {
     },
     render: function() {
       canvas.renderAll();
+    },
+    draw: function(state) {
+      this.drawPolice(CommonUtils.getActors(state, 'police'));
+      this.drawVillains(CommonUtils.getActors(state, 'villain'));
+      this.drawClock(state.clockIs);
+      this.render();
+      return state;
     }
   }
 }

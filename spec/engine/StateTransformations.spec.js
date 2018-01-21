@@ -1,25 +1,28 @@
 'use strict';
 
 const expect = require('chai').expect
-var sb = require('./StateBuilder.js');
+var sb = require('../StateBuilder.js');
 var moment = require('moment');
-var log = require('../src/Log.js');
+var log = require('../../src/utils/Log.js');
 
-describe("state/StateUtils.js", function() {
+describe("engine/StateTransformations.js", function() {
 
-  var stateUtils = require('../src/state/StateUtils.js');
-  var dataUtils = require('../src/state/DataUtils.js');
+  var stateUtils = require('../../src/engine/StateTransformations.js');
+  var dataUtils = require('../../src/state/DataUtils.js');
 
   describe("getActors()", function() {
+
     it("should return actors of type", function() {
       expect(stateUtils.getActors({ actors: [
         {name: 'jack', type: 'villain'},
         {name: 'kim', type: 'police'}]}, 'villain'))
         .to.deep.equal([{name: 'jack', type: 'villain'}]);
     });
+
   });
 
   describe("applyStateChanges()", function() {
+
     it("should not mark villain caught if there are no police in same location", function() {
       var state = {
         actors: [
@@ -31,6 +34,7 @@ describe("state/StateUtils.js", function() {
       expect(newState.actors[0].caught).to.be.false;
       expect(newState.actors[1].caught).to.be.false;
     });
+
     it("Should mark villain caught if in same location than police", function() {
       var state = {
         actors: [
@@ -42,6 +46,7 @@ describe("state/StateUtils.js", function() {
       expect(newState.actors[0].caught).to.be.true;
       expect(newState.actors[1].caught).to.be.false;
     });
+
     it("Should not mark villain caught if in in train without police", function() {
       var state = sb.state()
         .withStation(sb.station("STATION-1", 14.24444, 42.24242))
@@ -62,6 +67,7 @@ describe("state/StateUtils.js", function() {
       expect(newState.actors[0].caught).to.be.false;
       expect(newState.actors[1].caught).to.be.false;
     });
+
     it("Should mark villain caught if in same train than police", function() {
       var state = sb.state()
         .withStation(sb.station("STATION-1", 14.24444, 42.24242))
@@ -82,6 +88,7 @@ describe("state/StateUtils.js", function() {
       expect(newState.actors[0].caught).to.be.true;
       expect(newState.actors[1].caught).to.be.false;
     });
+
     it("Should work correctly with multiple actors caughting", function() {
       var state = sb.state()
         .withStation(sb.station("STATION-1", 14.24444, 42.24242))
@@ -124,6 +131,7 @@ describe("state/StateUtils.js", function() {
 
 
   describe('calculateNewPositions()', function() {
+    
     it('should not alter actor if trains has not left yet', function() {
       var s = sb.state()
         .withStation(sb.station("STATION-1", 14.24444, 42.24242))

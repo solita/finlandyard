@@ -82,4 +82,14 @@ describe('clock.js', function() {
       expect(clock(12, 0).isBefore(clock(12, 1))).to.equal(true);
     });
   });
+
+  describe("clone()", function() {
+    it("Should return new instance", function() {
+      const clockInstance = clock(12, 1);
+      const clone = clockInstance.clone();
+      expect(clockInstance.minutes()).to.equal(clone.minutes());
+      clone.tick();
+      expect(clockInstance.minutes()).not.to.equal(clone.minutes());
+    })
+  });
 });

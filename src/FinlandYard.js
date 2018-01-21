@@ -2,10 +2,11 @@
 
 require('file-loader?name=[name].[ext]!./index.html');
 var dataUtils = require('./state/DataUtils.js');
-var stateUtils = require('./state/StateUtils.js');
+var stateUtils = require('./engine/StateTransformations.js');
+var FyEngine = require('./engine/FyEngine.js');
 var mapControl = require('./map/MapControl.js');
-var log = require('./Log.js');
-var api = require('./Api.js');
+var log = require('./utils/Log.js');
+var api = require('./utils/Api.js');
 var moment = require('moment');
 var R = require('ramda');
 var ActorBridge = require('./ActorBridge.js');
@@ -64,80 +65,24 @@ api.loadData(function(data) {
   mapControl.drawConnections(dataUtils.collectConnections());
   mapControl.drawStations(dataUtils.connectedStations());
 
-  var state = {};
-  state.actors = ActorBridge.actors();
+  var initialState = {};
+  initialState.actors = ActorBridge.actors();
 
-  state.clockIs = clock(4, 0);
+  initialState.clockIs = clock(4, 0);
 
   // THE game loop
-  (function tick() {
+  (function tick(state) {
     setTimeout(
       function() {
-        // Proceed
-        state.clockIs.tick();
-
-        // Applies ai functions
-        var applyAI = R.map((actor) => {
-          // AI is not applied when travelling or caught
-
-          if(actor.train || actor.caught) {
-            return actor;
-          }
-          try {
-            var action = actor.aifn(R.clone(state.clockIs), createContext(state), actor);
-          } catch (error) {
-            log.log(state.clockIs, "Haha, doesn't work for " + actor.name + " throws an exception");
-            console.error(error);
-            return actor;
-          }
-          switch(action.type) {
-            case 'IDLE':
-              return actor;
-            case 'CRIME':
-              return R.evolve({money: R.add(1)}, actor)
-            case 'TRAIN':
-              if(R.isNil(action.trainNumber)) {
-                log.log(state.clockIs, "Haha, doesn't work for " + actor.name + " trainNumber null in command");
-                return actor;
-              }
-              if(!action.destination) {
-                log.log(state.clockIs, "Haha, doesn't work for " + actor.name + " destination null in command");
-                return actor;
-              }
-              if(!dataUtils.assertAction(action)) {
-                log.log(state.clockIs, "Haha, doesn't work for " + actor.name + " can't travel to " + action.destination + " with " + action.trainNumber);
-                return actor;
-              }
-              // Logging this is somewhat tricky
-              log.log(state.clockIs, actor.name + " decides to leave to " + action.destination + " with train " + action.trainNumber +
-                " departure " + dataUtils.findTrainDeparture(dataUtils.getTrainById(action.trainNumber), actor.location).scheduledTime.asString() +
-                " arrival " + dataUtils.findTrainArrival(dataUtils.getTrainById(action.trainNumber), action.destination).scheduledTime.asString());
-              return R.merge(actor, {train: action.trainNumber, destination: action.destination});
-            default:
-              log.log(state.clockIs, "HAHA, " + actor.name + " barfs!!!");
-          }
-        });
-
-        // Apply ai functions
-        state = R.evolve({'actors': applyAI}, state);
-
-        state = stateUtils.applyStateChanges(state);
-        state = stateUtils.calculateNewPositions(state);
-
-        mapControl.drawPolice(stateUtils.getActors(state, 'police'));
-        mapControl.drawVillains(stateUtils.getActors(state, 'villain'));
-        mapControl.drawClock(state.clockIs);
-        mapControl.render();
-      
 
         if(stateUtils.gameOver(state)) {
           console.log('Game over');
           api.postResults(state.actors, document.getElementById("clock"));
           return;
         } else {
-          tick();
+          tick(FyEngine.runGameIteration(mapControl, stateUtils, state));
         }
 
 
-      }, 1)})();
+      }, 1)})(initialState);
 });

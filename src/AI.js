@@ -1,6 +1,6 @@
 var dataUtils = require('./state/DataUtils.js');
 var R = require('ramda');
-var Actions = require('./Actions.js');
+var Actions = require('./engine/Actions.js');
 
 var randomNth = (coll) =>  R.nth(Math.floor(Math.random() * coll.length), coll);
 
