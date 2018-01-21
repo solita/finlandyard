@@ -1,6 +1,13 @@
 'use strict';
+
+/**
+DataUtils contains functions, which need pre calculated
+data structures.
+*/
+
 var R = require('ramda');
 var moment = require('moment');
+var clock = require('../Clock.js');
 
 var throwIfNull = (message, value) =>
   R.ifElse(
@@ -19,14 +26,34 @@ var dropUntil = (fn, coll) =>
     }
   }, coll, coll);
 
-var state = {};
+// Evolves departure/arrival as moment instance (instead of raw string value)
+var scheduleEntryToMoment = R.evolve({'scheduledTime': (rtime) =>  {
+  if (typeof rtime !== 'string') {
+    return rtime;
+  }
+  var m = moment(rtime);
+  if(m.seconds() > 30) {
+    return clock(m.hours(), m.minutes() + 1);
+  } else {
+    return clock(m.hours(), m.minutes());
+  }
+}});
+
+// Maps all timetables as moment instances
+var processTimesToMomentInstances =
+ R.map((timetableEntry) => R.assoc('timeTableRows',
+          R.map(scheduleEntryToMoment, R.prop('timeTableRows', timetableEntry)), timetableEntry));
+
+
+var dataHolder = {};
 
 var stationConnections = {};
 
 module.exports = {
   initData: function(data) {
-    state = data;
-    state.timetable.map(function(train) {
+    data.timetable = processTimesToMomentInstances(R.reject(R.propEq('trainType', 'HL'), data.timetable));
+    dataHolder = data;
+    dataHolder.timetable.map(function(train) {
       var x = R.reduce((acc, departure) => {
         return R.assoc(departure.stationShortCode, module.exports.getPossibleHoppingOffStations(train, departure.stationShortCode), acc);
       }, {},  R.filter(R.propEq('type', 'DEPARTURE'), train.timeTableRows));
@@ -56,12 +83,12 @@ module.exports = {
   getStationById: R.memoize(function(id) {
     return throwIfNull(
       R.concat("No such station: ", id),
-      R.find(R.propEq('stationShortCode', id), state.stations));
+      R.find(R.propEq('stationShortCode', id), dataHolder.stations));
   }),
   getTrainById: R.memoize(function(id) {
     return throwIfNull(
       R.concat("No such train: ", id),
-      R.find(R.propEq('trainNumber', id), state.timetable));
+      R.find(R.propEq('trainNumber', id), dataHolder.timetable));
   }),
   assertAction(action) {
     return R.contains(action.destination, R.map(R.prop('stationShortCode'), this.getTrainById(action.trainNumber).timeTableRows));
@@ -89,7 +116,7 @@ module.exports = {
         },
         R.filter(R.propEq('type', 'DEPARTURE')),
         R.prop('timeTableRows')),
-      state.timetable);
+      dataHolder.timetable);
 
       return x;
   },
@@ -107,7 +134,7 @@ module.exports = {
         },
         R.filter(R.propEq('type', 'DEPARTURE')),
         R.prop('timeTableRows')),
-      state.timetable).length;
+      dataHolder.timetable).length;
   },
   nextLeavingTrain: function(clockIs, location) {
     var trains = this.trainsLeavingFrom(clockIs, location);
@@ -120,7 +147,7 @@ module.exports = {
   },
 
   collectConnections: function() {
-    // Partial for accessing coordinates from state
+    // Partial for accessing coordinates from dataHolder
     var coordsById = R.partial(this.stationCoordinates, []);
 
     var timeTableRows = R.compose(
@@ -142,10 +169,10 @@ module.exports = {
       R.flatten,
       R.map(R.prop('timeTableRows')));
 
-    return timeTableRows(state.timetable);
+    return timeTableRows(dataHolder.timetable);
   },
   connectedStations: function() {
-    if(R.isNil(state.timetable)) {
+    if(R.isNil(dataHolder.timetable)) {
       return [];
     }
     var collector = R.compose(
@@ -155,6 +182,6 @@ module.exports = {
       R.flatten,
       R.map(R.prop('timeTableRows'))
     );
-    return collector(state.timetable);
+    return collector(dataHolder.timetable);
   }
 }

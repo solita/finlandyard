@@ -10,17 +10,6 @@ describe("engine/StateTransformations.js", function() {
   var stateUtils = require('../../src/engine/StateTransformations.js');
   var dataUtils = require('../../src/state/DataUtils.js');
 
-  describe("getActors()", function() {
-
-    it("should return actors of type", function() {
-      expect(stateUtils.getActors({ actors: [
-        {name: 'jack', type: 'villain'},
-        {name: 'kim', type: 'police'}]}, 'villain'))
-        .to.deep.equal([{name: 'jack', type: 'villain'}]);
-    });
-
-  });
-
   describe("applyStateChanges()", function() {
 
     it("should not mark villain caught if there are no police in same location", function() {
@@ -131,7 +120,7 @@ describe("engine/StateTransformations.js", function() {
 
 
   describe('calculateNewPositions()', function() {
-    
+
     it('should not alter actor if trains has not left yet', function() {
       var s = sb.state()
         .withStation(sb.station("STATION-1", 14.24444, 42.24242))
