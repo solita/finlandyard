@@ -1,6 +1,6 @@
-var AI = require('./AI.js');
+import AI from './AI.js'
 
-var actors = [
+const actors = [
   {type: 'villain', name: 'Badmouth', location: 'HKI', caught: false, freeMinutes: 0, money: 0, aifn: AI.crime },
   {type: 'villain', name: 'Mongoose', location: 'TPE', caught: false, freeMinutes: 0, money: 0, aifn: AI.noop },
   {type: 'villain', name: 'Luke', location: 'LR', caught: false, freeMinutes: 0, money: 0, aifn: AI.crime },
