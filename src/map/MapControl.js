@@ -105,7 +105,8 @@ module.exports = function() {
         }
       });
       canvas.renderAll();
-    }.bind(this),
+    },
+
     drawVillains: function(villains) {
       villains.forEach(function(v, index) {
         if(v.caught) {
