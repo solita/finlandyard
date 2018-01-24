@@ -1,7 +1,7 @@
 var ActorBridge = require('../ActorBridge.js');
 var dataUtils = require('../state/DataUtils.js');
 var R = require('ramda');
-var Actions = require('../Actions.js');
+var Actions = require('../engine/Actions.js');
 
 
 
@@ -27,7 +27,7 @@ ActorBridge.registerActor('police', 'sipowitch', 'JNS', function(clockIs, contex
   }
 
   if(!R.isNil(train)) {
-    console.log("NICE, catching that dude in " + destination + " departure: " +
+    console.log("NICE, catching that dude in " + destination + " arrival: " +
       dataUtils.findTrainArrival(train, destination).scheduledTime.asString());
     return Actions.train(train, destination);
   }

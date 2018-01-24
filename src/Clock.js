@@ -1,9 +1,12 @@
 var R = require('ramda');
 
-module.exports = function(h, m) {
+module.exports = function clock(h, m) {
   var hour = h;
   var minutes = m;
   return {
+    clone: function() {
+      return clock(hour, minutes);
+    },
     tick: function() {
       if(minutes == 59) {
         if(hour == 23) {

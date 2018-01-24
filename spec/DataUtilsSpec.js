@@ -1,33 +1,35 @@
 'use strict';
 
+const expect = require('chai').expect
+
 var sb = require('./StateBuilder.js');
 var clock = require('../src/Clock.js');
 
-describe("DataUtils", function() {
+describe("state/DataUtils.js", function() {
 
   var dataUtils = require('../src/state/DataUtils.js');
 
-  describe("getStationById", function() {
+  describe("getStationById()", function() {
     it("should throw if no station was found for id", function() {
       var s = sb.state().build();
       dataUtils.initData(s);
-      expect(function() { dataUtils.getStationById("STATIONID")}).toThrow(new Error("No such station: STATIONID"));
+      expect(function() { dataUtils.getStationById("STATIONID")}).to.throw(/No such station: STATIONID/);
     });
 
     it("should return station with id", function() {
       var s = sb.state().withStation(sb.station("STATIONID")).build();
       dataUtils.initData(s);
-      expect(dataUtils.getStationById( "STATIONID").stationShortCode).toEqual("STATIONID");
+      expect(dataUtils.getStationById( "STATIONID").stationShortCode).to.equal("STATIONID");
     });
 
     it("should return correct station with id", function() {
       var s = sb.state().withStation(sb.station("STATION-1")).withStation(sb.station("STATION-2")).build();
       dataUtils.initData(s);
-      expect(dataUtils.getStationById("STATION-2").stationShortCode).toEqual("STATION-2");
+      expect(dataUtils.getStationById("STATION-2").stationShortCode).to.equal("STATION-2");
     });
   });
 
-  describe("collectConnections", function() {
+  describe("collectConnections()", function() {
     it("Should collect connection between two stations", function() {
       var s = sb.state()
         .withStation(sb.station("ID-1", 14.24444, 42.24242))
@@ -38,7 +40,7 @@ describe("DataUtils", function() {
         .build();
       dataUtils.initData(s);
       expect(dataUtils.collectConnections())
-        .toEqual([{from: [14.24444, 42.24242], to: [43.42424, 13.2424]}]);
+        .to.deep.equal([{from: [14.24444, 42.24242], to: [43.42424, 13.2424]}]);
     });
     it("Should collect transitive connections between stations", function() {
       var s = sb.state()
@@ -53,7 +55,7 @@ describe("DataUtils", function() {
         .build();
       dataUtils.initData(s);
       expect(dataUtils.collectConnections())
-        .toEqual([{from: [14.24444, 42.24242], to: [43.42424, 13.2424]}, {from: [43.42424, 13.2424], to: [46.42424, 34.2424]}]);
+        .to.deep.equal([{from: [14.24444, 42.24242], to: [43.42424, 13.2424]}, {from: [43.42424, 13.2424], to: [46.42424, 34.2424]}]);
     });
     it("Should pick connection only once for different routes", function() {
       var s = sb.state()
@@ -67,7 +69,7 @@ describe("DataUtils", function() {
             sb.arrival("ID-2"))
         .build();
       dataUtils.initData(s);
-      expect(dataUtils.collectConnections().length).toEqual(1);
+      expect(dataUtils.collectConnections().length).to.equal(1);
     });
     it("Should pick connection only once for opposite routes", function() {
       var s = sb.state()
@@ -81,17 +83,17 @@ describe("DataUtils", function() {
             sb.arrival("ID-1"))
         .build();
       dataUtils.initData(s);
-      expect(dataUtils.collectConnections().length).toEqual(1);
+      expect(dataUtils.collectConnections().length).to.equal(1);
     });
   });
 
-  describe("connectedStations", function() {
+  describe("connectedStations()", function() {
     it("Should return nothing without timetable", function() {
       var s = sb.state()
         .withStation(sb.station("ID-1", 14.24444, 42.24242))
         .build();
       dataUtils.initData(s);
-      expect(dataUtils.connectedStations().length).toEqual(0);
+      expect(dataUtils.connectedStations().length).to.equal(0);
     });
     it("Should return stations in timetable", function() {
       var s = sb.state()
@@ -103,11 +105,11 @@ describe("DataUtils", function() {
             sb.arrival("ID-2"))
         .build();
       dataUtils.initData(s);
-      expect(dataUtils.connectedStations().length).toEqual(2);
+      expect(dataUtils.connectedStations().length).to.equal(2);
     });
   });
 
-  describe("trainsLeavingFrom", function() {
+  describe("trainsLeavingFrom()", function() {
     it('Should find leaving trains when one is leaving and clock is before departure', function() {
       var s = sb.state()
         .withStation(sb.station("STATION-1", 14.24444, 42.24242))
@@ -118,7 +120,7 @@ describe("DataUtils", function() {
         .build();
       dataUtils.initData(s);
       var clockIs = clock(4, 10);
-      expect(dataUtils.trainsLeavingFrom(clockIs, "STATION-1").length).toEqual(1);
+      expect(dataUtils.trainsLeavingFrom(clockIs, "STATION-1").length).to.equal(1);
     });
     it('Should not find already left trains', function() {
       var s = sb.state()
@@ -130,7 +132,7 @@ describe("DataUtils", function() {
         .build();
       dataUtils.initData(s);
       var clockIs = clock(7, 10);
-      expect(dataUtils.trainsLeavingFrom(clockIs, "STATION-1").length).toEqual(0);
+      expect(dataUtils.trainsLeavingFrom(clockIs, "STATION-1").length).to.equal(0);
     });
     it('Should find trains actor can jump into', function() {
       var s = sb.state()
@@ -144,11 +146,11 @@ describe("DataUtils", function() {
         .build();
       dataUtils.initData(s);
       var clockIs = clock(5, 10);
-      expect(dataUtils.trainsLeavingFrom(clockIs, "STATION-2").length).toEqual(1);
+      expect(dataUtils.trainsLeavingFrom(clockIs, "STATION-2").length).to.equal(1);
     });
   });
 
-  describe("howCanIGetTo", function() {
+  describe("howCanIGetTo() EXPERIMENTAL", function() {
     it('Should find without transition', function() {
       var s = sb.state()
         .withStation(sb.station("STATION-1", 14.24444, 42.24242))
@@ -158,7 +160,7 @@ describe("DataUtils", function() {
           sb.arrival('STATION-2', clock(6, 16)))
         .build();
       dataUtils.initData(s);
-      expect(dataUtils.howCanIGetTo("STATION-1", "STATION-2")).toEqual("FROMHERE");
+      expect(dataUtils.howCanIGetTo("STATION-1", "STATION-2")).to.equal("FROMHERE");
     });
     it('Should find one transition', function() {
       var s = sb.state()
@@ -173,7 +175,7 @@ describe("DataUtils", function() {
           sb.arrival('STATION-3', clock(7, 16)))
         .build();
       dataUtils.initData(s);
-      expect(dataUtils.howCanIGetTo("STATION-1", "STATION-3")[0]).toEqual("STATION-2");
+      expect(dataUtils.howCanIGetTo("STATION-1", "STATION-3")[0]).to.equal("STATION-2");
     });
   });
 });
