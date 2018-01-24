@@ -5,7 +5,7 @@
   "main": "api.js",
   "scripts": {
     "clean": "rm -rf dist && cd bouncer && rm -rf .store",
-    "test": "mocha './spec/**/*.js'",
+    "test": "mocha --require babel-polyfill --require babel-register ./spec/*.js ./spec/**/*.js",
     "dist": "webpack",
     "dev": "webpack-dev-server --content-base dist/",
     "proxy": "node bouncer/finlandyard-bouncer.js",
@@ -20,6 +20,9 @@
   "devDependencies": {
     "babel-core": "6.18.2",
     "babel-loader": "6.2.8",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-register": "^6.26.0",
     "chai": "4.1.2",
     "css-loader": "0.28.7",
     "extract-text-webpack-plugin": "1.0.1",
