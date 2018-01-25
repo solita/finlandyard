@@ -1,22 +1,19 @@
-'use strict';
+import 'file-loader?name=[name].[ext]!./index.html';
+import dataUtils from './state/DataUtils.js';
+import CommonUtils from './state/CommonUtils.js';
+import StateTransformations from './engine/StateTransformations.js';
+import FyEngine from './engine/FyEngine.js';
+import MapControl from './map/MapControl.js';
+import api from './utils/Api.js';
+import ActorBridge from './ActorBridge.js';
+import clock from './Clock.js';
 
-require('file-loader?name=[name].[ext]!./index.html');
-var dataUtils = require('./state/DataUtils.js');
-var CommonUtils = require('./state/CommonUtils.js');
-var StateTransformations = require('./engine/StateTransformations.js');
-var FyEngine = require('./engine/FyEngine.js');
-var mapControl = require('./map/MapControl.js');
-var log = require('./utils/Log.js');
-var api = require('./utils/Api.js');
-var ActorBridge = require('./ActorBridge.js');
-var clock = require('./Clock.js');
-
-function requireAll(r) { r.keys().forEach(r); }
+const requireAll = r => r.keys().forEach(r);
 requireAll(require.context('./actors/', true, /\.js$/));
 
 console.log("Starting up finland yard");
 
-var mapControl = mapControl();
+const mapControl = MapControl();
 
 /**
  * Game callback after api-operations
@@ -35,20 +32,21 @@ api.loadData(function(data) {
   mapControl.drawStations(dataUtils.connectedStations());
 
   // Initialize initial state
-  var initialState = {};
-  initialState.actors = ActorBridge.actors();
-  initialState.clockIs = clock(7, 0);
+  const initialState = {
+    actors: ActorBridge.actors(),
+    clockIs: clock(7, 0)
+  };
 
   // Run the game loop
-  (function tick(state) {
-    setTimeout(
-      function() {
-        if(CommonUtils.gameOver(state)) {
-          console.log('Game over');
-          api.postResults(state.actors, document.getElementById("clock"));
-          return;
-        } else {
-          tick(FyEngine.runGameIteration(mapControl, StateTransformations, state));
-        }
-      }, 1)})(initialState);
+  ((state) => {
+    setTimeout(() => {
+      if(CommonUtils.gameOver(state)) {
+        console.log('Game over');
+        api.postResults(state.actors, document.getElementById("clock"));
+        return;
+      } else {
+        tick(FyEngine.runGameIteration(mapControl, StateTransformations, state));
+      }
+    }, 1)
+  })(initialState);
 });
