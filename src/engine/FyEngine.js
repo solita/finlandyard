@@ -1,13 +1,10 @@
-'use strict';
-
 /**
 The main game iteration function.
 
 drawClosure -> stateChangeClosure -> state -> state
 */
-
-const R = require('ramda');
-const CommonUtils = require('../state/CommonUtils.js');
+import R from 'ramda';
+import CommonUtils from '../state/CommonUtils.js';
 
 // Applies AI functions by creating context AND evaluating Action AI function invokes
 const applyAI = state => R.map(actor => actor.caught || actor.train ?

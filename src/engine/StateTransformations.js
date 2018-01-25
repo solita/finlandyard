@@ -1,12 +1,10 @@
-'use strict';
+import R from 'ramda';
+import dataUtils from'../state/DataUtils.js';
+import CommonUtils from '../state/CommonUtils.js';
+import moment from 'moment';
+import log from '../utils/Log.js';
 
-var R = require('ramda');
-var dataUtils = require('../state/DataUtils.js');
-var CommonUtils = require('../state/CommonUtils.js');
-var moment = require('moment');
-var log = require('../utils/Log.js');
-
-var isInBetween = (timestamp, e) => {
+const isInBetween = (timestamp, e) => {
   return e[0].scheduledTime.isBefore(timestamp) && timestamp.isBefore(e[1].scheduledTime);
 }
 
