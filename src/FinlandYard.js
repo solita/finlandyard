@@ -38,7 +38,7 @@ api.loadData(function(data) {
   };
 
   // Run the game loop
-  ((state) => {
+  const tick = state => {
     setTimeout(() => {
       if(CommonUtils.gameOver(state)) {
         console.log('Game over');
@@ -48,5 +48,7 @@ api.loadData(function(data) {
         tick(FyEngine.runGameIteration(mapControl, StateTransformations, state));
       }
     }, 1)
-  })(initialState);
+  };
+
+  tick(initialState);
 });
