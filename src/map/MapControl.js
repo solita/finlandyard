@@ -1,9 +1,9 @@
 'use strict';
 
-var R = require('ramda');
-var rangeFit = require('range-fit');
-var fabric = require('fabric').fabric;
-
+const R = require('ramda');
+const rangeFit = require('range-fit');
+const fabric = require('fabric').fabric;
+const CommonUtils = require('../state/CommonUtils.js');
 
 
 function fitLatitude(v) {
@@ -32,6 +32,8 @@ module.exports = function() {
   var villainObjects = {};
   /* Name labels */
   var textObjects = {};
+  /* Money objects */
+  var moneyObjects = {};
   /* Counter for police sirens */
   var policeSirenCounter = 0;
 
@@ -104,11 +106,15 @@ module.exports = function() {
       });
       canvas.renderAll();
     },
+
     drawVillains: function(villains) {
-      villains.forEach(function(v) {
+      villains.forEach(function(v, index) {
         if(v.caught) {
           var textObject = textObjects[v.name];
           textObject.setColor('#ccc');
+          var moneyObject = moneyObjects[v.name];
+          moneyObject.text = v.name + ': ' + v.money;
+          moneyObject.setColor('#ccc');
           return;
         }
         if(!villainObjects[v.name]) {
@@ -121,10 +127,18 @@ module.exports = function() {
             left : fitLongitude(v.longitude),
             fontSize: 12
           });
+          var money = new fabric.Text(v.name + ' ' + v.money, {
+            top : 300 + (index * 12),
+            left : 600,
+            fontSize: 12
+          });
+
           canvas.add(villain);
           canvas.add(text);
+          canvas.add(money);
           villainObjects[v.name] = villain;
           textObjects[v.name] = text;
+          moneyObjects[v.name] = money;
         }
         var villainObject = villainObjects[v.name];
         villainObject.top = fitLatitude(v.latitude);
@@ -133,10 +147,19 @@ module.exports = function() {
         textObject.top = fitLatitude(v.latitude) - 6;
         textObject.left = fitLongitude(v.longitude) + 6;
         textObject.text = v.name + ' ' + (v.location || '') + (v.destination ? '->' + v.destination : '');
+        var moneyObject = moneyObjects[v.name];
+        moneyObject.text = v.name + ': ' + v.money;
       });
     },
     render: function() {
       canvas.renderAll();
+    },
+    draw: function(state) {
+      this.drawPolice(CommonUtils.getActors(state, 'police'));
+      this.drawVillains(CommonUtils.getActors(state, 'villain'));
+      this.drawClock(state.clockIs);
+      this.render();
+      return state;
     }
   }
 }

@@ -1,12 +1,10 @@
-'use strict';
+import R from 'ramda';
+import dataUtils from'../state/DataUtils.js';
+import CommonUtils from '../state/CommonUtils.js';
+import moment from 'moment';
+import log from '../utils/Log.js';
 
-var R = require('ramda');
-var dataUtils = require('./DataUtils.js');
-var moment = require('moment');
-var log = require('../Log.js');
-
-var isInBetween = (timestamp, e) => {
-  //return e[0].scheduledTime.unix() <= timestamp && timestamp <= e[1].scheduledTime.unix();
+const isInBetween = (timestamp, e) => {
   return e[0].scheduledTime.isBefore(timestamp) && timestamp.isBefore(e[1].scheduledTime);
 }
 
@@ -66,9 +64,8 @@ function calculatePosition(state, actor) {
 }
 
 module.exports = {
-  getActors: function(state, type) {
-    var result=R.filter(R.propEq('type', type), state.actors);
-    return result;
+  calculateNewPositions: function(state) {
+    return R.evolve({actors: R.map(R.partial(calculatePosition, [state]))}, state);
   },
   applyStateChanges: function(state) {
     var policesAreInCitiesAll = R.compose(
@@ -112,7 +109,7 @@ module.exports = {
     state.actors = R.map(actor => {
       if(actor.train) {
         var actorTrain = dataUtils.getTrainById(actor.train);
-        // Actor has selected train but is waiting for it
+        // Actor has scheduleEntryToMomentcted train but is waiting for it
         if(actor.location &&
            state.clockIs.isSame(dataUtils.findTrainDeparture(dataUtils.getTrainById(actor.train), actor.location).scheduledTime)) {
           var station = dataUtils.getStationById(actor.location);
@@ -133,10 +130,7 @@ module.exports = {
 
     return state;
   },
-  calculateNewPositions: function(state) {
-    return R.evolve({actors: R.map(R.partial(calculatePosition, [state]))}, state);
-  },
-  gameOver: function(state) {
-    return R.all(R.propEq('caught', true), this.getActors(state, 'villain'));
+  applyRound: function(state) {
+    return this.calculateNewPositions(this.applyStateChanges(state));
   }
 }

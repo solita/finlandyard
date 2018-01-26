@@ -1,12 +1,15 @@
-var R = require('ramda');
+const clock = (h, m) => {
+  let hour = h;
+  let minutes = m;
 
-module.exports = function(h, m) {
-  var hour = h;
-  var minutes = m;
   return {
-    tick: function() {
-      if(minutes == 59) {
-        if(hour == 23) {
+    clone() {
+      return clock(hour, minutes);
+    },
+
+    tick() {
+      if(minutes === 59) {
+        if(hour === 23) {
           hour = 0;
           minutes = 0;
         } else {
@@ -17,42 +20,43 @@ module.exports = function(h, m) {
         minutes = minutes + 1;
       }
     },
-    hour: function() {
+
+    hour() {
       return hour;
     },
-    minutes: function() {
+
+    minutes() {
       return minutes;
     },
-    unix: function() {
+
+    unix() {
       return hour * 60 + minutes;
     },
-    asString: function() {
-      var str = "";
-      if(hour < 10) {
-        str += "0";
-      }
-      str += hour + ":";
 
-      if(minutes < 10) {
-        str += "0";
-      }
-      str += minutes;
-      return str;
+    asString() {
+      return `${(hour < 10 ? '0' : '') + hour}:${(minutes < 10 ? '0' : '') + minutes}`
     },
-    isBefore: function(ref) {
+
+    isBefore(ref) {
       if(hour > 12 && ref.hour() < 12) {
           return true;
       }
+
       if(ref.hour() > 12 && hour < 12) {
         return false;
       }
-      if(hour == ref.hour()) {
+
+      if(hour === ref.hour()) {
         return minutes <= ref.minutes();
       }
+
       return hour <= ref.hour();
     },
-    isSame: function(ref) {
-      return hour == ref.hour() && minutes == ref.minutes();
+
+    isSame(ref) {
+      return hour === ref.hour() && minutes === ref.minutes();
     }
   };
 }
+
+export default clock

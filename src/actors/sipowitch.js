@@ -1,9 +1,7 @@
-var ActorBridge = require('../ActorBridge.js');
-var dataUtils = require('../state/DataUtils.js');
-var R = require('ramda');
-var Actions = require('../Actions.js');
-
-
+import R from 'ramda'
+import Actions from '../engine/Actions.js'
+import ActorBridge from '../ActorBridge.js'
+import dataUtils from '../state/DataUtils.js'
 
 ActorBridge.registerActor('police', 'sipowitch', 'JNS', function(clockIs, context, actor) {
   var leaving = dataUtils.trainsLeavingFrom(clockIs, actor.location);
