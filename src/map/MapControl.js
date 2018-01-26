@@ -1,100 +1,135 @@
-'use strict';
+import R from 'ramda';
+import rangeFit from 'range-fit';
+import {fabric} from 'fabric'
+import CommonUtils from '../state/CommonUtils.js';
 
-const R = require('ramda');
-const rangeFit = require('range-fit');
-const fabric = require('fabric').fabric;
-const CommonUtils = require('../state/CommonUtils.js');
+fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center';
 
+const fitLatitude = v => 1000 - rangeFit(v, 58, 68, 0, 1000)
 
-function fitLatitude(v) {
-  return 1000 - rangeFit(v, 58, 68, 0, 1000);
-}
-function fitLongitude(v) {
-  return rangeFit(v, 20, 42, 0, 1000);
-}
+const fitLongitude = v => rangeFit(v, 20, 42, 0, 1000)
 
-module.exports = function() {
+export default function() {
 
   /* The canvas */
-  var canvas = new fabric.StaticCanvas('canvas');
+  const canvas = new fabric.StaticCanvas('canvas');
 
   /* Clock render object */
-  var clockObject = new fabric.Text('', {
+  const clockObject = new fabric.Text('', {
     top : 250,
     left : 400,
     fontSize: 12
   });
+
   canvas.add(clockObject);
 
   /* Polices */
-  var policeObjects = {};
+  const policeObjects = {};
   /* Villains */
-  var villainObjects = {};
+  const villainObjects = {};
   /* Name labels */
-  var textObjects = {};
+  const textObjects = {};
   /* Money objects */
-  var moneyObjects = {};
+  const moneyObjects = {};
   /* Counter for police sirens */
-  var policeSirenCounter = 0;
+  let policeSirenCounter = 0;
 
   return {
-    drawStations: function(stations) {
+    drawStations(stations) {
       console.log("Drawing " + stations.length + " stations");
+
       stations.forEach(function(station) {
         if(station.passengerTraffic) {
-          var stationCircle = new fabric.Circle({
+          const stationCircle = new fabric.Circle({
               top : fitLatitude(station.latitude),
               left : fitLongitude(station.longitude),
-              radius: 1,
-              fill : 'black'
+              radius: 4,
+              fill: '#f1d6b9',
+              stroke: '#705122',
+              strokeWidth: 2
           });
           canvas.add(stationCircle);
         }
 
       });
-
     },
-    drawConnections: function(connections) {
+
+    drawConnections(connections) {
       console.log("Drawing " + connections.length + " connections");
 
       connections.forEach(function(connection) {
-        var d = [fitLongitude(connection.from[0]) + 1, fitLatitude(connection.from[1]) + 1,
+        const d = [fitLongitude(connection.from[0]) + 1, fitLatitude(connection.from[1]) + 1,
                 fitLongitude(connection.to[0]) + 1, fitLatitude(connection.to[1]) + 1];
-        var line = new fabric.Line(d, {
-          stroke: '#aaa',
-          strokeWidth: 1,
+
+        const line = new fabric.Line(d, {
+          stroke: '#fff1cb',
+          strokeWidth: 10,
           selectable: false
         });
+
+        const circle = new fabric.Circle({
+          top : d[3],
+          left : d[2],
+          radius: 5,
+          fill : '#fff1cb'
+        });
+
         canvas.add(line);
+        canvas.add(circle);
       });
 
+      connections.forEach(function(connection) {
+        const d = [fitLongitude(connection.from[0]) + 1, fitLatitude(connection.from[1]) + 1,
+          fitLongitude(connection.to[0]) + 1, fitLatitude(connection.to[1]) + 1];
+
+        const line = new fabric.Line(d, {
+          stroke: '#9a9253',
+          strokeWidth: 2,
+          selectable: false
+        });
+
+        const circle = new fabric.Circle({
+          top : d[3],
+          left : d[2],
+          radius: 1,
+          fill : '#9a9253'
+        });
+
+        canvas.add(line);
+        canvas.add(circle);
+      });
     },
-    drawClock: function(clockIs) {
+
+    drawClock(clockIs) {
       clockObject.text = clockIs.asString();
     },
-    drawPolice: function(polices) {
+
+    drawPolice(polices) {
       polices.forEach(function(p) {
         if(!policeObjects[p.name]) {
-          var police = new fabric.Circle({
+          const police = new fabric.Circle({
               radius: 2
           });
-          var text = new fabric.Text(p.name + ' ' + p.destination, {
+
+          const text = new fabric.Text(p.name + ' ' + p.destination, {
             top : fitLatitude(p.latitude),
             left : fitLongitude(p.longitude),
             fontSize: 12
           });
+
           canvas.add(police);
           canvas.add(text);
+
           policeObjects[p.name] = police;
           textObjects[p.name] = text;
         }
-        var policeObject = policeObjects[p.name];
+        const policeObject = policeObjects[p.name];
         policeObject.top = fitLatitude(p.latitude);
         policeObject.left = fitLongitude(p.longitude);
         policeObject.set({fill: policeSirenCounter < 10 ? 'blue' : 'red'});
 
 
-        var textObject = textObjects[p.name];
+        const textObject = textObjects[p.name];
         textObject.top = fitLatitude(p.latitude) - 6;
         textObject.left = fitLongitude(p.longitude) + 6;
         textObject.text = p.name + ' ' + (p.location || '') + (p.destination ? '->' + p.destination : '');
@@ -107,27 +142,30 @@ module.exports = function() {
       canvas.renderAll();
     },
 
-    drawVillains: function(villains) {
+    drawVillains(villains) {
       villains.forEach(function(v, index) {
         if(v.caught) {
-          var textObject = textObjects[v.name];
+          const textObject = textObjects[v.name];
           textObject.setColor('#ccc');
-          var moneyObject = moneyObjects[v.name];
+          const moneyObject = moneyObjects[v.name];
           moneyObject.text = v.name + ': ' + v.money;
           moneyObject.setColor('#ccc');
           return;
         }
+
         if(!villainObjects[v.name]) {
-          var villain = new fabric.Circle({
+          const villain = new fabric.Circle({
               radius: 2,
               fill : 'green'
           });
-          var text = new fabric.Text(v.name + ' ' + v.destination, {
+
+          const text = new fabric.Text(v.name + ' ' + v.destination, {
             top : fitLatitude(v.latitude),
             left : fitLongitude(v.longitude),
             fontSize: 12
           });
-          var money = new fabric.Text(v.name + ' ' + v.money, {
+
+          const money = new fabric.Text(v.name + ' ' + v.money, {
             top : 300 + (index * 12),
             left : 600,
             fontSize: 12
@@ -140,25 +178,31 @@ module.exports = function() {
           textObjects[v.name] = text;
           moneyObjects[v.name] = money;
         }
-        var villainObject = villainObjects[v.name];
+
+        const villainObject = villainObjects[v.name];
         villainObject.top = fitLatitude(v.latitude);
         villainObject.left = fitLongitude(v.longitude);
-        var textObject = textObjects[v.name];
+
+        const textObject = textObjects[v.name];
         textObject.top = fitLatitude(v.latitude) - 6;
         textObject.left = fitLongitude(v.longitude) + 6;
         textObject.text = v.name + ' ' + (v.location || '') + (v.destination ? '->' + v.destination : '');
-        var moneyObject = moneyObjects[v.name];
+
+        const moneyObject = moneyObjects[v.name];
         moneyObject.text = v.name + ': ' + v.money;
       });
     },
-    render: function() {
+
+    render() {
       canvas.renderAll();
     },
-    draw: function(state) {
+
+    draw(state) {
       this.drawPolice(CommonUtils.getActors(state, 'police'));
       this.drawVillains(CommonUtils.getActors(state, 'villain'));
       this.drawClock(state.clockIs);
       this.render();
+
       return state;
     }
   }
