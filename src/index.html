@@ -46,10 +46,26 @@
       #canvas {
           border: 1px solid #aaa;
       }
+
+
+      .canvas-container {
+        position: relative;
+      }
+
+      .canvas-container canvas {
+        position: absolute;
+        left: 0;
+        top: 0;
+      }
     </style>
   </head>
   <body>
-    <canvas id="canvas" width="1000" height="1000"></canvas>
+
+    <div class="canvas-container">
+      <canvas id="background" width="650" height="750"></canvas>
+      <canvas id="foreground" width="650" height="750"></canvas>
+    </div>
+
     <div class="left">
 
       <!--<div id="clock" class="clock"></div>--

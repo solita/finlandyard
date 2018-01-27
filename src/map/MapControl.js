@@ -5,14 +5,15 @@ import CommonUtils from '../state/CommonUtils.js';
 
 fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center';
 
-const fitLatitude = v => 1000 - rangeFit(v, 58, 68, 0, 1000)
+const fitLatitude = v => 900 - rangeFit(v, 58, 68, 0, 900)
 
-const fitLongitude = v => rangeFit(v, 20, 42, 0, 1000)
+const fitLongitude = v => rangeFit(v, 20, 42, 0, 1200)
 
 export default function() {
 
-  /* The canvas */
-  const canvas = new fabric.StaticCanvas('canvas');
+  /* The foreground */
+  const background = new fabric.StaticCanvas('background', {renderOnAddRemove: false});
+  const foreground = new fabric.StaticCanvas('foreground');
 
   /* Clock render object */
   const clockObject = new fabric.Text('', {
@@ -21,7 +22,7 @@ export default function() {
     fontSize: 12
   });
 
-  canvas.add(clockObject);
+  foreground.add(clockObject);
 
   /* Polices */
   const policeObjects = {};
@@ -41,17 +42,18 @@ export default function() {
       stations.forEach(function(station) {
         if(station.passengerTraffic) {
           const stationCircle = new fabric.Circle({
-              top : fitLatitude(station.latitude),
-              left : fitLongitude(station.longitude),
-              radius: 4,
-              fill: '#f1d6b9',
-              stroke: '#705122',
-              strokeWidth: 2
+              top: fitLatitude(station.latitude),
+              left: fitLongitude(station.longitude),
+              radius: 3,
+              fill: '#f8d05d',
+              stroke: '#3d230c',
+              strokeWidth: 1
           });
-          canvas.add(stationCircle);
+          background.add(stationCircle);
         }
-
       });
+
+      background.renderAll();
     },
 
     drawConnections(connections) {
@@ -62,20 +64,20 @@ export default function() {
                 fitLongitude(connection.to[0]) + 1, fitLatitude(connection.to[1]) + 1];
 
         const line = new fabric.Line(d, {
-          stroke: '#fff1cb',
-          strokeWidth: 10,
+          stroke: '#f5e6ca',
+          strokeWidth: 8,
           selectable: false
         });
 
         const circle = new fabric.Circle({
           top : d[3],
           left : d[2],
-          radius: 5,
-          fill : '#fff1cb'
+          radius: 4,
+          fill : '#f5e6ca'
         });
 
-        canvas.add(line);
-        canvas.add(circle);
+        background.add(line);
+        background.add(circle);
       });
 
       connections.forEach(function(connection) {
@@ -83,7 +85,7 @@ export default function() {
           fitLongitude(connection.to[0]) + 1, fitLatitude(connection.to[1]) + 1];
 
         const line = new fabric.Line(d, {
-          stroke: '#9a9253',
+          stroke: '#f8d05d',
           strokeWidth: 2,
           selectable: false
         });
@@ -92,11 +94,11 @@ export default function() {
           top : d[3],
           left : d[2],
           radius: 1,
-          fill : '#9a9253'
+          fill : '#f8d05d'
         });
 
-        canvas.add(line);
-        canvas.add(circle);
+        background.add(line);
+        background.add(circle);
       });
     },
 
@@ -117,8 +119,8 @@ export default function() {
             fontSize: 12
           });
 
-          canvas.add(police);
-          canvas.add(text);
+          foreground.add(police);
+          foreground.add(text);
 
           policeObjects[p.name] = police;
           textObjects[p.name] = text;
@@ -139,7 +141,7 @@ export default function() {
           policeSirenCounter = 0;
         }
       });
-      canvas.renderAll();
+      foreground.renderAll();
     },
 
     drawVillains(villains) {
@@ -171,9 +173,9 @@ export default function() {
             fontSize: 12
           });
 
-          canvas.add(villain);
-          canvas.add(text);
-          canvas.add(money);
+          foreground.add(villain);
+          foreground.add(text);
+          foreground.add(money);
           villainObjects[v.name] = villain;
           textObjects[v.name] = text;
           moneyObjects[v.name] = money;
@@ -194,7 +196,7 @@ export default function() {
     },
 
     render() {
-      canvas.renderAll();
+      foreground.renderAll();
     },
 
     draw(state) {
