@@ -30,9 +30,13 @@ function findClosestVillain(context, currentStation, clockIs) {
   dest=null;
   train=null;
   for (var i = 0; i < context.knownVillainLocations.length; i++) {
+
     var villainLocation = context.knownVillainLocations[i];
     var station = dataUtils.getStationById(villainLocation);
-    var dist = astar(currentStation, station, clockIs)
+    var dist = astar(currentStation, station, clockIs);
+    if(dist != null && (dist.prev != currentStation.stationShortCode)) {
+      debugger;
+    }
     if (dist != null && dist.distance < shortest && dist.distance > 0) {
       shortest = dist.distance;
       dest=dist.destination;
@@ -42,7 +46,58 @@ function findClosestVillain(context, currentStation, clockIs) {
   if (!R.isNil(train)) {
     return {train: train, dist: dest};
   }
+  if(R.isNil(train)) {
+    var result=goToBigCity(context, currentStation, clockIs);
+    if(!R.isNil(result)) {
+      train=result.train;
+      dest=result.destination;
+    }
+
+  }
+  if (!R.isNil(train)) {
+    return {train: train, dist: dest};
+  }
+
   return null;
+}
+
+function goToBigCity(context, currentStation, clockIs) {
+  var leaving = dataUtils.trainsLeavingFrom(clockIs, currentStation);
+  var retreatingTo = null;
+  var usingTrain = null;
+  for(var i = 0; i < leaving.length; i++) {
+    var possibleTrain = leaving[i];
+    var hops = dataUtils.getPossibleHoppingOffStations(possibleTrain, actor.location);
+    if(R.contains('HKI', hops)) {
+      retreatingTo = 'HKI';
+      usingTrain = possibleTrain;
+      break;
+    }
+    if(R.contains('JNS', hops)) {
+      retreatingTo = 'JNS';
+      usingTrain = possibleTrain;
+      break;
+    }
+    if(R.contains('TKU', hops)) {
+      retreatingTo = 'TKU';
+      usingTrain = possibleTrain;
+      break;
+    }
+    if(R.contains('TPE', hops)) {
+      retreatingTo = 'TPE';
+      usingTrain = possibleTrain;
+      break;
+    }
+    if(R.contains('OUL', hops)) {
+      retreatingTo = 'TPE';
+      usingTrain = possibleTrain;
+      break;
+    }
+
+  }
+  return {train: usingTrain, destination: retreatingTo};
+
+
 }
 
 function distance(lat1, lon1, lat2, lon2, unit) {
@@ -79,13 +134,14 @@ function findStraightConnections(context, currentStation, clockIs) {
       var possibleHops = dataUtils.getPossibleHoppingOffStations(possibleTrain, currentStation.stationShortCode);
       if (R.contains(villainLocation, possibleHops)) {
         var arrival = dataUtils.findTrainArrival(possibleTrain, villainLocation).scheduledTime;
-        if (!timeToGetThere || timeToGetThere.isBefore(arrival)) {
-          if (timeToGetThere < shortest) {
+        var travelTime=arrival.unix()-clockIs.unix()
+
+        if (travelTime > 0 && travelTime < shortest) {
+          debugger;
             train = possibleTrain;
             timeToGetThere = arrival;
             shortest = timeToGetThere;
             dest = villainLocation;
-          }
 
         }
       }
@@ -103,67 +159,73 @@ var astar = (start, goal, clockIs) => {
   var closedSet = [];
   var openSet = [start];
   var cameFrom = [];
-  var stations = dataUtils.getAllStations()
+  var stations = dataUtils.getAllStations();
   var stationShortkoodit = R.map(R.prop('stationShortCode'), stations);
   var stationObjs = R.map(createNode, stationShortkoodit);
 
-  //gScore and fScore have objects like {name: x, distance: y}
-  var gScore = stationObjs;
-  var gStart=R.filter(R.propEq('name', start.stationShortCode), gScore)[0];
-  gStart.distance=0
-  gScore=R.update(R.findIndex(R.propEq('name', start.stationShortCode), gScore),gStart, gScore)
+  //gScore and distancesLeft have objects like {name: x, distance: y}
+  var travelledDistances = stationObjs;
+  var gStart=R.filter(R.propEq('name', start.stationShortCode), travelledDistances)[0];
+  gStart.distance=0;
+  travelledDistances=R.update(R.findIndex(R.propEq('name', start.stationShortCode), travelledDistances),gStart, travelledDistances);
 
-  var fScore = stationObjs;
-  var fStart=R.filter(R.propEq('name', start.stationShortCode), fScore)[0];
+  var distancesLeft = stationObjs;
+  var startPoint=R.filter(R.propEq('name', start.stationShortCode), distancesLeft)[0];
   //Let's put some big value at the beginning, so that start station get's large score
-  fStart.distance = distance(start.latitude, start.longitude, goal.latitude, goal.longitude)*100;
-  fScore=R.update(R.findIndex(R.propEq('name', start.stationShortCode), fScore),fStart, fScore)
+  startPoint.distance = distance(start.latitude, start.longitude, goal.latitude, goal.longitude)*100;
+  distancesLeft=R.update(R.findIndex(R.propEq('name', start.stationShortCode), distancesLeft),startPoint, distancesLeft);
 
   while (openSet.length > 0) {
-    var foundStations=R.filter(station => R.contains(station.name, R.pluck('stationShortCode', openSet)), fScore);
+    //Take the station with lowest distancesLeft
+    var foundStations=R.filter(station => R.contains(station.name, R.pluck('stationShortCode', openSet)), distancesLeft);
     //Closest means the next city with smallest destination, at the beginning it is start
     var closest = R.sort(compareDistance, foundStations)[0];
     if(closest.name == goal.stationShortCode) {
       return reconstructPath(cameFrom, closest.name);
     }
+    //Remove current station from the list of upcoming stations and add it to list of stations we already went through
     openSet=R.reject(R.propEq('stationShortCode', closest.name), openSet);
     closedSet.push(closest);
     var leavingTrains=dataUtils.trainsLeavingFrom(clockIs, closest.name);
-    //Let's map stationName and train together
+    //Let's get all the neighbor stations and map stationName and train together
     var nextStops=R.map(train => {return {train: train, stationName: dataUtils.getPossibleHoppingOffStations(train, closest.name)[0]}})(leavingTrains);
     for (var i=0; i < nextStops.length; i++) {
       var neighbor=nextStops[i];
+      //If we have already visited this city and found the shortest route there, don't continue
       if(R.contains(neighbor.stationName, R.pluck('name', closedSet))) {
-          continue
+          continue;
       }
+      //Add current station to to list of stations we go through
       if(!R.contains(neighbor.stationName, R.pluck('name', openSet))) {
         openSet.push(R.find(R.propEq('stationShortCode', neighbor.stationName))(stations));
 
       }
-      var currentScore=R.find(R.propEq('name', closest.name), gScore);
+      //Let's take distance travelled to this point
+      var currentScore=R.find(R.propEq('name', closest.name), travelledDistances);
+      //New score is current distance travelled + time to departure + travelling time
       currentScore.distance=currentScore.distance + (dataUtils.findTrainDeparture(neighbor.train, closest.name).scheduledTime.unix()-clockIs.unix())+(dataUtils.findTrainArrival(neighbor.train, neighbor.stationName).scheduledTime.unix() - dataUtils.findTrainDeparture(neighbor.train, closest.name).scheduledTime.unix());
-      var currentStationGScore=R.find(R.propEq('name', neighbor.stationName), gScore)
+      var currentStationGScore=R.find(R.propEq('name', neighbor.stationName), travelledDistances)
       if(currentScore.distance >= currentStationGScore.distance) {
         continue
       }
-      var existing=R.find(R.propEq('prev', closest.name), cameFrom);
+      var existing=R.find(R.propEq('destination', neighbor.stationName), cameFrom);
       if(!existing) {
-        var newEntry={prev: closest.name, other: {distance: currentScore.distance, train: neighbor.train, destination: neighbor.stationName}};
+        var newEntry={prev: closest.name, distance: currentScore.distance, train: neighbor.train, destination: neighbor.stationName};
         cameFrom.push(newEntry);
       }
-      else if(existing.other.distance > currentScore.distance) {
-        existing.other.distance=currentScore.distance;
-        R.update(R.findIndex(R.propEq('destination', neighbor.name), cameFrom),existing ,cameFrom);
+      else if(existing.distance > currentScore.distance) {
+        existing.distance=currentScore.distance;
+        existing.destination=neighbor.stationName;
+        cameFrom=R.update(R.findIndex(R.propEq('destination', neighbor.stationName), cameFrom),existing ,cameFrom);
       }
 
       currentStationGScore.distance=currentScore.distance;
-      gScore=R.update(R.findIndex(R.propEq('name', neighbor.stationName), gScore),currentStationGScore, gScore);
+      travelledDistances=R.update(R.findIndex(R.propEq('name', neighbor.stationName), travelledDistances),currentStationGScore, travelledDistances);
 
       var neighborStation=R.find(R.propEq('stationShortCode', neighbor.stationName), stations);
-      var fScoreNow=R.find(R.propEq('name', neighbor.stationName), fScore);
-      var newFScore=fScoreNow.distance + distance(neighborStation.latitude, neighborStation.longitude, goal.latitude, goal.longitude);
+      var newFScore=currentStationGScore.distance + distance(neighborStation.latitude, neighborStation.longitude, goal.latitude, goal.longitude);
       currentStationGScore.distance=newFScore;
-      fScore=R.update(R.findIndex(R.propEq('name', neighbor.stationName), fScore),currentStationGScore, fScore);
+      distancesLeft=R.update(R.findIndex(R.propEq('name', neighbor.stationName), distancesLeft),currentStationGScore, distancesLeft);
     }
   }
 }
@@ -173,22 +235,15 @@ var createNode = function (shortCode) {
 };
 
 var reconstructPath=function(trainTrace, current) {
-  var totalPath=[]
-
-  var steps=R.map(step => step.other)(trainTrace)
-  var all=R.pluck('destination', steps);
-  debugger;
+  var totalPath=[];
+  var all=R.pluck('destination', trainTrace);
   while(R.contains(current, all)) {
-    var nextTrain=R.filter(R.propEq('destination', current), steps);
-    debugger;
-    var entry=R.find(R.propEq('other', nextTrain[0]), trainTrace)
-    current=entry.prev;
-    totalPath.push(entry);
+    var nextTrain=R.filter(R.propEq('destination', current), trainTrace)[0];
+    current=nextTrain.prev;
+    totalPath.push(nextTrain);
   }
-  debugger;
-  return totalPath[totalPath.length-1];
-}
 
-var reconstruct_path = (trainTrace) => {return trainTrace[0]};
+  return totalPath[totalPath.length-1];
+};
 
 var compareDistance = (station, nextStation) => station.distance > nextStation.distance;
