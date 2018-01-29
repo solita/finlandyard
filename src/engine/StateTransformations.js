@@ -94,7 +94,6 @@ module.exports = {
           }
           police[0].stats++;
 
-          debugger;
          console.log(actor.name +" got caught by " + police[0].name + "!");
         }
         return R.assoc('caught', true, actor);
