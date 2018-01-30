@@ -137,10 +137,10 @@ function findStraightConnections(context, currentStation, clockIs) {
         var travelTime=arrival.unix()-clockIs.unix()
 
         if (travelTime > 0 && travelTime < shortest) {
-          debugger;
+          //debugger;
             train = possibleTrain;
             timeToGetThere = arrival;
-            shortest = timeToGetThere;
+            shortest = travelTime;
             dest = villainLocation;
 
         }
