@@ -16,10 +16,16 @@ console.log("Starting up finland yard");
 
 const mapControl = MapControl();
 
+function printPoliceStats(state) {
+  const printStats = police => console.log(`${police.name} caught ${police.stats} villains`);
+  var polices = R.filter(R.propEq('type', 'police'))(state.actors);
+  R.forEach(printStats, polices);
+}
+
 /**
  * Game callback after api-operations
  */
-api.loadData(function (data) {
+api.loadData(data => {
   if (data.timetable.length === 0) {
     console.error("No timetable rows found from api");
     return;
@@ -42,9 +48,7 @@ api.loadData(function (data) {
   const tick = state => {
     setTimeout(() => {
       if (CommonUtils.gameOver(state)) {
-        var printStats = police => console.log(police.name + " caught " + police.stats + " villains");
-        var polices = R.filter(R.propEq('type', 'police'))(state.actors);
-        R.forEach(printStats, polices);
+        printPoliceStats(state);
         console.log('Game over');
         api.postResults(state.actors, document.getElementById("clock"));
         return;
