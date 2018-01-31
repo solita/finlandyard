@@ -14,16 +14,34 @@ ActorBridge.registerActor('police', 'Jari Aarnio', 'TKU', function (clockIs, con
   if(result == null) {
     return Actions.idle();
   }
-  console.log(actor.name +" leaving from " + actor.location + " to " + result.dist + ", departure: " +
-      dataUtils.findTrainArrival(result.train, result.dist).scheduledTime.asString());
-  return Actions.train(result.train, result.dist);
+  console.log(actor.name +" leaving from " + actor.location + " to " + result.destination + ", departure: " +
+      dataUtils.findTrainArrival(result.train, result.destination).scheduledTime.asString());
+  return Actions.train(result.train, result.destination);
 });
 
 function findClosestVillain(context, currentStation, clockIs) {
 //See if we can get to the villain with just one train
   var {shortest, dest, train} = findStraightConnections(context, currentStation, clockIs);
   if (!R.isNil(train)) {
-    return {train: train, dist: dest};
+    return {train: train, destination: dest};
+  }
+  if(context.knownVillainLocations.length == 1) {
+      var route=dataUtils.howCanIGetTo(currentStation.stationShortCode, context.knownVillainLocations[0]);
+      if(!route=='FROMHERE') {
+        var firstStop=route[0];
+        const ret =findTrainToFrom(clockIs, currentStation, firstStop);
+        if(!R.isNil(ret.train) && !R.isNil(ret.dest)) {
+          return {train: ret.train, destination: ret.dest};
+        }
+        return null;
+      } else {
+        const ret =findTrainToFrom(clockIs, currentStation, context.knownVillainLocations[0]);
+        if(!R.isNil(ret.train) && !R.isNil(ret.dest)) {
+          return {train: ret.train, destination: ret.dest};
+        }
+        return null;
+
+      }
   }
 
   shortest=10000000;
@@ -33,18 +51,18 @@ function findClosestVillain(context, currentStation, clockIs) {
 
     var villainLocation = context.knownVillainLocations[i];
     var station = dataUtils.getStationById(villainLocation);
-    var dist = astar(currentStation, station, clockIs);
-    if(dist != null && (dist.prev != currentStation.stationShortCode)) {
+    var destination = astar(currentStation, station, clockIs);
+    if(destination != null && (destination.prev != currentStation.stationShortCode)) {
       debugger;
     }
-    if (dist != null && dist.distance < shortest && dist.distance > 0) {
-      shortest = dist.distance;
-      dest=dist.destination;
-      train=dist.train;
+    if (destination != null && destination.distance < shortest && destination.distance > 0) {
+      shortest = destination.distance;
+      dest=destination.destination;
+      train=destination.train;
     }
   }
   if (!R.isNil(train)) {
-    return {train: train, dist: dest};
+    return {train: train, destination: dest};
   }
   if(R.isNil(train)) {
     var result=goToBigCity(context, currentStation, clockIs);
@@ -55,7 +73,7 @@ function findClosestVillain(context, currentStation, clockIs) {
 
   }
   if (!R.isNil(train)) {
-    return {train: train, dist: dest};
+    return {train: train, destination: dest};
   }
 
   return null;
@@ -118,34 +136,47 @@ function distance(lat1, lon1, lat2, lon2, unit) {
   return dist
 }
 
+function findTrainToFrom(clockIs, currentStation, villainLocation) {
+  var leaving = dataUtils.trainsLeavingFrom(clockIs, currentStation.stationShortCode);
+  var train = null;
+
+  var timeToGetThere = null;
+  var dest=null;
+  var shortest=10000;
+
+  for (var i = 0; i < leaving.length; i++) {
+    var possibleTrain = leaving[i];
+    var possibleHops = dataUtils.getPossibleHoppingOffStations(possibleTrain, currentStation.stationShortCode);
+    if (R.contains(villainLocation, possibleHops)) {
+      if(possibleTrain == null || villainLocation == null) {
+        debugger;
+      }
+      var arrival = dataUtils.findTrainArrival(possibleTrain, villainLocation).scheduledTime;
+      var travelTime = arrival.unix() - clockIs.unix();
+
+      if (travelTime > 0 && travelTime < shortest) {
+        //debugger;
+        train = possibleTrain;
+        timeToGetThere = arrival;
+        shortest = travelTime;
+        dest = villainLocation;
+
+      }
+    }
+  }
+  return {train,shortest, dest};
+}
+
 function findStraightConnections(context, currentStation, clockIs) {
   var shortest = 10000000;
   var dest = null;
   var train = null;
   for (var i = 0; i < context.knownVillainLocations.length; i++) {
     var villainLocation = context.knownVillainLocations[i];
-    var leaving = dataUtils.trainsLeavingFrom(clockIs, currentStation.stationShortCode);
-    var train = null;
-
-    var timeToGetThere = null;
-
-    for (var i = 0; i < leaving.length; i++) {
-      var possibleTrain = leaving[i];
-      var possibleHops = dataUtils.getPossibleHoppingOffStations(possibleTrain, currentStation.stationShortCode);
-      if (R.contains(villainLocation, possibleHops)) {
-        var arrival = dataUtils.findTrainArrival(possibleTrain, villainLocation).scheduledTime;
-        var travelTime=arrival.unix()-clockIs.unix()
-
-        if (travelTime > 0 && travelTime < shortest) {
-          //debugger;
-            train = possibleTrain;
-            timeToGetThere = arrival;
-            shortest = travelTime;
-            dest = villainLocation;
-
-        }
-      }
-    }
+    const ret = findTrainToFrom(clockIs, currentStation, villainLocation);
+    shortest = ret.shortest;
+    dest = ret.dest;
+    train=ret.train;
 
   }
   return {shortest, dest, train};
