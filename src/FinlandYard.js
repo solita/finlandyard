@@ -16,9 +16,12 @@ console.log("Starting up finland yard");
 
 const mapControl = MapControl();
 
+var findPolices =(allActors) =>R.filter(R.propEq('type', 'police'))(allActors);
+
 function printPoliceStats(state) {
   const printStats = police => console.log(`${police.name} caught ${police.stats} villains`);
-  var polices = R.filter(R.propEq('type', 'police'))(state.actors);
+
+  var polices = findPolices(state.actors);
   R.forEach(printStats, polices);
 }
 
