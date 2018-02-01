@@ -7,7 +7,6 @@ const isInBetween = (timestamp, e) => {
 }
 
 function getTrainLocationCoordinated(state, train) {
-
   // Find the gap train is between in currently
   var d = R.find(
     R.partial(isInBetween, [state.clockIs]),
@@ -19,6 +18,7 @@ function getTrainLocationCoordinated(state, train) {
     // log("Train missing! " + state.clockIs.asString());
     return null;
   }
+
   // Calculate the coordinated train is at in given time
   var departure_station = dataUtils.getStationById(R.head(d).stationShortCode);
   var arrival_station =  dataUtils.getStationById(R.last(d).stationShortCode);
@@ -33,13 +33,13 @@ function getTrainLocationCoordinated(state, train) {
     // Location MUST be null if actor is in train
     location: null
   };
-
 }
 
 function calculatePosition(state, actor) {
   if(actor.caught) {
     return actor;
   }
+
   if(actor.location) {
     // If actor is in location, this should NEVER be rewritten
     var station = dataUtils.getStationById(actor.location);
