@@ -168,7 +168,7 @@ let astar = (start, goal, clockIs, currentShortest) => {
     //Closest means the next city with smallest destination, at the beginning it is start
     const closest = findClosestStation(foundStations);
     if (closest.name === goal.stationShortCode) {
-      return reconstructPath(cameFrom, closest.name);;
+      return reconstructPath(cameFrom, closest.name);
     }
     //Remove current station from the list of upcoming stations and add it to list of stations we already went through
     openSet = R.reject(R.propEq('stationShortCode', closest.name), openSet);
