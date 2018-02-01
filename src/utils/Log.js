@@ -1,7 +1,6 @@
 import R from 'ramda'
 
 const logElement = document.querySelector('.js-log');
-const logElementContainer = document.querySelector('.js-log');
 
 const logToHTML = msg => {
   const paragraph = document.createElement('p');

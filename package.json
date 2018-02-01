@@ -5,7 +5,7 @@
   "main": "api.js",
   "scripts": {
     "clean": "rm -rf dist && cd bouncer && rm -rf .store",
-    "test": "mocha --require babel-polyfill --require babel-register ./spec/*.js ./spec/**/*.js",
+    "test": "mocha --require babel-polyfill --require babel-register --recursive spec/",
     "dist": "webpack",
     "dev": "webpack-dev-server --content-base dist/",
     "proxy": "node bouncer/finlandyard-bouncer.js",
