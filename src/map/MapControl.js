@@ -1,3 +1,4 @@
+import R from 'ramda';
 import rangeFit from 'range-fit';
 import {fabric} from 'fabric'
 import CommonUtils from '../state/CommonUtils.js';
@@ -5,9 +6,21 @@ import {log} from '../utils/Log';
 
 fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center';
 
+const MAX_SCORE_DIGITS = 6;
+
 const playerListElement = document.querySelector('.js-players');
 
 const clockElement = document.querySelector('.js-clock');
+
+const scoreElement = document.querySelector('.js-score');
+
+const repeatEmptySegmentMarks = R.repeat('!');
+
+const updateScoreElement = score => {
+  const scoreStr = '' + score;
+  const emptySegments = repeatEmptySegmentMarks(MAX_SCORE_DIGITS - scoreStr.length);
+  scoreElement.innerHTML = emptySegments.join('') + scoreStr;
+}
 
 const fitLatitude = v => 900 - rangeFit(v, 58, 68, 0, 900)
 
@@ -144,7 +157,6 @@ export default function() {
         policeObject.left = fitLongitude(p.longitude);
         policeObject.set({fill: policeSirenCounter < 10 ? 'blue' : 'red'});
 
-
         const textObject = textObjects[p.name];
         textObject.top = fitLatitude(p.latitude) - 6;
         textObject.left = fitLongitude(p.longitude) + 6;
@@ -184,8 +196,8 @@ export default function() {
           });
 
           const text = new fabric.Text(v.name + ' ' + v.destination, {
-            top : fitLatitude(v.latitude),
-            left : fitLongitude(v.longitude),
+            top: fitLatitude(v.latitude),
+            left: fitLongitude(v.longitude),
             fontSize: 12
           });
 
@@ -208,6 +220,10 @@ export default function() {
         textObject.top = fitLatitude(v.latitude) - 6;
         textObject.left = fitLongitude(v.longitude) + 6;
         textObject.text = v.name + ' ' + (v.location || '') + (v.destination ? '->' + v.destination : '');
+
+        if (v.isPlayer) {
+          updateScoreElement(v.money);
+        }
       });
     },
 
