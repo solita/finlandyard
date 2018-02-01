@@ -5,6 +5,7 @@ import R from 'ramda'
 import Actions from '../engine/Actions.js'
 import ActorBridge from '../ActorBridge.js'
 import dataUtils from '../state/DataUtils.js'
+import {log} from '../utils/Log';
 
 
 ActorBridge.registerActor('police', 'Jari Aarnio', 'TKU', function (clockIs, context, actor) {
@@ -14,7 +15,7 @@ ActorBridge.registerActor('police', 'Jari Aarnio', 'TKU', function (clockIs, con
   if (!result) {
     return Actions.idle();
   }
-  console.log(`${actor.name} leaving from ${actor.location} to ${result.destination}, departure: ` +
+  log(`${actor.name} leaving from ${actor.location} to ${result.destination}, arrival: ` +
       dataUtils.findTrainArrival(result.train, result.destination).scheduledTime.asString());
   return Actions.train(result.train, result.destination);
 });
@@ -37,11 +38,11 @@ function findClosestVillain(context, currentStation, clockIs) {
   train = null;
   for (const villainLocation of context.knownVillainLocations) {
     const station = dataUtils.getStationById(villainLocation);
-    const destination = astar(currentStation, station, clockIs);
-    if (destination && destination.distance < shortest && destination.distance > 0) {
-      shortest = destination.distance;
-      dest = destination.destination;
-      train = destination.train;
+    const result = astar(currentStation, station, clockIs, shortest);
+    if (result && Math.abs(result.distance) < shortest) {
+      shortest = Math.abs(result.distance);
+      dest = result.destination;
+      train = result.train;
     }
   }
   if (!R.isNil(train)) {
@@ -136,7 +137,7 @@ const findClosestStation=(foundStations)  => {
 
 const getInformationForCurrentLocation = (currentLocation, travelledDistances) => {return R.head(R.filter(R.propEq('name', currentLocation), travelledDistances));}
 
-let astar = (start, goal, clockIs) => {
+let astar = (start, goal, clockIs, currentShortest) => {
   if (start.stationShortCode === goal.stationShortCode) {
     return null;
   }
@@ -150,19 +151,18 @@ let astar = (start, goal, clockIs) => {
 
   //gScore and distancesLeft have objects like {name: x, distance: y}
   let travelledDistances = stationObjs;
-  //const gStart = R.head(R.filter(R.propEq('name', start.stationShortCode), travelledDistances));
   const gStart = getInformationForCurrentLocation(start.stationShortCode, travelledDistances);
   gStart.distance = 0;
   travelledDistances = R.update(R.findIndex(R.propEq('name', start.stationShortCode), travelledDistances), gStart, travelledDistances);
 
   let distancesLeft = stationObjs;
   const startPoint=getInformationForCurrentLocation(start.stationShortCode, distancesLeft);
-  //const startPoint = R.head(R.filter(R.propEq('name', start.stationShortCode), distancesLeft));
   //Let's put some big value at the beginning, so that start station get's large score
-  startPoint.distance = distance(start.latitude, start.longitude, goal.latitude, goal.longitude) * 100;
+  startPoint.distance = distance(start.latitude, start.longitude, goal.latitude, goal.longitude);
   distancesLeft = R.update(R.findIndex(R.propEq('name', start.stationShortCode), distancesLeft), startPoint, distancesLeft);
 
   while (openSet.length > 0) {
+
     //Take the station with lowest distancesLeft
     const foundStations = R.filter(station => R.contains(station.name, R.pluck('stationShortCode', openSet)), distancesLeft);
     //Closest means the next city with smallest destination, at the beginning it is start
@@ -212,6 +212,11 @@ let astar = (start, goal, clockIs) => {
         cameFrom = R.update(R.findIndex(R.propEq('destination', neighbor.stationName), cameFrom), existing, cameFrom);
       }
 
+      //If the villain is far far away or we already have villain closer don't continue
+      if(Math.abs(currentScore.distance) > 150000 || Math.abs(currentScore.distance) > currentShortest) {
+        return null;
+      }
+
       currentStationGScore.distance = currentScore.distance;
       travelledDistances = R.update(R.findIndex(R.propEq('name', neighbor.stationName), travelledDistances), currentStationGScore, travelledDistances);
 
@@ -235,7 +240,8 @@ const reconstructPath = function (trainTrace, current) {
     current = nextTrain.prev;
     totalPath.push(nextTrain);
   }
-
+  //We want to pass the distance for the whole path, not just to the next station
+  totalPath[totalPath.length - 1].distance=totalPath[0].distance;
   return totalPath[totalPath.length - 1];
 };
 
