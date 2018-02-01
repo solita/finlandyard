@@ -35,11 +35,11 @@ function postResults(actors, container) {
 function loadData(fireCallback) {
   var state = {};
   doAsyncJsonRequest("http://localhost:8000/api/v1/metadata/stations", function(stations) {
-    log("Stations loaded. " + stations.length + " stations");
+    log("Stations loaded. " + stations.length + " stations", "system");
     state.stations = stations;
   });
   doAsyncJsonRequest("http://localhost:8000/api/v1/schedules?departure_date=2017-11-01", function(timetable) {
-    log("Timetable loaded. Contains " + timetable.length);
+    log("Timetable loaded. Contains " + timetable.length, "system");
     state.timetable = timetable;
   });
   (function sleep() {

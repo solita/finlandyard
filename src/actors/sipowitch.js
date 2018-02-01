@@ -26,11 +26,13 @@ ActorBridge.registerActor('police', 'sipowitch', 'JNS', function(clockIs, contex
   }
 
   if(!R.isNil(train)) {
+    const status = actor.type === 'police' ? 'enemy' : 'neutral'
     log(actor.name +" leaving from " + actor.location + " to " + destination + ", departure: " +
-        dataUtils.findTrainArrival(train, destination).scheduledTime.asString());
+        dataUtils.findTrainArrival(train, destination).scheduledTime.asString(), status);
     return Actions.train(train, destination);
   }
-  log("Retreating...");
+
+  log("Retreating...", "enemy");
   var retreatingTo = null;
   var usingTrain = null;
   for(var i = 0; i < leaving.length; i++) {
@@ -63,17 +65,17 @@ ActorBridge.registerActor('police', 'sipowitch', 'JNS', function(clockIs, contex
     }
   }
   if(retreatingTo && usingTrain) {
-    log('Retreating to ' + retreatingTo);
+    log('Retreating to ' + retreatingTo, "enemy");
     return Actions.train(usingTrain, retreatingTo);
   }
-  log("I'm stuck, I'll just hop to first train");
+  log("I'm stuck, I'll just hop to first train", "enemy");
   var train = dataUtils.nextLeavingTrain(clockIs, actor.location);
   if(!train) {
-    log("No trains leaving... " + clockIs.asString());
+    log("No trains leaving... " + clockIs.asString(), "enemy");
     return Actions.idle();
   }
   var possibleStops = dataUtils.getPossibleHoppingOffStations(train, actor.location);
   var hopOff = R.last(possibleStops);
-  log("It's going to " + hopOff + ' at ' + dataUtils.findTrainArrival(train, hopOff).scheduledTime.asString());
+  log("It's going to " + hopOff + ' at ' + dataUtils.findTrainArrival(train, hopOff).scheduledTime.asString(), "enemy");
   return Actions.train(train, hopOff);
 });

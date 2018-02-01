@@ -204,3 +204,21 @@ body {
     grid-area: console;
     overflow-y: scroll;
 }
+
+/* 'player', 'enemy', 'system', 'gameover' */
+.console-container p.player {
+    color: #0f0;
+}
+
+.console-container p.enemy {
+    color: #f00;
+}
+
+.console-container p.system {
+    color: #555;
+}
+
+.console-container p.gameover {
+    text-transform: uppercase;
+    color: #ff2;
+}

@@ -54,7 +54,7 @@ export default function() {
 
   return {
     drawStations(stations) {
-      log("Drawing " + stations.length + " stations");
+      log("Drawing " + stations.length + " stations", "system");
 
       stations.forEach(function(station) {
         if(station.passengerTraffic) {
@@ -79,7 +79,7 @@ export default function() {
     },
 
     drawConnections(connections) {
-      log("Drawing " + connections.length + " connections");
+      log("Drawing " + connections.length + " connections", "system");
 
        background.setBackgroundImage('./static/images/background.png', () => background.renderAll(), {
          originX: 'left',

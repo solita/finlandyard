@@ -15,7 +15,7 @@ ActorBridge.registerActor('police', 'Jari Aarnio', 'TKU', function (clockIs, con
     return Actions.idle();
   }
   console.log(`${actor.name} leaving from ${actor.location} to ${result.destination}, departure: ` +
-      dataUtils.findTrainArrival(result.train, result.destination).scheduledTime.asString());
+      dataUtils.findTrainArrival(result.train, result.destination).scheduledTime.asString(), "enemy");
   return Actions.train(result.train, result.destination);
 });
 

@@ -110,14 +110,17 @@ module.exports = {
         if(actor.location &&
            state.clockIs.isSame(dataUtils.findTrainDeparture(dataUtils.getTrainById(actor.train), actor.location).scheduledTime)) {
           var station = dataUtils.getStationById(actor.location);
-          log(state.clockIs.asString() + ': ' + actor.name + ' departs from ' + actor.location);
+
+          const status = actor.type === 'police' ? 'enemy' : 'neutral'
+          log(state.clockIs.asString() + ': ' + actor.name + ' departs from ' + actor.location, status);
           return R.merge(actor, {location: null});
         }
         // Actor is in train and waiting for arrival
         if(!actor.location &&
            state.clockIs.isSame(dataUtils.findTrainArrival(dataUtils.getTrainById(actor.train), actor.destination).scheduledTime)) {
            var station = dataUtils.getStationById(actor.destination);
-           log(state.clockIs.asString() + ': ' + actor.name + ' arrives tos ' + actor.destination);
+           const status = actor.type === 'police' ? 'enemy' : 'neutral'
+           log(state.clockIs.asString() + ': ' + actor.name + ' arrives tos ' + actor.destination, status);
           return R.merge(actor, {location: actor.destination, destination: null, train: null});
         }
       }
