@@ -1,5 +1,4 @@
-'use strict';
-// LUL WUT? Why yuno promise?
+import {log} from './Log';
 
 function doAsyncJsonRequest(url, cb) {
   var xhr = new XMLHttpRequest();
@@ -36,11 +35,11 @@ function postResults(actors, container) {
 function loadData(fireCallback) {
   var state = {};
   doAsyncJsonRequest("http://localhost:8000/api/v1/metadata/stations", function(stations) {
-    console.log("Stations loaded. " + stations.length + " stations");
+    log("Stations loaded. " + stations.length + " stations");
     state.stations = stations;
   });
   doAsyncJsonRequest("http://localhost:8000/api/v1/schedules?departure_date=2017-11-01", function(timetable) {
-    console.log("Timetable loaded. Contains " + timetable.length);
+    log("Timetable loaded. Contains " + timetable.length);
     state.timetable = timetable;
   });
   (function sleep() {

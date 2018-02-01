@@ -2,76 +2,50 @@
 <html>
   <head>
     <title>FINLANDYARD - the chase, the glory</title>
-    <style>
-      .left {
-        width: 50%;
-        height: 500px;
-        float: left;
-      }
-      .map {
-        height:480px;
-      }
-      .states {
-        float:left;
-      }
-      .statecontainer {
-        float:left;
-        height:140px;
-        display: block;
-        unicode-bidi: embed;
-        font-family: monospace;
-        white-space: pre;
-        overflow: auto;
-        width: 25em;
-        background-color: #eee;
-        font-size: 8px;
-      }
-      .caught {
-        background-color: pink;
-      }
-      .caughtContainer {
-        float:right;
-        display: block;
-        unicode-bidi: embed;
-        font-family: monospace;
-        white-space: pre;
-        overflow: auto;
-        width: 25em;
-        background-color: #eee;
-        font-size: 8px;
-      }
-      #log {
-        clear: both;
-      }
-      #canvas {
-          border: 1px solid #aaa;
-      }
-
-
-      .canvas-container {
-        position: relative;
-      }
-
-      .canvas-container canvas {
-        position: absolute;
-        left: 0;
-        top: 0;
-      }
-    </style>
+    <link rel="stylesheet" href="./styles.css">
   </head>
   <body>
 
-    <div class="canvas-container">
-      <canvas id="background" width="650" height="750"></canvas>
-      <canvas id="foreground" width="650" height="750"></canvas>
-    </div>
+    <main class="board">
+      <section class="canvas-container">
+        <canvas class="canvas" id="background" width="650" height="750"></canvas>
+        <canvas class="canvas" id="game" width="650" height="750"></canvas>
+        <canvas class="canvas" id="foreground" width="650" height="750"></canvas>
+      </section>
 
-    <div class="left">
+      <div class="game-controls">
+        <header class="header">
+          <img class="logo" alt="Finland Yard" src="./static/images/finland-yard.png">
+        </header>
 
-      <!--<div id="clock" class="clock"></div>--
-    </div>
-    <!--<div id="states"></div>
-    <div id="log"></div>-->
+        <section class="section clock-container">
+          <h2 class="section-title">Clock</h2>
+
+          <div class="segment-display js-clock" data-text="88:88"></div>
+        </section>
+
+        <section class="section points-container">
+          <h2 class="section-title">Score</h2>
+
+          <div class="segment-display" data-text="8888">
+            !123
+          </div>
+        </section>
+
+        <section class="section player-container">
+          <h2 class="section-title">Players</h2>
+
+          <ul class="players js-players"></ul>
+        </section>
+
+        <section class="section console-container js-log">
+          <h2 class="section-title">Console</h2>
+        </section>
+      </div>
+
+      <img class="board-logo" alt="Solita" src="./static/images/solita.png">
+    </main>
+
     <script src="./bundle.js"></script>
   </body>
 </html>

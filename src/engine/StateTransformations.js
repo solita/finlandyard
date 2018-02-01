@@ -1,8 +1,6 @@
 import R from 'ramda';
 import dataUtils from'../state/DataUtils.js';
-import CommonUtils from '../state/CommonUtils.js';
-import moment from 'moment';
-import log from '../utils/Log.js';
+import {log} from '../utils/Log';
 
 const isInBetween = (timestamp, e) => {
   return e[0].scheduledTime.isBefore(timestamp) && timestamp.isBefore(e[1].scheduledTime);
@@ -18,7 +16,7 @@ function getTrainLocationCoordinated(state, train) {
   if(R.isNil(d)) {
     // This is the situation where actor is marked to be in train
     // but train is not currently moving
-    // console.log("Train missing! " + state.clockIs.asString());
+    // log("Train missing! " + state.clockIs.asString());
     return null;
   }
   // Calculate the coordinated train is at in given time
@@ -100,14 +98,14 @@ module.exports = {
         if(actor.location &&
            state.clockIs.isSame(dataUtils.findTrainDeparture(dataUtils.getTrainById(actor.train), actor.location).scheduledTime)) {
           var station = dataUtils.getStationById(actor.location);
-          log.log(state.clockIs, actor.name + ' departs from ' + actor.location);
+          log(state.clockIs.asString() + ': ' + actor.name + ' departs from ' + actor.location);
           return R.merge(actor, {location: null});
         }
         // Actor is in train and waiting for arrival
         if(!actor.location &&
            state.clockIs.isSame(dataUtils.findTrainArrival(dataUtils.getTrainById(actor.train), actor.destination).scheduledTime)) {
            var station = dataUtils.getStationById(actor.destination);
-           log.log(state.clockIs, actor.name + ' arrives tos ' + actor.destination);
+           log(state.clockIs.asString() + ': ' + actor.name + ' arrives tos ' + actor.destination);
           return R.merge(actor, {location: actor.destination, destination: null, train: null});
         }
       }

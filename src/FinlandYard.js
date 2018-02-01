@@ -7,11 +7,12 @@ import MapControl from './map/MapControl.js';
 import api from './utils/Api.js';
 import ActorBridge from './ActorBridge.js';
 import clock from './Clock.js';
+import {log} from './utils/Log';
 
 const requireAll = r => r.keys().forEach(r);
 requireAll(require.context('./actors/', true, /\.js$/));
 
-console.log("Starting up finland yard");
+log("Starting up finland yard");
 
 const mapControl = MapControl();
 
@@ -41,7 +42,7 @@ api.loadData(function(data) {
   const tick = state => {
     setTimeout(() => {
       if(CommonUtils.gameOver(state)) {
-        console.log('Game over');
+        log('Game over');
         api.postResults(state.actors, document.getElementById("clock"));
         return;
       } else {
