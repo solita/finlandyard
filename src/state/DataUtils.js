@@ -192,6 +192,10 @@ const collectConnections = () => {
   return timeTableRows(dataHolder.timetable);
 }
 
+const getAllStations=()=> {
+  return dataHolder.stations
+}
+
 const connectedStations = () => {
   if(R.isNil(dataHolder.timetable)) {
     return [];
@@ -222,5 +226,6 @@ export default {
   connectionCountFromStation,
   nextLeavingTrain,
   collectConnections,
-  connectedStations
+  connectedStations,
+  getAllStations
 }
