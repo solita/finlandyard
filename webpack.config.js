@@ -1,10 +1,16 @@
 const path = require('path');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
-  entry: './src/FinlandYard.js',
+  context: path.resolve(__dirname, 'src'),
+  entry: [
+    './FinlandYard.js',
+    './styles.css'
+  ],
   output: {
-    path: path.resolve(__dirname, '/dist'),
-    filename: "bundle.js"
+    path: path.resolve(__dirname, 'dist'),
+    filename: "bundle.js",
+    publicPath: '/'
   },
   module: {
     rules: [
@@ -19,5 +25,13 @@ module.exports = {
       }
     ]
   },
-  devtool: 'source-map'
+  devtool: 'source-map',
+  plugins: [
+    new CopyWebpackPlugin([
+      {
+        from: 'static',
+        to: 'static'
+      }
+    ])
+  ]
 };

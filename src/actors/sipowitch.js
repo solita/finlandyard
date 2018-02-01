@@ -2,6 +2,7 @@ import R from 'ramda'
 import Actions from '../engine/Actions.js'
 import ActorBridge from '../ActorBridge.js'
 import dataUtils from '../state/DataUtils.js'
+import {log} from '../utils/Log';
 
 ActorBridge.registerActor('police', 'sipowitch', 'JNS', function(clockIs, context, actor) {
   var leaving = dataUtils.trainsLeavingFrom(clockIs, actor.location);
@@ -25,11 +26,11 @@ ActorBridge.registerActor('police', 'sipowitch', 'JNS', function(clockIs, contex
   }
 
   if(!R.isNil(train)) {
-    console.log(actor.name +" leaving from " + actor.location + " to " + destination + ", departure: " +
+    log(actor.name +" leaving from " + actor.location + " to " + destination + ", departure: " +
         dataUtils.findTrainArrival(train, destination).scheduledTime.asString());
     return Actions.train(train, destination);
   }
-  console.log("Retreating...");
+  log("Retreating...");
   var retreatingTo = null;
   var usingTrain = null;
   for(var i = 0; i < leaving.length; i++) {
@@ -62,17 +63,17 @@ ActorBridge.registerActor('police', 'sipowitch', 'JNS', function(clockIs, contex
     }
   }
   if(retreatingTo && usingTrain) {
-    console.log('Retreating to ' + retreatingTo);
+    log('Retreating to ' + retreatingTo);
     return Actions.train(usingTrain, retreatingTo);
   }
-  console.log("I'm stuck, I'll just hop to first train");
+  log("I'm stuck, I'll just hop to first train");
   var train = dataUtils.nextLeavingTrain(clockIs, actor.location);
   if(!train) {
-    console.log("No trains leaving... " + clockIs.asString());
+    log("No trains leaving... " + clockIs.asString());
     return Actions.idle();
   }
   var possibleStops = dataUtils.getPossibleHoppingOffStations(train, actor.location);
   var hopOff = R.last(possibleStops);
-  console.log("It's going to " + hopOff + ' at ' + dataUtils.findTrainArrival(train, hopOff).scheduledTime.asString());
+  log("It's going to " + hopOff + ' at ' + dataUtils.findTrainArrival(train, hopOff).scheduledTime.asString());
   return Actions.train(train, hopOff);
 });

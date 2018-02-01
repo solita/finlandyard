@@ -1,0 +1,206 @@
+@import url('https://fonts.googleapis.com/css?family=Inconsolata');
+
+@font-face {
+    font-family: "Segment";
+    src: url("/static/fonts/DSEG7Modern-Regular.woff2") format("woff2"),
+    url("/static/fonts/DSEG7Modern-Regular.woff") format("woff");
+}
+
+/* General styles */
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html {
+    background: #232526;
+}
+
+body {
+    padding: 0;
+    margin: 0;
+    min-height: 100vh;
+
+    font-family: "Inconsolata";
+    font-size: 16px;
+    background: linear-gradient(to right, #232526, #414345);
+    color: white;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Canvases for fabric.js */
+
+.canvas-container {
+    position: relative;
+    width: 650px;
+}
+
+.canvas {
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+/* "Game board" */
+
+.board {
+    position: relative;
+
+    padding: 0.75em;
+    margin: 0 auto;
+
+    width: calc(1070px + 1.5em);
+    height: calc(750px + 1.5em);
+    display: flex;
+
+    box-shadow: 0 0 5em 1em rgba(0, 0, 0, 0.25);
+    background: radial-gradient(at top right, #003e82, #02111D);
+    border: 5px solid #003e82;
+    border-right-color: #002e72;
+    border-bottom-color: #02111D;
+    border-left-color: #02111D;
+    border-radius: 0.25em;
+}
+
+.board-logo {
+    position: absolute;
+    left: -5px;
+    bottom: -5px;
+}
+
+/* Game controls grid */
+
+.game-controls {
+    display: grid;
+    width: 400px;
+    margin-left: 1em;
+
+    grid-template:
+            "header header" 2.1em
+            "clock score" 4.7em
+            "players players" 5.3em
+            "console console" auto
+          / 50% 50%;
+    grid-column-gap: 0.5em;
+    grid-row-gap: 0.5em;
+}
+
+/* Sections */
+
+.section {
+    padding: 0.35em 0.4em;
+    box-shadow: 0 0 15px 0 rgba(0,0,0,0.5) inset;
+    background: linear-gradient(to right, #1e1e1e, #050505);
+}
+
+.section-title {
+    margin: 0 0 0.25em 0;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+
+    color: darkgray;
+}
+
+/* Finland Yard -header */
+
+.header {
+    grid-area: header;
+    text-align: center;
+}
+
+.logo {
+    width: 100%;
+}
+
+.logo::after {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+
+    content: attr(data-text);
+    font-style: italic;
+    background: none;
+    text-shadow: 0 0 0.5em rgba(255, 255, 255, 0.25), -5px 1px black;
+
+    letter-spacing: -0.2px;
+    text-align: center;
+}
+
+/* Segment displays */
+
+.segment-display {
+    position: relative;
+    text-align: center;
+    font-size: 2em;
+
+    font-family: "Segment";
+}
+
+.segment-display::before {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: -1;
+
+    content: attr(data-text);
+
+    color: #222;
+    text-align: center;
+}
+
+/* Clock display */
+
+.clock-container {
+    grid-area: clock;
+    transform: translateZ(0);
+}
+
+/* Score display */
+
+.points-container {
+    grid-area: score;
+    transform: translateZ(0);
+}
+
+/* Player display */
+
+.player-container {
+    grid-area: players;
+}
+
+.players {
+    margin: 0;
+    padding: 0;
+
+    list-style: none;
+}
+
+.player {
+    float: left;
+
+    display: inline-block;
+    width: 50%;
+    padding: 0.15em 0;
+    border-bottom: 1px solid black;
+
+    font-size: 0.9em;
+
+    transition: all 0.3s;
+}
+
+.player.caught {
+    opacity: 0.25;
+    text-decoration: line-through;
+}
+
+/* Console */
+
+.console-container {
+    grid-area: console;
+    overflow-y: scroll;
+}
