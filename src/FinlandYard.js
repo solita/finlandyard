@@ -8,6 +8,7 @@ import api from './utils/Api.js';
 import ActorBridge from './ActorBridge.js';
 import clock from './Clock.js';
 import {log} from './utils/Log';
+import R from 'ramda'
 
 const requireAll = r => r.keys().forEach(r);
 requireAll(require.context('./actors/', true, /\.js$/));
@@ -16,11 +17,19 @@ log("Starting up finland yard");
 
 const mapControl = MapControl();
 
+var findPolices =(allActors) =>R.filter(R.propEq('type', 'police'))(allActors);
+
+function printPoliceStats(state) {
+  const printStats = police => log(`${police.name} caught ${police.stats} villains`);
+  var polices = findPolices(state.actors);
+  R.forEach(printStats, polices);
+}
+
 /**
  * Game callback after api-operations
  */
-api.loadData(function(data) {
-  if(data.timetable.length === 0) {
+api.loadData(data => {
+  if (data.timetable.length === 0) {
     console.error("No timetable rows found from api");
     return;
   }
@@ -42,6 +51,7 @@ api.loadData(function(data) {
   const tick = state => {
     setTimeout(() => {
       if(CommonUtils.gameOver(state)) {
+        printPoliceStats(state);
         log('Game over');
         api.postResults(state.actors, document.getElementById("clock"));
         return;

@@ -26,8 +26,8 @@ ActorBridge.registerActor('police', 'sipowitch', 'JNS', function(clockIs, contex
   }
 
   if(!R.isNil(train)) {
-    log("NICE, catching that dude in " + destination + " arrival: " +
-      dataUtils.findTrainArrival(train, destination).scheduledTime.asString());
+    log(actor.name +" leaving from " + actor.location + " to " + destination + ", departure: " +
+        dataUtils.findTrainArrival(train, destination).scheduledTime.asString());
     return Actions.train(train, destination);
   }
   log("Retreating...");
