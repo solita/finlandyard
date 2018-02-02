@@ -58,7 +58,7 @@ api.loadData(data => {
       } else {
         tick(FyEngine.runGameIteration(mapControl, StateTransformations, state));
       }
-    }, 1)
+    }, 20);
   };
 
   tick(initialState);

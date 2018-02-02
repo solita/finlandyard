@@ -198,7 +198,9 @@ export default function() {
           const text = new fabric.Text(v.name + ' ' + v.destination, {
             top: fitLatitude(v.latitude),
             left: fitLongitude(v.longitude),
-            fontSize: 12
+            fontSize: 12,
+            fill: '#fff',
+            backgroundColor: '#000'
           });
 
           const element = createPlayerElement(v.name);
