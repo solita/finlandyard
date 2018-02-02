@@ -10,6 +10,12 @@ import {log} from '../utils/Log';
 
 ActorBridge.registerActor('police', 'Jari Aarnio', 'TKU', function (clockIs, context, actor) {
   let currentStation = dataUtils.getStationById(actor.location);
+  var leavingTrains = dataUtils.trainsLeavingFrom(clockIs, actor.location);
+
+  if (leavingTrains.length === 0) {
+    return Actions.idle();
+  }
+  const result = findClosestVillain(context, currentStation, clockIs);
 
   let result = findClosestVillain(context, currentStation, clockIs);
   if (!result) {
