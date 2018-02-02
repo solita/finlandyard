@@ -16,5 +16,9 @@ export default {
 
   registerActor(type, name, location, aifn) {
     actors.push({freeMinutes: 0, caught: false, type: type, name: name, money: 0, location: location, aifn: aifn});
+  },
+
+  registerPlayer(name, location, aifn) {
+    actors.push({freeMinutes: 0, caught: false, type: 'villain', name: name, money: 0, location: location, aifn: aifn, isPlayer:true});
   }
 }

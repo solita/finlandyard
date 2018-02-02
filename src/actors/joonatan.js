@@ -10,10 +10,7 @@ import {log} from '../utils/Log';
 
 //This is template for villain
 
-ActorBridge.registerActor('villain', 'Joonatan', 'KEM', function (clockIs, context, actor) {
-  if (!actor.isPlayer) {
-    actor.isPlayer = true;
-  }
+ActorBridge.registerPlayer('Joonatan', 'KEM', function (clockIs, context, actor) {
   return Actions.crime();
 
 });
