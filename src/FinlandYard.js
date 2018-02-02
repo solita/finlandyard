@@ -13,14 +13,14 @@ import R from 'ramda'
 const requireAll = r => r.keys().forEach(r);
 requireAll(require.context('./actors/', true, /\.js$/));
 
-log("Starting up finland yard");
+log("Starting up finland yard", "system");
 
 const mapControl = MapControl();
 
 var findPolices =(allActors) =>R.filter(R.propEq('type', 'police'))(allActors);
 
 function printPoliceStats(state) {
-  const printStats = police => log(`${police.name} caught ${police.stats} villains`);
+  const printStats = police => log(`${police.name} caught ${police.stats} villains`, "enemy");
   var polices = findPolices(state.actors);
   R.forEach(printStats, polices);
 }
@@ -52,7 +52,7 @@ api.loadData(data => {
     setTimeout(() => {
       if(CommonUtils.gameOver(state)) {
         printPoliceStats(state);
-        log('Game over');
+        log('Game over', 'gameover');
         api.postResults(state.actors, document.getElementById("clock"));
         return;
       } else {
