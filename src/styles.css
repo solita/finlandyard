@@ -204,6 +204,9 @@ body {
     grid-area: console;
     overflow-y: scroll;
 }
+.console-container p {
+    white-space: pre;
+}
 
 /* 'player', 'enemy', 'system', 'gameover' */
 .console-container p.player {

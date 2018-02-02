@@ -157,6 +157,7 @@ const nextLeavingTrain = (clockIs, location) => {
   const trains = trainsLeavingFrom(clockIs, location);
 
   return R.reduce((currentlyNext, train) => {
+    
     if(findTrainDeparture(train, location).scheduledTime.unix() < findTrainDeparture(currentlyNext, location).scheduledTime.unix()) {
       return train;
     }
