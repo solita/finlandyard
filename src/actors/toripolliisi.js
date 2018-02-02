@@ -15,9 +15,8 @@ ActorBridge.registerActor('police', 'Jari Aarnio', 'TKU', function (clockIs, con
   if (leavingTrains.length === 0) {
     return Actions.idle();
   }
-  const result = findClosestVillain(context, currentStation, clockIs);
 
-  let result = findClosestVillain(context, currentStation, clockIs);
+  const result = findClosestVillain(context, currentStation, clockIs);
   if (!result) {
     return Actions.idle();
   }
