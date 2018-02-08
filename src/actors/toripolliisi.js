@@ -8,7 +8,7 @@ import dataUtils from '../state/DataUtils.js'
 import {log} from '../utils/Log';
 
 
-ActorBridge.registerActor('police', 'Jari Aarnio', 'TKU', function (clockIs, context, actor) {
+ActorBridge.registerActor('police', 'Aino Ainokainen', 'TKU', function (clockIs, context, actor) {
   let currentStation = dataUtils.getStationById(actor.location);
   var leavingTrains = dataUtils.trainsLeavingFrom(clockIs, actor.location);
 
