@@ -66,9 +66,8 @@ function postResultsOnFly(req) {
 
     var s = R.compose(
       // :D
-      R.map((r) => { return {player: r.name, score: r.freeMinutes}; }),
-      R.project(['name', 'freeMinutes']),
-      R.filter(R.propEq('type', 'police'))
+      R.map((r) => { return {player: r.name, score: r.money}; }),
+      R.project(['name', 'money']),R.filter(R.propEq('type', 'villain')), R.filter(R.propEq('isPlayer', true))
     )(JSON.parse(data));
     echoLine("Received results:");
     echoLine(s);
