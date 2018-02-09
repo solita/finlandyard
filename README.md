@@ -1,8 +1,18 @@
-#Finland yard
+# Finland Yard
+
+Finland Yard is a AI programming game based on VR (Valtion Rautatiet - Finnish national railways)
+timetable data.
+
+[[https://github.com/solita/finlandyard/blob/master/screenshots/fy-screenshot.png|alt=Screenshot]]
+
+Idea is that police should catch villains on railways using trains simulated from
+actual timetable data.
+
+Villains must also choose, when to do crime to get points. See repository wiki for furher information.
 
 ## Set up
 
-You need nodejs installed and then just install dependencies
+You need Nodejs installed and then just install dependencies with:
 
 ```
 npm install
@@ -10,44 +20,25 @@ npm install
 
 ## Development
 
+`/bouncer` contains simple proxy for proxying and caching the data from VR apis.
+
 Start the game and run timetable proxy by
 
 ```
 npm run dev+proxy
 ```
 
-Run tests
+Then, at localhost:8080 you should have a running game, which you can run at any time by refreshing the page.
+
+Running test
 
 ```
 npm run test
 ```
 
-## Architecture
+## Contributing
 
-Player can be implemented by putting a js file with following content to `src/actors/[NAME].js`
-
-```
-var ActorBridge = require('../ActorBridge.js');
-var dataUtils = require('../state/DataUtils.js');
-var Actions = require('../engine/Actions.js');
-
-ActorBridge.registerActor('police', 'sipowitch', 'JNS', function(clockIs, context, actor) {
-    return Actions.idle();
-});
-```
-
-`engine/FyEngine.js`
-
-Contains the main game loop iteration function. Takes drawing and state transformations closures as arguments.
-
-`engine/StateTransformations.js`
-
-Contains the nasty transformations. Calculates the new coordinates, applies new locations to the state and checks who is caught.
-
-`state/CommonUtils.js`
-
-Contains functions for fetching information from the state when state is the first argument. Should not be exposed to game AI functions.
-
-`state/DataUtils.js`
-
-Contains functions which require pre calculations. Must be initialised with initial data. This is usually exposed to AI functions, for example for fetching leaving trains.
+The game is not finished at any level. We gladly accept and appreciate pull requests, so
+feel free to fork the repo and tinker freely around with it. We are quite strict on
+how the actual game engine must be implemented, and at some time, we'll provide
+better description of the architecture.
