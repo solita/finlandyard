@@ -1,6 +1,6 @@
 # Finland Yard
 
-Finland Yard is a AI programming game based on VR (Valtion Rautatiet - Finnish national railways)
+Finland Yard is programming game based on VR (Valtion Rautatiet - Finnish national railways)
 timetable data.
 
 ![Screenshot](screenshots/fy-screenshot.png?raw=true "Screenshot")
