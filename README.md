@@ -3,7 +3,7 @@
 Finland Yard is a AI programming game based on VR (Valtion Rautatiet - Finnish national railways)
 timetable data.
 
-[[https://github.com/solita/finlandyard/blob/master/screenshots/fy-screenshot.png|alt=Screenshot]]
+![Screenshot](screenshots/fy-screenshot.png?raw=true "Screenshot")
 
 Idea is that police should catch villains on railways using trains simulated from
 actual timetable data.
