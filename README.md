@@ -8,7 +8,7 @@ timetable data.
 Idea is that police should catch villains on railways using trains simulated from
 actual timetable data.
 
-Villains must also choose, when to do crime to get points. See repository wiki for furher information.
+Villains must also choose, when to do crime to get points. See repository wiki for further information.
 
 ## Set up
 
@@ -42,3 +42,5 @@ The game is not finished at any level. We gladly accept and appreciate pull requ
 feel free to fork the repo and tinker freely around with it. We are quite strict on
 how the actual game engine must be implemented, and at some time, we'll provide
 better description of the architecture.
+
+Feel free to open up a issue, throw in an idea or two.
