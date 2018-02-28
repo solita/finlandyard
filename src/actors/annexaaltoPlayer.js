@@ -31,7 +31,7 @@ const randomNth = (coll) =>  R.nth(Math.floor(Math.random() * coll.length), coll
  * return Action.crime() <- do crime and get one (1) point
  * return Action.train(train, hopOfStation) <- take the train and hop of at hopOfStation
  */
-ActorBridge.registerPlayer('!!!IMPORTANT_PLAYER_NAME_HERE!!!!', 'TPE', function(clockIs, context, actor) {
+ActorBridge.registerPlayer('!!!IMPORTANT_PLAYER_NAME_HERE!!!!', 'HKI', function(clockIs, context, actor) {
   log(context);
 
   /* context is an object such:
@@ -48,6 +48,6 @@ ActorBridge.registerPlayer('!!!IMPORTANT_PLAYER_NAME_HERE!!!!', 'TPE', function(
   }
   */
 
-  throw Error('Short circuit at any time by throwing! Remove this.');
+  //throw Error('Short circuit at any time by throwing! Remove this.');
   return Actions.idle();
 });
