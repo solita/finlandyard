@@ -49,5 +49,5 @@ ActorBridge.registerPlayer('!!!IMPORTANT_PLAYER_NAME_HERE!!!!', 'TPE', function(
   */
 
   throw Error('Short circuit at any time by throwing! Remove this.');
-  //return Actions.idle();
+  return Actions.idle();
 });
