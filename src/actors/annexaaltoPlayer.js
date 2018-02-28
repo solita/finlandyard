@@ -27,9 +27,9 @@ const randomNth = (coll) =>  R.nth(Math.floor(Math.random() * coll.length), coll
  *
  * First, make up a GREAT name for your player and add it ass a first arg.
  *
- * return Action.idle() <- idle, don't do nothing (you don't get points...)
- * return Action.crime() <- do crime and get one (1) point
- * return Action.train(train, hopOfStation) <- take the train and hop of at hopOfStation
+ * return Actions.idle() <- idle, don't do nothing (you don't get points...)
+ * return Actions.crime() <- do crime and get one (1) point
+ * return Actions.train(train, hopOfStation) <- take the train and hop of at hopOfStation
  */
 ActorBridge.registerPlayer('!!!IMPORTANT_PLAYER_NAME_HERE!!!!', 'HKI', function(clockIs, context, actor) {
   log(context);
