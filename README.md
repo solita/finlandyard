@@ -36,6 +36,14 @@ Running test
 npm run test
 ```
 
+## Running with Docker
+
+To build a docker image and run it, issue the following commands in the project folder:
+```
+$ docker build -t solita/finlandyard .
+$ docker run -p 8080:8080 -p 8000:8000 solita/finlandyard
+```
+
 ## Contributing
 
 The game is not finished at any level. We gladly accept and appreciate pull requests, so

@@ -33,5 +33,6 @@ module.exports = {
         to: 'static'
       }
     ])
-  ]
+  ],
+  devServer: {host: '0.0.0.0'}
 };
